@@ -79,6 +79,13 @@ export default function Dashboard() {
         
         <div className="flex gap-4 w-full sm:w-auto">
           <button 
+            onClick={() => navigate('/customers')}
+            className="flex-1 sm:flex-none neu-card px-4 py-2 flex items-center justify-center text-neu-heading hover:text-neu-primary transition-colors font-medium"
+          >
+             <span className="hidden sm:inline">Customers</span>
+          </button>
+          
+          <button 
             onClick={handleLogout}
             className="flex-1 sm:flex-none neu-card px-4 py-2 flex items-center justify-center gap-2 text-neu-heading hover:text-neu-primary transition-colors font-medium"
           >

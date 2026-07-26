@@ -4,6 +4,7 @@ import { supabase } from './lib/supabase';
 import Auth from './pages/Auth';
 import Dashboard from './pages/Dashboard';
 import Landing from './pages/Landing';
+import Customers from './pages/Customers';
 
 function App() {
   const [session, setSession] = useState(null);
@@ -35,6 +36,7 @@ function App() {
       <Route path="/" element={!session ? <Landing /> : <Navigate to="/dashboard" replace />} />
       <Route path="/auth" element={!session ? <Auth /> : <Navigate to="/dashboard" replace />} />
       <Route path="/dashboard" element={session ? <Dashboard /> : <Navigate to="/auth" replace />} />
+      <Route path="/customers" element={session ? <Customers /> : <Navigate to="/auth" replace />} />
       {/* Fallback */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
