@@ -185,22 +185,22 @@ export default function Customers() {
       {/* Add Customer Modal */}
       <AnimatePresence>
         {isModalOpen && (
-          <>
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <motion.div 
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-white/20 backdrop-blur-sm z-40"
+              className="absolute inset-0 bg-neu-bg/80 backdrop-blur-sm"
               onClick={() => setIsModalOpen(false)}
             />
             <motion.div 
               initial={{ opacity: 0, scale: 0.95, y: 20 }} 
               animate={{ opacity: 1, scale: 1, y: 0 }} 
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md z-50 p-4"
+              className="relative w-full max-w-md z-10"
             >
-              <div className="neu-card p-8 border border-white/60 shadow-[20px_20px_40px_rgba(163,177,198,0.7),-20px_-20px_40px_rgba(255,255,255,0.9)]">
+              <div className="neu-card p-8 border border-white/60">
                 <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-2xl font-bold text-neu-heading">Add Customer</h2>
-                  <button onClick={() => setIsModalOpen(false)} className="w-8 h-8 rounded-full shadow-neu flex items-center justify-center text-neu-text hover:text-neu-danger transition-colors">
+                  <h2 className="text-2xl font-bold text-neu-heading">Add Party</h2>
+                  <button type="button" onClick={() => setIsModalOpen(false)} className="w-8 h-8 rounded-full shadow-neu flex items-center justify-center text-neu-text hover:text-neu-danger transition-colors">
                     <X size={18} />
                   </button>
                 </div>
@@ -213,34 +213,27 @@ export default function Customers() {
 
                 <form onSubmit={handleAddCustomer} className="space-y-5">
                   <div>
-                    <label className="block text-sm font-semibold text-neu-heading mb-2 pl-1">Customer Name *</label>
+                    <label className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">Party Name *</label>
                     <input 
                       type="text" required value={newCustomer.name} onChange={e => setNewCustomer({...newCustomer, name: e.target.value})}
-                      placeholder="e.g. Ramesh" className="input-field"
+                      placeholder="e.g. Ramesh Singh" className="input-field"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-neu-heading mb-2 pl-1">Phone Number</label>
+                    <label className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">Phone Number (Optional)</label>
                     <input 
                       type="tel" value={newCustomer.phone} onChange={e => setNewCustomer({...newCustomer, phone: e.target.value})}
-                      placeholder="e.g. +91 98765 43210" className="input-field"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-neu-heading mb-2 pl-1">Email Address</label>
-                    <input 
-                      type="email" value={newCustomer.email} onChange={e => setNewCustomer({...newCustomer, email: e.target.value})}
-                      placeholder="Optional" className="input-field"
+                      placeholder="e.g. 9876543210" className="input-field"
                     />
                   </div>
 
-                  <button type="submit" disabled={isSubmitting} className="btn-solid w-full mt-4">
-                    {isSubmitting ? 'Saving...' : 'Save Customer'}
+                  <button type="submit" disabled={isSubmitting} className="btn-solid w-full mt-6 py-4">
+                    {isSubmitting ? 'Saving...' : 'Save Party'}
                   </button>
                 </form>
               </div>
             </motion.div>
-          </>
+          </div>
         )}
       </AnimatePresence>
 
