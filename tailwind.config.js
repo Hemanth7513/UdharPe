@@ -7,32 +7,20 @@ export default {
   theme: {
     extend: {
       colors: {
-        'brand': {
-          50: '#eef2ff',
-          100: '#e0e7ff',
-          200: '#c7d2fe',
-          300: '#a5b4fc',
-          400: '#818cf8',
-          500: '#6366f1',
-          600: '#4f46e5',
-          700: '#4338ca',
-          800: '#3730a3',
-          900: '#312e81',
-          950: '#1e1b4b',
-        },
-        'slate': {
-          850: '#151f32',
-          900: '#0f172a',
-          950: '#020617',
-        }
+        'neu-bg': '#e0e5ec',
+        'neu-text': '#4a5568',
+        'neu-heading': '#2d3748',
+        'neu-primary': '#5a67d8',
+        'neu-primary-hover': '#4c51bf',
+        'neu-danger': '#e53e3e',
       },
       fontFamily: {
         sans: ['Inter', 'sans-serif'],
       },
       boxShadow: {
-        'glass': '0 8px 32px 0 rgba(0, 0, 0, 0.3)',
-        'glass-sm': '0 4px 16px 0 rgba(0, 0, 0, 0.2)',
-        'neon': '0 0 15px rgba(99, 102, 241, 0.5)',
+        'neu': '9px 9px 16px rgba(163,177,198,0.5), -9px -9px 16px rgba(255,255,255,0.8)',
+        'neu-hover': '12px 12px 20px rgba(163,177,198,0.6), -12px -12px 20px rgba(255,255,255,0.9)',
+        'neu-inner': 'inset 6px 6px 10px 0 rgba(163,177,198,0.5), inset -6px -6px 10px 0 rgba(255,255,255,0.8)',
       },
       animation: {
         'fade-in': 'fadeIn 0.3s ease-out forwards',

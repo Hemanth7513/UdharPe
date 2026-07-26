@@ -1,15 +1,13 @@
-import { useState, useEffect } from 'react';
-import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
-import { AnimatePresence } from 'framer-motion';
+import { useEffect, useState } from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { supabase } from './lib/supabase';
-import Dashboard from './pages/Dashboard';
 import Auth from './pages/Auth';
-import './App.css';
+import Dashboard from './pages/Dashboard';
+import Landing from './pages/Landing';
 
 function App() {
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -17,9 +15,7 @@ function App() {
       setLoading(false);
     });
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
     });
 
@@ -27,20 +23,21 @@ function App() {
   }, []);
 
   if (loading) {
-    return <div style={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center' }}>Loading...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-neu-bg">
+        <div className="animate-pulse text-neu-primary font-bold">Loading UdharPe...</div>
+      </div>
+    );
   }
 
   return (
-    <div className="app-container">
-      <AnimatePresence mode="wait">
-        <Routes>
-          <Route path="/" element={session ? <Navigate to="/dashboard" replace /> : <Navigate to="/auth" replace />} />
-          <Route path="/auth" element={!session ? <Auth /> : <Navigate to="/dashboard" replace />} />
-          <Route path="/dashboard" element={session ? <Dashboard /> : <Navigate to="/auth" replace />} />
-          {/* We will add Customers and Billing routes later */}
-        </Routes>
-      </AnimatePresence>
-    </div>
+    <Routes>
+      <Route path="/" element={!session ? <Landing /> : <Navigate to="/dashboard" replace />} />
+      <Route path="/auth" element={!session ? <Auth /> : <Navigate to="/dashboard" replace />} />
+      <Route path="/dashboard" element={session ? <Dashboard /> : <Navigate to="/auth" replace />} />
+      {/* Fallback */}
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
 }
 

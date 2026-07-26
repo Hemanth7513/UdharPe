@@ -61,10 +61,7 @@ export default function Dashboard() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse flex flex-col items-center">
-          <div className="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-          <p className="text-slate-400">Loading your ledger...</p>
-        </div>
+        <div className="animate-pulse text-neu-primary font-bold text-xl">Loading your ledger...</div>
       </div>
     );
   }
@@ -76,19 +73,19 @@ export default function Dashboard() {
     >
       <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-white tracking-tight">Dashboard</h1>
-          <p className="text-slate-400 mt-1">Welcome back, {firmName}</p>
+          <h1 className="text-3xl font-bold text-neu-heading tracking-tight">Dashboard</h1>
+          <p className="text-neu-text mt-1 font-medium">Welcome back, {firmName}</p>
         </div>
         
-        <div className="flex gap-3 w-full sm:w-auto">
+        <div className="flex gap-4 w-full sm:w-auto">
           <button 
             onClick={handleLogout}
-            className="flex-1 sm:flex-none glass-card-sm px-4 py-2 flex items-center justify-center gap-2 text-slate-300 hover:text-white hover:bg-slate-800 transition-colors"
+            className="flex-1 sm:flex-none neu-card px-4 py-2 flex items-center justify-center gap-2 text-neu-heading hover:text-neu-primary transition-colors font-medium"
           >
             <LogOut size={18} /> <span className="hidden sm:inline">Logout</span>
           </button>
           
-          <button onClick={() => navigate('/billing')} className="btn-primary flex-1 sm:flex-none">
+          <button onClick={() => navigate('/billing')} className="btn-solid flex-1 sm:flex-none">
             <Plus size={20} /> Raise a Bill
           </button>
         </div>
@@ -96,38 +93,39 @@ export default function Dashboard() {
       
       {/* Search Bar */}
       <div className="relative mb-8 group">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-400 transition-colors" size={20} />
+        <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-neu-text group-focus-within:text-neu-primary transition-colors" size={20} />
         <input 
           type="text" 
           placeholder="Search customers by name or phone..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full bg-slate-900/60 backdrop-blur-md border border-white/10 text-white placeholder-slate-500 rounded-2xl pl-12 pr-4 py-4 outline-none focus:bg-slate-900/80 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 shadow-glass-sm transition-all"
+          className="w-full bg-neu-bg text-neu-heading placeholder-neu-text/60 rounded-2xl pl-14 pr-4 py-4 outline-none focus:ring-2 focus:ring-neu-primary/30 shadow-neu-inner transition-all font-medium"
         />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
         {/* Total Outstanding Card */}
-        <div className="glass-card p-6 md:col-span-2 border-t-4 border-t-indigo-500 relative overflow-hidden">
-          <div className="absolute right-0 top-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-3xl -mr-10 -mt-10"></div>
-          <div className="flex items-center gap-2 text-slate-400 mb-2">
-            <Wallet size={18} />
-            <h3 className="font-medium">Total Outstanding</h3>
+        <div className="neu-card p-8 md:col-span-2 relative overflow-hidden flex flex-col justify-center">
+          <div className="flex items-center gap-2 text-neu-text mb-3">
+            <div className="w-10 h-10 shadow-neu rounded-full flex items-center justify-center text-neu-primary">
+              <Wallet size={18} />
+            </div>
+            <h3 className="font-bold text-lg">Total Outstanding</h3>
           </div>
-          <p className="text-4xl sm:text-5xl font-bold text-white tracking-tight">
+          <p className="text-4xl sm:text-5xl font-black text-neu-heading tracking-tight mt-2">
             ₹{totalOutstanding.toLocaleString('en-IN')}
           </p>
         </div>
 
         {/* Quick Stats */}
-        <div className="glass-card p-6 flex flex-col justify-center">
-           <div className="flex justify-between items-center mb-4">
-             <span className="text-slate-400 font-medium">Overdue</span>
-             <span className="bg-red-500/20 text-red-400 px-2.5 py-0.5 rounded-full text-sm font-semibold">{overdueBills.length}</span>
+        <div className="neu-card p-8 flex flex-col justify-center space-y-6">
+           <div className="flex justify-between items-center shadow-neu-inner p-4 rounded-xl">
+             <span className="text-neu-heading font-bold">Overdue</span>
+             <span className="bg-neu-bg shadow-neu text-neu-danger px-3 py-1 rounded-lg text-sm font-black">{overdueBills.length}</span>
            </div>
-           <div className="flex justify-between items-center">
-             <span className="text-slate-400 font-medium">Due this week</span>
-             <span className="bg-indigo-500/20 text-indigo-400 px-2.5 py-0.5 rounded-full text-sm font-semibold">{dueThisWeek.length}</span>
+           <div className="flex justify-between items-center shadow-neu-inner p-4 rounded-xl">
+             <span className="text-neu-heading font-bold">Due this week</span>
+             <span className="bg-neu-bg shadow-neu text-neu-primary px-3 py-1 rounded-lg text-sm font-black">{dueThisWeek.length}</span>
            </div>
         </div>
       </div>
@@ -135,24 +133,24 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Overdue Section */}
         <div>
-          <h2 className="text-xl font-semibold flex items-center gap-2 text-red-400 mb-4">
+          <h2 className="text-xl font-bold flex items-center gap-2 text-neu-danger mb-6 pl-2">
             <AlertCircle size={22} /> Overdue Bills
           </h2>
           
           {overdueBills.length === 0 ? (
-            <div className="glass-card-sm p-8 text-center border-dashed border-white/10">
-              <p className="text-slate-400">All clear! No overdue bills.</p>
+            <div className="neu-card p-8 text-center shadow-neu-inner">
+              <p className="text-neu-text font-medium">All clear! No overdue bills.</p>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-5">
               {overdueBills.map(bill => (
-                <div key={bill.id} className="glass-card-sm p-4 flex justify-between items-center border-l-4 border-l-red-500 hover:bg-slate-800/50 transition-colors cursor-pointer group">
+                <div key={bill.id} className="neu-card p-5 flex justify-between items-center hover:shadow-neu-hover transition-all cursor-pointer group">
                   <div>
-                    <h4 className="font-semibold text-white group-hover:text-red-400 transition-colors">{bill.customers?.name || 'Unknown'}</h4>
-                    <p className="text-slate-400 text-sm mt-0.5">Due: {new Date(bill.due_date).toLocaleDateString()}</p>
+                    <h4 className="font-bold text-neu-heading group-hover:text-neu-danger transition-colors text-lg">{bill.customers?.name || 'Unknown'}</h4>
+                    <p className="text-neu-text font-medium text-sm mt-1">Due: {new Date(bill.due_date).toLocaleDateString()}</p>
                   </div>
                   <div className="text-right">
-                    <p className="font-bold text-red-400 text-lg">₹{Number(bill.remaining_amount).toLocaleString()}</p>
+                    <p className="font-black text-neu-danger text-xl">₹{Number(bill.remaining_amount).toLocaleString()}</p>
                   </div>
                 </div>
               ))}
@@ -162,24 +160,24 @@ export default function Dashboard() {
 
         {/* Due This Week Section */}
         <div>
-          <h2 className="text-xl font-semibold flex items-center gap-2 text-white mb-4">
-            <Calendar size={22} className="text-indigo-400" /> Due This Week
+          <h2 className="text-xl font-bold flex items-center gap-2 text-neu-heading mb-6 pl-2">
+            <Calendar size={22} className="text-neu-primary" /> Due This Week
           </h2>
           
           {dueThisWeek.length === 0 ? (
-            <div className="glass-card-sm p-8 text-center border-dashed border-white/10">
-              <p className="text-slate-400">No bills due in the next 7 days.</p>
+            <div className="neu-card p-8 text-center shadow-neu-inner">
+              <p className="text-neu-text font-medium">No bills due in the next 7 days.</p>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-5">
               {dueThisWeek.map(bill => (
-                <div key={bill.id} className="glass-card-sm p-4 flex justify-between items-center border-l-4 border-l-indigo-500 hover:bg-slate-800/50 transition-colors cursor-pointer group">
+                <div key={bill.id} className="neu-card p-5 flex justify-between items-center hover:shadow-neu-hover transition-all cursor-pointer group">
                   <div>
-                    <h4 className="font-semibold text-white group-hover:text-indigo-400 transition-colors">{bill.customers?.name || 'Unknown'}</h4>
-                    <p className="text-slate-400 text-sm mt-0.5">Due: {new Date(bill.due_date).toLocaleDateString()}</p>
+                    <h4 className="font-bold text-neu-heading group-hover:text-neu-primary transition-colors text-lg">{bill.customers?.name || 'Unknown'}</h4>
+                    <p className="text-neu-text font-medium text-sm mt-1">Due: {new Date(bill.due_date).toLocaleDateString()}</p>
                   </div>
                   <div className="text-right">
-                    <p className="font-bold text-white text-lg">₹{Number(bill.remaining_amount).toLocaleString()}</p>
+                    <p className="font-black text-neu-heading text-xl">₹{Number(bill.remaining_amount).toLocaleString()}</p>
                   </div>
                 </div>
               ))}
