@@ -1,0 +1,39 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-slate-950 text-slate-50 antialiased selection:bg-indigo-500/30 selection:text-indigo-50 min-h-screen overflow-x-hidden;
+    /* Subtle radial gradient for depth */
+    background-image: radial-gradient(circle at top right, rgba(99, 102, 241, 0.08) 0%, transparent 40%),
+                      radial-gradient(circle at bottom left, rgba(56, 189, 248, 0.05) 0%, transparent 40%);
+  }
+}
+
+@layer components {
+  /* Premium Glassmorphism Card - Readable & Sharp */
+  .glass-card {
+    @apply bg-slate-900/60 backdrop-blur-xl border border-white/10 rounded-2xl shadow-glass;
+  }
+  
+  .glass-card-sm {
+    @apply bg-slate-900/60 backdrop-blur-lg border border-white/5 rounded-xl shadow-glass-sm;
+  }
+
+  /* The primary CTA button - vibrant, clickable */
+  .btn-primary {
+    @apply relative overflow-hidden bg-indigo-600 text-white font-medium px-5 py-3 rounded-xl 
+           transition-all duration-300 ease-out hover:bg-indigo-500 hover:shadow-neon 
+           active:scale-[0.98] active:bg-indigo-700 flex items-center justify-center gap-2;
+  }
+  
+  /* Input fields - dark, high contrast borders on focus */
+  .input-field {
+    @apply w-full bg-slate-950/50 border border-slate-700/50 text-white placeholder-slate-500
+           rounded-xl px-4 py-3 outline-none transition-all duration-200
+           focus:bg-slate-900/80 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/50;
+  }
+}

@@ -1,42 +1,30 @@
 {
-  "name": "udharpay",
-  "version": "1.0.0",
-  "main": "index.ts",
+  "name": "udharpe",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "oxlint",
+    "preview": "vite preview"
+  },
   "dependencies": {
-    "@expo-google-fonts/inter": "^0.4.2",
-    "@expo-google-fonts/poppins": "^0.4.1",
-    "@nozbe/watermelondb": "^0.28.0",
-    "@nozbe/with-observables": "^1.6.0",
-    "@react-navigation/bottom-tabs": "^7.18.7",
-    "@react-navigation/native": "^7.3.7",
-    "@react-navigation/stack": "^7.10.10",
-    "@shopify/flash-list": "^2.3.2",
-    "@supabase/supabase-js": "^2.110.0",
-    "dayjs": "^1.11.21",
-    "expo": "~57.0.2",
-    "expo-font": "~57.0.0",
-    "expo-haptics": "~57.0.0",
-    "expo-network": "~57.0.0",
-    "expo-secure-store": "^57.0.0",
-    "expo-status-bar": "~57.0.0",
-    "jail-monkey": "^3.0.0",
-    "react": "19.2.3",
-    "react-native": "0.86.0",
-    "react-native-gesture-handler": "~2.32.0",
-    "react-native-reanimated": "^4.5.0",
-    "react-native-safe-area-context": "^5.8.0",
-    "react-native-screens": "^4.25.2",
-    "zustand": "^5.0.14"
+    "@supabase/supabase-js": "^2.110.8",
+    "framer-motion": "^12.42.2",
+    "lucide-react": "^1.27.0",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "react-router-dom": "^7.18.1"
   },
   "devDependencies": {
-    "@types/react": "~19.2.2",
-    "typescript": "~6.0.3"
-  },
-  "scripts": {
-    "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
-    "web": "expo start --web"
-  },
-  "private": true
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.3",
+    "autoprefixer": "^10.5.4",
+    "oxlint": "^1.71.0",
+    "postcss": "^8.5.23",
+    "tailwindcss": "^3.4.19",
+    "vite": "^8.1.1"
+  }
 }
