@@ -171,12 +171,20 @@ export default function Customers() {
                 </div>
               </div>
               
-              <button 
-                onClick={() => navigate('/billing')}
-                className="mt-6 w-full py-2.5 rounded-lg shadow-neu-inner text-neu-primary font-bold hover:bg-neu-primary hover:text-white transition-colors flex items-center justify-center gap-2"
-              >
-                <Plus size={18} /> Raise Bill
-              </button>
+              <div className="mt-6 flex flex-col sm:flex-row gap-3">
+                <button 
+                  onClick={() => navigate(`/customers/${customer.id}`)}
+                  className="flex-1 py-2.5 rounded-lg shadow-neu text-neu-heading font-bold hover:text-neu-primary transition-colors flex items-center justify-center gap-2"
+                >
+                  View Ledger
+                </button>
+                <button 
+                  onClick={() => navigate('/billing')}
+                  className="flex-1 py-2.5 rounded-lg shadow-neu-inner text-neu-primary font-bold hover:bg-neu-primary hover:text-white transition-colors flex items-center justify-center gap-2"
+                >
+                  <Plus size={18} /> Udhar
+                </button>
+              </div>
             </div>
           ))}
         </div>

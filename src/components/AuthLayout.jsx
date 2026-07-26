@@ -1,6 +1,6 @@
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { LayoutDashboard, Users, PlusCircle, LogOut } from 'lucide-react';
+import { LayoutDashboard, Users, PlusCircle, LogOut, IndianRupee } from 'lucide-react';
 import logo from '../assets/logo.png';
 
 export default function AuthLayout() {
@@ -16,6 +16,7 @@ export default function AuthLayout() {
     { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
     { name: 'Customers', path: '/customers', icon: Users },
     { name: 'Raise Bill', path: '/billing', icon: PlusCircle },
+    { name: 'Settle', path: '/settle', icon: IndianRupee },
   ];
 
   return (

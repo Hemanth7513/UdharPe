@@ -5,7 +5,9 @@ import Auth from './pages/Auth';
 import Dashboard from './pages/Dashboard';
 import Landing from './pages/Landing';
 import Customers from './pages/Customers';
+import CustomerLedger from './pages/CustomerLedger';
 import Billing from './pages/Billing';
+import Settlement from './pages/Settlement';
 import AuthLayout from './components/AuthLayout';
 
 function App() {
@@ -43,7 +45,9 @@ function App() {
         <Route element={<AuthLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/customers" element={<Customers />} />
+          <Route path="/customers/:id" element={<CustomerLedger />} />
           <Route path="/billing" element={<Billing />} />
+          <Route path="/settle" element={<Settlement />} />
         </Route>
       )}
 
