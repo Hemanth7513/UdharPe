@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { motion } from 'framer-motion';
-import { ArrowLeft, User, Receipt, IndianRupee, ArrowDownRight, ArrowUpRight } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowLeft, User, Receipt, IndianRupee, ArrowDownRight, ArrowUpRight, MessageCircle, X } from 'lucide-react';
 
 export default function CustomerLedger() {
   const { id } = useParams();
@@ -11,6 +11,13 @@ export default function CustomerLedger() {
   const [customer, setCustomer] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // Payment Modal State
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [paymentAmount, setPaymentAmount] = useState('');
+  const [paymentNote, setPaymentNote] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
 
   useEffect(() => {
     fetchLedger();
@@ -37,7 +44,6 @@ export default function CustomerLedger() {
       if (billsError) throw billsError;
 
       // 3. Fetch Settlements (Payments received)
-      // Check if table exists first, if it fails, just return empty array
       let settlementsData = [];
       const { data: sData, error: sError } = await supabase
         .from('settlements')
@@ -65,6 +71,76 @@ export default function CustomerLedger() {
     }
   };
 
+  const handleRecordPayment = async (e) => {
+    e.preventDefault();
+    if (!paymentAmount || isNaN(paymentAmount) || Number(paymentAmount) <= 0) {
+      setErrorMsg('Please enter a valid amount.');
+      return;
+    }
+
+    setIsSubmitting(true);
+    setErrorMsg('');
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      const numericAmount = Number(paymentAmount);
+
+      if (numericAmount > Number(customer.total_outstanding)) {
+          throw new Error('Payment amount cannot be greater than the outstanding Udhar.');
+      }
+
+      // 1. Insert the new settlement entry
+      const { error: settlementError } = await supabase
+        .from('settlements')
+        .insert([{
+          business_id: user.id,
+          customer_id: id,
+          amount_paid: numericAmount,
+          note: paymentNote
+        }]);
+
+      if (settlementError) throw settlementError;
+
+      // 2. Fetch current outstanding for the customer and subtract the payment
+      const newTotal = Number(customer.total_outstanding) - numericAmount;
+
+      // 3. Update the customer's total_outstanding balance
+      const { error: updateError } = await supabase
+        .from('customers')
+        .update({ total_outstanding: newTotal })
+        .eq('id', id);
+
+      if (updateError) throw updateError;
+
+      // Reset modal and refetch
+      setIsPaymentModalOpen(false);
+      setPaymentAmount('');
+      setPaymentNote('');
+      fetchLedger(); // Refresh data
+
+    } catch (error) {
+      setErrorMsg(error.message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleWhatsAppRemind = () => {
+    if (!customer.phone) {
+      alert("Customer does not have a phone number saved.");
+      return;
+    }
+    const message = `Hello ${customer.name}, your total outstanding Udhar is ₹${Number(customer.total_outstanding).toLocaleString()}. Please clear it at your earliest convenience. Thank you!`;
+    const encodedMessage = encodeURIComponent(message);
+    // Assumes Indian numbers if no country code, for a real app we'd format better
+    let phoneStr = customer.phone.replace(/\D/g, '');
+    if (phoneStr.length === 10) phoneStr = '91' + phoneStr;
+    
+    window.open(`https://wa.me/${phoneStr}?text=${encodedMessage}`, '_blank');
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -84,7 +160,7 @@ export default function CustomerLedger() {
 
   return (
     <motion.div 
-      className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 animate-fade-in pb-12"
+      className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 animate-fade-in pb-24"
       initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
     >
       <button 
@@ -106,9 +182,29 @@ export default function CustomerLedger() {
           </div>
         </div>
         
-        <div className="text-left md:text-right w-full md:w-auto p-4 md:p-0 rounded-2xl md:rounded-none shadow-neu-inner md:shadow-none bg-neu-bg md:bg-transparent">
-          <p className="text-sm text-neu-text font-bold uppercase tracking-wider mb-1">Total Outstanding</p>
-          <p className="text-4xl font-black text-neu-danger">₹{Number(customer.total_outstanding).toLocaleString()}</p>
+        <div className="text-left md:text-right w-full md:w-auto flex flex-col md:items-end gap-3">
+          <div className="p-4 md:p-0 rounded-2xl md:rounded-none shadow-neu-inner md:shadow-none bg-neu-bg md:bg-transparent w-full md:w-auto">
+            <p className="text-sm text-neu-text font-bold uppercase tracking-wider mb-1">Total Outstanding</p>
+            <p className="text-4xl font-black text-neu-danger">₹{Number(customer.total_outstanding).toLocaleString()}</p>
+          </div>
+          
+          {Number(customer.total_outstanding) > 0 && (
+            <div className="flex gap-2 w-full md:w-auto">
+              <button 
+                onClick={() => setIsPaymentModalOpen(true)}
+                className="btn-solid flex-1 md:flex-none py-2 px-4 text-sm"
+              >
+                Record Payment
+              </button>
+              <button 
+                onClick={handleWhatsAppRemind}
+                className="neu-card flex items-center justify-center w-10 h-10 text-[#25D366] hover:scale-105 transition-transform"
+                title="Send WhatsApp Reminder"
+              >
+                <MessageCircle size={20} />
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -158,6 +254,78 @@ export default function CustomerLedger() {
         )}
       </div>
 
+      {/* Floating Action Button for raising a bill pre-filled with this customer */}
+      <button 
+        onClick={() => navigate(`/billing?customer_id=${customer.id}`)}
+        className="fixed bottom-24 md:bottom-8 right-6 w-14 h-14 bg-neu-primary text-white rounded-full shadow-[0_10px_20px_rgba(79,70,229,0.4)] flex items-center justify-center hover:scale-105 hover:bg-neu-primary-hover transition-all z-40"
+        title="Raise Udhar for this customer"
+      >
+        <Receipt size={24} />
+      </button>
+
+      {/* Record Payment Modal */}
+      <AnimatePresence>
+        {isPaymentModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-neu-bg/80 backdrop-blur-sm"
+              onClick={() => setIsPaymentModalOpen(false)}
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }} 
+              animate={{ opacity: 1, scale: 1, y: 0 }} 
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-md z-10"
+            >
+              <div className="neu-card p-8 border border-white/60">
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-2xl font-bold text-neu-heading">Record Payment</h2>
+                  <button type="button" onClick={() => setIsPaymentModalOpen(false)} className="w-8 h-8 rounded-full shadow-neu flex items-center justify-center text-neu-text hover:text-neu-danger transition-colors">
+                    <X size={18} />
+                  </button>
+                </div>
+                
+                {errorMsg && (
+                  <div className="bg-neu-bg shadow-neu-inner text-neu-danger p-3 rounded-lg mb-5 text-sm font-medium">
+                    {errorMsg}
+                  </div>
+                )}
+
+                <form onSubmit={handleRecordPayment} className="space-y-5">
+                  <div>
+                    <label className="block text-sm font-bold text-neu-heading mb-2 pl-1 uppercase tracking-wide">
+                      Amount Paid (₹) *
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-5 top-1/2 -translate-y-1/2 text-neu-heading font-black text-xl">₹</span>
+                      <input 
+                        type="number" required min="1" step="0.01"
+                        value={paymentAmount} onChange={e => setPaymentAmount(e.target.value)}
+                        placeholder="0.00" 
+                        className="w-full bg-neu-bg text-neu-heading rounded-2xl pl-12 pr-4 py-4 outline-none focus:ring-2 focus:ring-neu-primary/30 shadow-neu-inner font-black text-xl"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-neu-heading mb-2 pl-1 uppercase tracking-wide">
+                      Note (Optional)
+                    </label>
+                    <input 
+                      type="text" value={paymentNote} onChange={e => setPaymentNote(e.target.value)}
+                      placeholder="e.g. Cash, UPI, etc." className="input-field"
+                    />
+                  </div>
+
+                  <button type="submit" disabled={isSubmitting} className="btn-solid w-full mt-6 py-4">
+                    {isSubmitting ? 'Processing...' : 'Save Payment'}
+                  </button>
+                </form>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }

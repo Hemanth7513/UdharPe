@@ -140,6 +140,14 @@ export default function Dashboard() {
         )}
       </div>
 
+      {/* Floating Action Button */}
+      <button 
+        onClick={() => navigate('/billing')}
+        className="fixed bottom-24 md:bottom-8 right-6 w-14 h-14 bg-neu-primary text-white rounded-full shadow-[0_10px_20px_rgba(79,70,229,0.4)] flex items-center justify-center hover:scale-105 hover:bg-neu-primary-hover transition-all z-40"
+        title="Raise New Bill"
+      >
+        <Receipt size={24} />
+      </button>
     </motion.div>
   );
 }

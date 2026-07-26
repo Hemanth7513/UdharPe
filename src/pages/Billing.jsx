@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { Receipt, CheckCircle, ArrowRight } from 'lucide-react';
+import { Receipt, CheckCircle, ArrowRight, UserPlus, X } from 'lucide-react';
 
 export default function Billing() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
   
@@ -18,6 +19,12 @@ export default function Billing() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [success, setSuccess] = useState(false);
+
+  // Inline Add Customer State
+  const [isAddCustomerModalOpen, setIsAddCustomerModalOpen] = useState(false);
+  const [newCustomerName, setNewCustomerName] = useState('');
+  const [newCustomerPhone, setNewCustomerPhone] = useState('');
+  const [isAddingCustomer, setIsAddingCustomer] = useState(false);
 
   useEffect(() => {
     fetchCustomers();
@@ -35,10 +42,52 @@ export default function Billing() {
 
       if (error) throw error;
       setCustomers(data || []);
+
+      // Check for pre-filled customer in URL
+      const searchParams = new URLSearchParams(location.search);
+      const prefilledId = searchParams.get('customer_id');
+      if (prefilledId && data && data.some(c => c.id === prefilledId)) {
+        setSelectedCustomerId(prefilledId);
+      }
+
     } catch (error) {
       console.error('Error fetching customers:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleAddCustomer = async (e) => {
+    e.preventDefault();
+    setIsAddingCustomer(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      const { data, error } = await supabase
+        .from('customers')
+        .insert([{ 
+          business_id: user.id, 
+          name: newCustomerName, 
+          phone: newCustomerPhone 
+        }])
+        .select();
+
+      if (error) throw error;
+
+      if (data && data.length > 0) {
+        const newCust = data[0];
+        setCustomers(prev => [...prev, newCust].sort((a, b) => a.name.localeCompare(b.name)));
+        setSelectedCustomerId(newCust.id); // Auto-select the new customer
+      }
+      
+      setIsAddCustomerModalOpen(false);
+      setNewCustomerName('');
+      setNewCustomerPhone('');
+    } catch (error) {
+      alert("Error adding customer: " + error.message);
+    } finally {
+      setIsAddingCustomer(false);
     }
   };
 
@@ -67,6 +116,7 @@ export default function Billing() {
           amount: numericAmount,
           remaining_amount: numericAmount,
           status: 'pending',
+          note: description,
           due_date: new Date().toISOString().split('T')[0] // default to today since we removed due date UI
         }]);
 
@@ -107,7 +157,7 @@ export default function Billing() {
 
   return (
     <motion.div 
-      className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 animate-fade-in"
+      className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 animate-fade-in pb-12"
       initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
     >
       <header className="mb-8 flex items-center gap-3">
@@ -120,7 +170,7 @@ export default function Billing() {
         </div>
       </header>
 
-      <div className="neu-card p-6 sm:p-10 border border-white/40">
+      <div className="neu-card p-6 sm:p-10 border border-white/40 relative z-10">
         
         {success ? (
           <motion.div 
@@ -144,14 +194,26 @@ export default function Billing() {
             )}
 
             {/* Customer / Party Selection */}
-            <div>
-              <label className="block text-sm font-bold text-neu-heading mb-2 pl-1 uppercase tracking-wide">
-                Customer / Party *
-              </label>
+            <div className="relative">
+              <div className="flex justify-between items-end mb-2">
+                <label className="block text-sm font-bold text-neu-heading pl-1 uppercase tracking-wide">
+                  Customer / Party *
+                </label>
+                {customers.length > 0 && (
+                  <button 
+                    type="button" 
+                    onClick={() => setIsAddCustomerModalOpen(true)}
+                    className="text-neu-primary font-bold flex items-center gap-1 hover:underline text-sm"
+                  >
+                    <UserPlus size={16} /> New Party
+                  </button>
+                )}
+              </div>
+              
               {customers.length === 0 ? (
                 <div className="p-4 rounded-2xl shadow-neu-inner bg-neu-bg text-neu-danger font-medium text-sm flex justify-between items-center">
                   <span>No parties found. Please add a customer first.</span>
-                  <button type="button" onClick={() => navigate('/customers')} className="btn-primary text-xs py-1.5 px-3">
+                  <button type="button" onClick={() => setIsAddCustomerModalOpen(true)} className="btn-primary text-xs py-1.5 px-3">
                     Add Customer
                   </button>
                 </div>
@@ -223,6 +285,55 @@ export default function Billing() {
         )}
 
       </div>
+
+      {/* Inline Add Customer Modal */}
+      <AnimatePresence>
+        {isAddCustomerModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-neu-bg/80 backdrop-blur-sm"
+              onClick={() => setIsAddCustomerModalOpen(false)}
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }} 
+              animate={{ opacity: 1, scale: 1, y: 0 }} 
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-md z-10"
+            >
+              <div className="neu-card p-8 border border-white/60">
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-2xl font-bold text-neu-heading">Add Party</h2>
+                  <button type="button" onClick={() => setIsAddCustomerModalOpen(false)} className="w-8 h-8 rounded-full shadow-neu flex items-center justify-center text-neu-text hover:text-neu-danger transition-colors">
+                    <X size={18} />
+                  </button>
+                </div>
+                
+                <form onSubmit={handleAddCustomer} className="space-y-5">
+                  <div>
+                    <label className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">Party Name *</label>
+                    <input 
+                      type="text" required value={newCustomerName} onChange={e => setNewCustomerName(e.target.value)}
+                      placeholder="e.g. Ramesh Singh" className="input-field"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">Phone Number (Optional)</label>
+                    <input 
+                      type="tel" value={newCustomerPhone} onChange={e => setNewCustomerPhone(e.target.value)}
+                      placeholder="e.g. 9876543210" className="input-field"
+                    />
+                  </div>
+
+                  <button type="submit" disabled={isAddingCustomer} className="btn-solid w-full mt-6 py-4">
+                    {isAddingCustomer ? 'Saving...' : 'Save Party'}
+                  </button>
+                </form>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }
