@@ -24,15 +24,6 @@ const itemVariants = {
   }
 };
 
-const floatingAnimation = {
-  y: [0, -15, 0],
-  transition: {
-    duration: 5,
-    repeat: Infinity,
-    ease: "easeInOut"
-  }
-};
-
 export default function Landing() {
   const navigate = useNavigate();
 
@@ -40,8 +31,16 @@ export default function Landing() {
     <div className="min-h-screen overflow-hidden flex flex-col relative bg-neu-bg">
       
       {/* Ambient background decoration */}
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-neu-primary/5 rounded-full blur-[100px] -z-10 transform translate-x-1/2 -translate-y-1/2"></div>
-      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-neu-primary/5 rounded-full blur-[80px] -z-10 transform -translate-x-1/2 translate-y-1/2"></div>
+      <motion.div 
+        animate={{ y: [0, -20, 0], scale: [1, 1.05, 1] }} 
+        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute top-1/4 left-1/4 w-[300px] h-[300px] rounded-full shadow-neu opacity-40 bg-neu-bg -z-10"
+      />
+      <motion.div 
+        animate={{ y: [0, 30, 0], scale: [1, 0.95, 1] }} 
+        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+        className="absolute bottom-1/4 right-1/4 w-[450px] h-[450px] rounded-full shadow-neu opacity-40 bg-neu-bg -z-10"
+      />
 
       {/* Minimal Navbar */}
       <motion.nav 
@@ -59,18 +58,16 @@ export default function Landing() {
         </button>
       </motion.nav>
 
-      {/* Hero Section */}
-      <main className="flex-grow flex items-center max-w-7xl mx-auto px-6 py-12 md:py-0 w-full z-10">
-        <div className="grid lg:grid-cols-2 gap-16 lg:gap-8 items-center w-full">
-          
-          {/* Left Text Column */}
+      {/* Ultra Minimal Hero */}
+      <main className="flex-grow flex items-center justify-center max-w-7xl mx-auto px-6 py-12 w-full z-10">
+        
           <motion.div 
             variants={containerVariants}
             initial="hidden"
             animate="visible"
-            className="flex flex-col items-center lg:items-start text-center lg:text-left"
+            className="flex flex-col items-center text-center max-w-3xl"
           >
-            <motion.div variants={itemVariants} className="inline-block px-5 py-2 mb-6 rounded-full shadow-neu-inner text-neu-primary font-bold text-sm tracking-wide">
+            <motion.div variants={itemVariants} className="inline-block px-5 py-2 mb-8 rounded-full shadow-neu-inner text-neu-primary font-bold text-sm tracking-wide bg-neu-bg">
               The Elegant Business Ledger
             </motion.div>
             
@@ -79,40 +76,17 @@ export default function Landing() {
               <span className="text-neu-primary">Managed Beautifully.</span>
             </motion.h1>
             
-            <motion.p variants={itemVariants} className="text-lg text-neu-text mb-10 max-w-xl font-medium leading-relaxed">
+            <motion.p variants={itemVariants} className="text-lg md:text-xl text-neu-text mb-12 max-w-2xl font-medium leading-relaxed">
               No clutter, no confusing menus, no messy notebooks. UdharPe is the private, premium way to track what you're owed.
             </motion.p>
             
             <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-5 w-full sm:w-auto">
-              <button onClick={() => navigate('/auth')} className="btn-solid text-lg px-8 py-4 w-full sm:w-auto shadow-neu-hover">
+              <button onClick={() => navigate('/auth')} className="btn-solid text-lg px-10 py-4 w-full sm:w-auto shadow-neu-hover">
                 Open Your Ledger <ArrowRight size={22} className="ml-2" />
               </button>
             </motion.div>
           </motion.div>
 
-          {/* Right Visual (The Selected Logo instead of dummy data) */}
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.85 }} 
-            animate={{ opacity: 1, scale: 1 }} 
-            transition={{ duration: 0.8, type: "spring", bounce: 0.3, delay: 0.2 }}
-            className="relative mx-auto w-full max-w-md lg:max-w-lg mt-8 lg:mt-0 flex justify-center"
-          >
-            <motion.div animate={floatingAnimation} className="relative z-10 w-64 h-64 md:w-80 md:h-80 neu-card rounded-[3rem] p-4 flex items-center justify-center">
-               <img src={logo} alt="UdharPe Logo" className="w-full h-full object-contain rounded-[2rem] shadow-neu-inner" />
-            </motion.div>
-            
-            {/* Decorative Floating Orbs */}
-            <motion.div 
-              animate={{ y: [0, 15, 0] }} transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute -top-10 right-10 w-24 h-24 rounded-full shadow-neu opacity-80 z-0 bg-neu-bg"
-            />
-            <motion.div 
-              animate={{ y: [0, -15, 0] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-              className="absolute -bottom-8 left-10 w-16 h-16 rounded-full shadow-neu opacity-80 z-0 bg-neu-bg"
-            />
-          </motion.div>
-
-        </div>
       </main>
 
       {/* Bottom Features Bar */}
