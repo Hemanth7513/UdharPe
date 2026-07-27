@@ -113,7 +113,13 @@ serve(async (req) => {
       totalCustomers: totalCustomers || 0,
       totalTransactions,
       totalVolume,
-      adminEmail: user.email
+      adminEmail: user.email,
+      businesses: users.users.map(u => ({
+        id: u.id,
+        email: u.email,
+        created_at: u.created_at,
+        last_sign_in_at: u.last_sign_in_at
+      }))
     }
 
     return new Response(

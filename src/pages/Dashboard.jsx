@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { Wallet, Users, Receipt } from 'lucide-react';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -11,6 +12,7 @@ export default function Dashboard() {
   const [paymentsReceived, setPaymentsReceived] = useState(0);
   const [newUdhar, setNewUdhar] = useState(0);
   const [recentBills, setRecentBills] = useState([]);
+  const [chartData, setChartData] = useState([]);
   const [firmName, setFirmName] = useState('Your Business');
   const [customerCount, setCustomerCount] = useState(0);
 
@@ -74,6 +76,45 @@ export default function Dashboard() {
       if (!billsError && billsData) {
         setRecentBills(billsData);
       }
+
+      // Fetch all bills for chart (last 30 days)
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      
+      const { data: chartBills } = await supabase
+        .from('bills')
+        .select('amount, created_at')
+        .eq('business_id', user.id)
+        .gte('created_at', thirtyDaysAgo.toISOString())
+        .order('created_at', { ascending: true });
+
+      const { data: chartSettlements } = await supabase
+        .from('settlements')
+        .select('amount_paid, created_at')
+        .eq('business_id', user.id)
+        .gte('created_at', thirtyDaysAgo.toISOString())
+        .order('created_at', { ascending: true });
+
+      // Process chart data by day
+      const dataMap = {};
+      const addData = (items, typeKey, amountKey) => {
+        if (items) {
+          items.forEach(item => {
+            const date = new Date(item.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+            if (!dataMap[date]) {
+              dataMap[date] = { date, given: 0, received: 0 };
+            }
+            dataMap[date][typeKey] += Number(item[amountKey]);
+          });
+        }
+      };
+
+      addData(chartBills, 'given', 'amount');
+      addData(chartSettlements, 'received', 'amount_paid');
+
+      const formattedChartData = Object.values(dataMap).sort((a, b) => new Date(a.date) - new Date(b.date));
+      setChartData(formattedChartData);
+
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
     } finally {
@@ -139,6 +180,38 @@ export default function Dashboard() {
           </p>
         </div>
       </div>
+
+      {/* Chart Section */}
+      {chartData.length > 0 && (
+        <div className="neu-card p-6 border border-white/50">
+          <h2 className="text-xl font-bold text-neu-heading mb-6 pl-2">30-Day Activity</h2>
+          <div className="h-72 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="colorGiven" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="#ef4444" stopOpacity={0}/>
+                  </linearGradient>
+                  <linearGradient id="colorReceived" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#22c55e" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="#22c55e" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.1)" />
+                <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'rgba(255,255,255,0.5)' }} dy={10} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'rgba(255,255,255,0.5)' }} tickFormatter={(value) => `₹${value}`} dx={-10} />
+                <Tooltip 
+                  contentStyle={{ backgroundColor: '#1a1f2b', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.5)' }}
+                  itemStyle={{ fontWeight: 'bold' }}
+                />
+                <Area type="monotone" dataKey="given" name="Udhar Given" stroke="#ef4444" strokeWidth={3} fillOpacity={1} fill="url(#colorGiven)" />
+                <Area type="monotone" dataKey="received" name="Payments Received" stroke="#22c55e" strokeWidth={3} fillOpacity={1} fill="url(#colorReceived)" />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* Quick Actions / Stats */}

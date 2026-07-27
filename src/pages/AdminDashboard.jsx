@@ -2,7 +2,9 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { ShieldAlert, Users, TrendingUp, Building, Receipt, Activity, ChevronLeft } from 'lucide-react';
+import { ShieldAlert, Users, TrendingUp, Building, Receipt, Activity, ChevronLeft, Eye, X } from 'lucide-react';
+import Modal from '../components/Modal';
+import toast from 'react-hot-toast';
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -10,6 +12,12 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  
+  // Deep Dive State
+  const [isDeepDiveOpen, setIsDeepDiveOpen] = useState(false);
+  const [selectedBusiness, setSelectedBusiness] = useState(null);
+  const [deepDiveData, setDeepDiveData] = useState({ customers: [], bills: [] });
+  const [loadingDeepDive, setLoadingDeepDive] = useState(false);
 
   useEffect(() => {
     checkAdminAndFetchStats();
@@ -43,6 +51,26 @@ export default function AdminDashboard() {
       setError("Failed to fetch platform statistics. Ensure the Edge Function is deployed.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeepDive = async (business) => {
+    setSelectedBusiness(business);
+    setIsDeepDiveOpen(true);
+    setLoadingDeepDive(true);
+
+    try {
+      const { data, error: invokeError } = await supabase.functions.invoke('admin-stats', {
+        body: { action: 'get_business_details', businessId: business.id }
+      });
+      
+      if (invokeError) throw invokeError;
+      setDeepDiveData({ customers: data.customers || [], bills: data.bills || [] });
+    } catch (err) {
+      toast.error('Failed to load business details');
+      setIsDeepDiveOpen(false);
+    } finally {
+      setLoadingDeepDive(false);
     }
   };
 
@@ -171,6 +199,81 @@ export default function AdminDashboard() {
           </div>
         </div>
       )}
+
+      {stats && stats.businesses && stats.businesses.length > 0 && (
+        <div className="mt-8 bg-neu-bg shadow-neu-inner rounded-3xl p-6 md:p-8 border border-white/40 overflow-hidden">
+          <h2 className="text-xl font-bold text-neu-heading mb-6 flex items-center gap-2">
+            <Building size={20} className="text-neu-primary" /> Registered Businesses
+          </h2>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b-2 border-neu-text/10">
+                  <th className="p-3 text-sm font-bold text-neu-text uppercase tracking-wider">Business Email</th>
+                  <th className="p-3 text-sm font-bold text-neu-text uppercase tracking-wider">Joined On</th>
+                  <th className="p-3 text-sm font-bold text-neu-text uppercase tracking-wider">Last Login</th>
+                  <th className="p-3 text-sm font-bold text-neu-text uppercase tracking-wider text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {stats.businesses.map(b => (
+                  <tr key={b.id} className="border-b border-neu-text/5 hover:bg-white/50 transition-colors">
+                    <td className="p-3 font-semibold text-neu-heading">{b.email}</td>
+                    <td className="p-3 text-neu-text font-medium text-sm">
+                      {new Date(b.created_at).toLocaleDateString()}
+                    </td>
+                    <td className="p-3 text-neu-text font-medium text-sm">
+                      {b.last_sign_in_at ? new Date(b.last_sign_in_at).toLocaleDateString() : 'Never'}
+                    </td>
+                    <td className="p-3 text-right">
+                      <button 
+                        onClick={() => handleDeepDive(b)}
+                        className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-neu-primary text-neu-primary font-bold hover:bg-neu-primary hover:text-white transition-colors text-xs"
+                      >
+                        <Eye size={14} /> Deep Dive
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* Deep Dive Modal */}
+      <Modal isOpen={isDeepDiveOpen} onClose={() => setIsDeepDiveOpen(false)} title="Business Deep Dive">
+        {loadingDeepDive ? (
+          <div className="py-12 text-center text-neu-primary font-bold animate-pulse">
+            Extracting data for {selectedBusiness?.email}...
+          </div>
+        ) : (
+          <div className="space-y-6">
+            <div className="neu-card p-4 bg-neu-primary/5 border border-neu-primary/20">
+              <p className="text-xs text-neu-text font-bold uppercase tracking-wide">Target Business</p>
+              <p className="font-bold text-neu-heading">{selectedBusiness?.email}</p>
+              <p className="text-xs text-neu-text font-medium mt-1">ID: {selectedBusiness?.id}</p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="neu-card p-4 text-center">
+                <p className="text-sm font-bold text-neu-text uppercase tracking-wider mb-1">Customers</p>
+                <p className="text-3xl font-black text-neu-heading">{deepDiveData.customers.length}</p>
+              </div>
+              <div className="neu-card p-4 text-center">
+                <p className="text-sm font-bold text-neu-text uppercase tracking-wider mb-1">Bills Logged</p>
+                <p className="text-3xl font-black text-neu-heading">{deepDiveData.bills.length}</p>
+              </div>
+            </div>
+            
+            <div className="mt-4 pt-4 border-t border-neu-text/10 text-center">
+              <p className="text-sm font-medium text-neu-text italic">
+                Viewing capabilities restricted to metrics to preserve target business data privacy.
+              </p>
+            </div>
+          </div>
+        )}
+      </Modal>
 
     </motion.div>
   );
