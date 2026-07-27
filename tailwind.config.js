@@ -15,7 +15,7 @@ export default {
         'neu-danger': '#e53e3e',
       },
       fontFamily: {
-        sans: ['Inter', 'sans-serif'],
+        sans: ['Outfit', 'sans-serif'],
       },
       boxShadow: {
         'neu': '9px 9px 16px rgba(163,177,198,0.5), -9px -9px 16px rgba(255,255,255,0.8)',

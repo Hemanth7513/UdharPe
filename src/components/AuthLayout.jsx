@@ -1,11 +1,22 @@
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { LayoutDashboard, Users, PlusCircle, LogOut, Settings } from 'lucide-react';
-import logo from '../assets/logo.png';
+import { LayoutDashboard, Users, PlusCircle, LogOut, Settings, ShieldAlert, Handshake } from 'lucide-react';
+import { useState, useEffect } from 'react';
 
 export default function AuthLayout() {
   const navigate = useNavigate();
   const location = useLocation();
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    const checkAdmin = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user?.email === 'hemaxtth@gmail.com') {
+        setIsAdmin(true);
+      }
+    };
+    checkAdmin();
+  }, []);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -19,6 +30,10 @@ export default function AuthLayout() {
     { name: 'Settings', path: '/settings', icon: Settings },
   ];
 
+  if (isAdmin) {
+    navItems.push({ name: 'Admin', path: '/admin', icon: ShieldAlert });
+  }
+
   return (
     <div className="min-h-screen bg-neu-bg flex flex-col">
       {/* Unified Top Navbar */}
@@ -27,8 +42,10 @@ export default function AuthLayout() {
           <div className="flex justify-between items-center h-20">
             {/* Logo */}
             <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/dashboard')}>
-              <img src={logo} alt="UdharPe" className="w-10 h-10 rounded-xl shadow-neu-inner object-cover" />
-              <span className="text-xl font-black text-neu-heading tracking-tight hidden sm:block">UdharPe</span>
+              <div className="w-10 h-10 rounded-xl shadow-neu flex items-center justify-center bg-neu-bg text-neu-primary">
+                <Handshake size={24} />
+              </div>
+              <span className="text-2xl font-black text-neu-heading tracking-tight hidden sm:block">UdharPe</span>
             </div>
 
             {/* Desktop Navigation */}

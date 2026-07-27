@@ -1,7 +1,6 @@
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, CheckCircle, Shield, TrendingUp } from 'lucide-react';
-import logo from '../assets/logo.png';
+import { ArrowRight, CheckCircle, Shield, TrendingUp, Handshake } from 'lucide-react';
 
 // Animation Variants for staggered, buttery smooth animations
 const containerVariants = {
@@ -50,8 +49,10 @@ export default function Landing() {
         className="w-full px-6 py-5 flex justify-between items-center max-w-7xl mx-auto z-10"
       >
         <div className="flex items-center gap-3">
-          <img src={logo} alt="UdharPe Logo" className="w-12 h-12 rounded-xl shadow-neu-inner object-cover" />
-          <span className="text-2xl font-black tracking-tight text-neu-heading">UdharPe</span>
+          <div className="w-12 h-12 rounded-xl shadow-neu flex items-center justify-center bg-neu-bg text-neu-primary">
+            <Handshake size={28} />
+          </div>
+          <span className="text-3xl font-black tracking-tight text-neu-heading">UdharPe</span>
         </div>
         <button onClick={() => navigate('/auth')} className="btn-solid text-sm px-6 py-2.5">
           Sign In

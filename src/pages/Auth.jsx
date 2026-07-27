@@ -79,9 +79,8 @@ export default function Auth() {
         const { error } = await supabase.auth.updateUser({ password });
         if (error) throw error;
         setIconState('CheckCircle2');
-        setErrorMsg('Password updated successfully! You can now log in.');
-        setAuthMode('login');
-        setPassword('');
+        // They are already authenticated via the recovery link, so send them to the dashboard!
+        navigate('/dashboard');
       }
     } catch (error) {
       console.error("Auth Error:", error); // Log the real error for debugging
