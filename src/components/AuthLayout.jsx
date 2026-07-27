@@ -42,7 +42,7 @@ export default function AuthLayout() {
           <div className="flex justify-between items-center h-20">
             {/* Logo */}
             <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/dashboard')}>
-              <div className="w-10 h-10 rounded-xl shadow-neu flex items-center justify-center bg-neu-bg text-neu-primary">
+              <div className="w-10 h-10 rounded-none shadow-neu flex items-center justify-center bg-neu-bg text-neu-primary">
                 <Handshake size={24} />
               </div>
               <span className="text-2xl font-black text-neu-heading tracking-tight hidden sm:block">UdharPe</span>
@@ -57,9 +57,9 @@ export default function AuthLayout() {
                   <button
                     key={item.name}
                     onClick={() => navigate(item.path)}
-                    className={`px-4 py-2.5 rounded-xl flex items-center gap-2 font-bold transition-all ${
+                    className={`px-4 py-2.5 rounded-none flex items-center gap-2 font-bold transition-all ${
                       isActive 
-                        ? 'shadow-neu-inner text-neu-primary' 
+                        ? 'border-4 border-black shadow-none bg-white text-neu-primary' 
                         : 'text-neu-text hover:text-neu-primary hover:shadow-neu-hover'
                     }`}
                   >
@@ -92,8 +92,8 @@ export default function AuthLayout() {
                 <button
                   key={item.name}
                   onClick={() => navigate(item.path)}
-                  className={`p-2 flex-1 mx-1 rounded-2xl flex flex-col items-center justify-center gap-1 transition-all ${
-                    isActive ? 'shadow-neu-inner text-neu-primary' : 'text-neu-text'
+                  className={`p-2 flex-1 mx-1 rounded-none flex flex-col items-center justify-center gap-1 transition-all ${
+                    isActive ? 'border-4 border-black shadow-none bg-white text-neu-primary' : 'text-neu-text'
                   }`}
                 >
                   <Icon size={20} className="shrink-0" />

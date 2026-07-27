@@ -7,20 +7,20 @@ export default {
   theme: {
     extend: {
       colors: {
-        'neu-bg': '#e0e5ec',
-        'neu-text': '#4a5568',
-        'neu-heading': '#2d3748',
-        'neu-primary': '#5a67d8',
-        'neu-primary-hover': '#4c51bf',
-        'neu-danger': '#e53e3e',
+        'neu-bg': '#FFFFFF',
+        'neu-text': '#000000',
+        'neu-heading': '#000000',
+        'neu-primary': '#2563EB', /* Royal Blue */
+        'neu-primary-hover': '#000000',
+        'neu-danger': '#DC2626',
       },
       fontFamily: {
         sans: ['Outfit', 'sans-serif'],
       },
       boxShadow: {
-        'neu': '9px 9px 16px rgba(163,177,198,0.5), -9px -9px 16px rgba(255,255,255,0.8)',
-        'neu-hover': '12px 12px 20px rgba(163,177,198,0.6), -12px -12px 20px rgba(255,255,255,0.9)',
-        'neu-inner': 'inset 6px 6px 10px 0 rgba(163,177,198,0.5), inset -6px -6px 10px 0 rgba(255,255,255,0.8)',
+        'neu': '6px 6px 0px 0px rgba(0,0,0,1)',
+        'neu-hover': '8px 8px 0px 0px rgba(0,0,0,1)',
+        'neu-inner': '4px 4px 0px 0px rgba(0,0,0,1)',
       },
       animation: {
         'fade-in': 'fadeIn 0.3s ease-out forwards',

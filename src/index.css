@@ -14,31 +14,33 @@
 }
 
 @layer components {
-  /* Premium Light Neumorphic Card */
+  /* Professional Neo-Brutalist Card */
   .neu-card {
-    @apply bg-neu-bg rounded-2xl shadow-neu border border-white/40;
+    @apply bg-white rounded-none shadow-neu border-4 border-black;
   }
   
   /* Primary CTA Button */
   .btn-primary {
-    @apply relative overflow-hidden bg-neu-bg text-neu-primary font-bold px-6 py-3 rounded-xl 
-           shadow-neu transition-all duration-300 ease-out 
-           hover:shadow-neu-hover hover:text-neu-primary-hover
-           active:shadow-neu-inner active:scale-[0.98]
-           flex items-center justify-center gap-2;
+    @apply relative bg-white text-neu-primary font-black px-6 py-3 rounded-none border-4 border-black
+           shadow-neu transition-all duration-150 ease-out 
+           hover:translate-x-1 hover:translate-y-1 hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:bg-neu-primary hover:text-white
+           active:translate-x-2 active:translate-y-2 active:shadow-none
+           flex items-center justify-center gap-2 uppercase tracking-wider;
   }
   
   /* Secondary Action Button (Filled) */
   .btn-solid {
-    @apply relative overflow-hidden bg-neu-primary text-white font-bold px-6 py-3 rounded-xl 
-           shadow-neu transition-all duration-300 ease-out hover:bg-neu-primary-hover
-           active:scale-[0.98] flex items-center justify-center gap-2;
+    @apply relative bg-neu-primary text-white font-black px-6 py-3 rounded-none border-4 border-black
+           shadow-neu transition-all duration-150 ease-out 
+           hover:translate-x-1 hover:translate-y-1 hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:bg-black
+           active:translate-x-2 active:translate-y-2 active:shadow-none
+           flex items-center justify-center gap-2 uppercase tracking-wider;
   }
 
-  /* Input fields - Inner shadow for pressed-in look */
+  /* Input fields - Neo-Brutalist look */
   .input-field {
-    @apply w-full bg-neu-bg text-neu-heading placeholder-neu-text/60
-           rounded-xl px-4 py-3 outline-none transition-all duration-200
-           border border-gray-300 shadow-neu-inner focus:ring-2 focus:ring-neu-primary/30;
+    @apply w-full bg-white text-neu-heading placeholder-neu-text/60 font-bold
+           rounded-none px-4 py-3 outline-none transition-all duration-150
+           border-4 border-black shadow-neu focus:translate-x-1 focus:translate-y-1 focus:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)];
   }
 }
