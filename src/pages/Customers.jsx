@@ -16,6 +16,8 @@ export default function Customers() {
   
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState('add'); // 'add' or 'edit'
+  const [editingId, setEditingId] = useState(null);
   const [newCustomer, setNewCustomer] = useState({ name: '', phone: '', email: '', firm_name: '', address: '', gst_details: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -82,6 +84,59 @@ export default function Customers() {
     }
   };
 
+  const handleEditCustomer = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    try {
+      const { error } = await supabase
+        .from('customers')
+        .update({
+          name: newCustomer.name, 
+          phone: newCustomer.phone, 
+          email: newCustomer.email,
+          firm_name: newCustomer.firm_name,
+          address: newCustomer.address,
+          gst_details: newCustomer.gst_details
+        })
+        .eq('id', editingId);
+
+      if (error) throw error;
+
+      // Update local state
+      setCustomers(prev => prev.map(c => c.id === editingId ? { ...c, ...newCustomer } : c));
+      
+      setIsModalOpen(false);
+      setNewCustomer({ name: '', phone: '', email: '', firm_name: '', address: '', gst_details: '' });
+      toast.success('Customer updated successfully!');
+    } catch (error) {
+      toast.error(error.message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const openAddModal = () => {
+    setModalMode('add');
+    setEditingId(null);
+    setNewCustomer({ name: '', phone: '', email: '', firm_name: '', address: '', gst_details: '' });
+    setIsModalOpen(true);
+  };
+
+  const openEditModal = (customer) => {
+    setModalMode('edit');
+    setEditingId(customer.id);
+    setNewCustomer({ 
+      name: customer.name || '', 
+      phone: customer.phone || '', 
+      email: customer.email || '', 
+      firm_name: customer.firm_name || '', 
+      address: customer.address || '', 
+      gst_details: customer.gst_details || '' 
+    });
+    setIsModalOpen(true);
+  };
+
   const handleExportExcel = () => {
     if (customers.length === 0) {
       toast.error("No customers to export.");
@@ -144,7 +199,7 @@ export default function Customers() {
           <button onClick={handleExportExcel} className="neu-card px-4 py-2 flex items-center justify-center gap-2 text-neu-primary hover:bg-neu-primary hover:text-white transition-all font-bold">
             <Download size={18} /> <span className="hidden sm:inline">Export</span>
           </button>
-          <button onClick={() => setIsModalOpen(true)} className="btn-solid flex-1 sm:flex-none">
+          <button onClick={openAddModal} className="btn-solid flex-1 sm:flex-none">
             <UserPlus size={20} /> Add Customer
           </button>
         </div>
@@ -173,7 +228,7 @@ export default function Customers() {
             {searchQuery ? "We couldn't find anyone matching your search." : "You haven't added any customers yet. Add your first customer to start tracking Udhar."}
           </p>
           {!searchQuery && (
-            <button onClick={() => setIsModalOpen(true)} className="btn-primary mx-auto mt-6">
+            <button onClick={openAddModal} className="btn-primary mx-auto mt-6">
               Add First Customer
             </button>
           )}
@@ -207,6 +262,13 @@ export default function Customers() {
                     </div>
                   )}
                 </div>
+                
+                <button 
+                  onClick={() => openEditModal(customer)}
+                  className="mt-4 text-xs font-bold text-neu-primary hover:text-neu-primary-hover border border-neu-primary px-3 py-1 rounded-lg transition-colors inline-block"
+                >
+                  Edit Details
+                </button>
               </div>
               
               <div className="mt-6 flex flex-col sm:flex-row gap-3">
@@ -228,9 +290,9 @@ export default function Customers() {
         </div>
       )}
 
-      {/* Add Customer Modal */}
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Add Party">
-        <form onSubmit={handleAddCustomer} className="space-y-5">
+      {/* Add/Edit Customer Modal */}
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={modalMode === 'add' ? "Add Party" : "Edit Party"}>
+        <form onSubmit={modalMode === 'add' ? handleAddCustomer : handleEditCustomer} className="space-y-5">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div>
               <label className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">Party Name *</label>
@@ -282,7 +344,7 @@ export default function Customers() {
           </div>
 
           <button type="submit" disabled={isSubmitting} className="btn-solid w-full mt-6 py-4">
-            {isSubmitting ? 'Saving...' : 'Save Party'}
+            {isSubmitting ? 'Saving...' : (modalMode === 'add' ? 'Save Party' : 'Update Party')}
           </button>
         </form>
       </Modal>

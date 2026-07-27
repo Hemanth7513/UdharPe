@@ -25,6 +25,11 @@ export default function CustomerLedger() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedBillForPayment, setSelectedBillForPayment] = useState(null);
 
+  // Edit Transaction State
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingTransaction, setEditingTransaction] = useState(null);
+  const [editNote, setEditNote] = useState('');
+
   // Email state
   const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
   const [emailSubject, setEmailSubject] = useState('');
@@ -156,6 +161,29 @@ export default function CustomerLedger() {
       toast.success('Payment recorded successfully!');
       fetchLedger(); // Refresh data
 
+    } catch (error) {
+      toast.error(error.message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleEditTransaction = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    try {
+      const table = editingTransaction.type === 'bill' ? 'bills' : 'settlements';
+      const { error } = await supabase
+        .from(table)
+        .update({ note: editNote })
+        .eq('id', editingTransaction.id);
+
+      if (error) throw error;
+      
+      toast.success('Note updated successfully!');
+      setIsEditModalOpen(false);
+      setEditingTransaction(null);
+      fetchLedger(); // Refresh
     } catch (error) {
       toast.error(error.message);
     } finally {
@@ -472,6 +500,17 @@ export default function CustomerLedger() {
                       Remaining: ₹{Number(t.remaining_amount).toLocaleString()}
                     </p>
                   )}
+                  
+                  <button 
+                    onClick={() => {
+                      setEditingTransaction(t);
+                      setEditNote(t.note || '');
+                      setIsEditModalOpen(true);
+                    }}
+                    className="mt-3 text-xs font-bold text-neu-text/60 hover:text-neu-primary transition-colors block"
+                  >
+                    Edit Note
+                  </button>
                 </div>
               </div>
               <div className="text-right w-full sm:w-auto mt-2 sm:mt-0 pt-4 sm:pt-0 border-t border-white/20 sm:border-t-0 flex flex-col items-end">
@@ -538,6 +577,24 @@ export default function CustomerLedger() {
 
           <button type="submit" disabled={isSubmitting} className="btn-solid w-full mt-6 py-4">
             {isSubmitting ? 'Processing...' : 'Save Payment'}
+          </button>
+        </form>
+      </Modal>
+
+      {/* Edit Transaction Note Modal */}
+      <Modal isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} title="Edit Note">
+        <form onSubmit={handleEditTransaction} className="space-y-5">
+          <div>
+            <label className="block text-sm font-bold text-neu-heading mb-2 pl-1 uppercase tracking-wide">
+              Transaction Note
+            </label>
+            <input 
+              type="text" value={editNote} onChange={e => setEditNote(e.target.value)}
+              placeholder="e.g. Cash, UPI, etc." className="input-field"
+            />
+          </div>
+          <button type="submit" disabled={isSubmitting} className="btn-solid w-full mt-4">
+            {isSubmitting ? 'Updating...' : 'Update Note'}
           </button>
         </form>
       </Modal>
