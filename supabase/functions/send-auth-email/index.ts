@@ -73,9 +73,13 @@ serve(async (req) => {
       message = "Click the button below to securely log into your UdharPe account. No password required!";
       buttonText = "Log In to UdharPe";
     } else if (type === 'signup') {
-      subject = "Welcome to UdharPe! Confirm your email";
+      const firmName = options?.data?.firm_name || "your firm";
+      const ownerName = options?.data?.owner_name || "";
+      const greeting = ownerName ? `Dear ${ownerName},` : 'Hello,';
+
+      subject = `Welcome to UdharPe, ${firmName}!`;
       title = "Confirm Your Email";
-      message = "Welcome to UdharPe! Please confirm your email address by clicking the button below so you can start managing your ledgers.";
+      message = `${greeting}<br/><br/>We are thrilled to welcome <strong>${firmName}</strong> to UdharPe. <br/><br/>UdharPe is designed to help you manage your business ledgers effortlessly, securely, and privately. No more messy notebooks or confusing spreadsheets—just a clean, professional way to track your business finances.<br/><br/>Please confirm your email address by clicking the button below to secure your account and open your ledger.`;
       buttonText = "Confirm Email Address";
     }
 
