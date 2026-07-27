@@ -19,7 +19,7 @@ export default function TermsOfService() {
 
       <div className="neu-card p-8 sm:p-12">
         <h1 className="text-3xl font-black text-neu-heading tracking-tight mb-2">Terms of Service</h1>
-        <p className="text-sm font-medium text-neu-text mb-8">Last Updated: July 2026</p>
+        <p className="text-sm font-bold text-neu-text mb-8">Last Updated: July 2026</p>
 
         <div className="space-y-6 text-neu-text leading-relaxed">
           <section>

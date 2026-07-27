@@ -165,7 +165,7 @@ export default function Billing() {
     return (
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="flex items-center gap-3 mb-8">
-          <SkeletonLoader className="w-12 h-12 rounded-2xl" />
+          <SkeletonLoader className="w-12 h-12 rounded-none" />
           <div>
             <SkeletonLoader className="w-48 h-8 mb-2" />
             <SkeletonLoader className="w-32 h-4" />
@@ -182,27 +182,27 @@ export default function Billing() {
       initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
     >
       <header className="mb-8 flex items-center gap-3">
-        <div className="w-12 h-12 shadow-neu rounded-2xl flex items-center justify-center text-neu-primary bg-neu-bg">
+        <div className="w-12 h-12 shadow-neu rounded-none flex items-center justify-center text-neu-primary bg-neu-bg">
           <Receipt size={24} />
         </div>
         <div>
           <h1 className="text-3xl font-bold text-neu-heading tracking-tight">Record Udhar</h1>
-          <p className="text-neu-text font-medium text-sm mt-1">Add a new entry to a party's ledger</p>
+          <p className="text-neu-text font-bold text-sm mt-1">Add a new entry to a party's ledger</p>
         </div>
       </header>
 
-      <div className="neu-card p-6 sm:p-10 border border-white/40 relative z-10">
+      <div className="neu-card p-6 sm:p-10 border border-4 border-[#059669] relative z-10">
         
         {success ? (
           <motion.div 
             initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
             className="py-12 text-center"
           >
-            <div className="w-20 h-20 mx-auto bg-neu-bg shadow-neu rounded-full flex items-center justify-center text-neu-primary mb-6">
+            <div className="w-20 h-20 mx-auto bg-neu-bg shadow-neu rounded-none flex items-center justify-center text-neu-primary mb-6">
               <CheckCircle size={40} />
             </div>
             <h2 className="text-2xl font-black text-neu-heading mb-2">Entry Recorded!</h2>
-            <p className="text-neu-text font-medium">The ledger has been updated successfully.</p>
+            <p className="text-neu-text font-bold">The ledger has been updated successfully.</p>
             <p className="text-xs text-neu-text/60 mt-8 uppercase tracking-widest font-bold">Redirecting to Dashboard...</p>
           </motion.div>
         ) : (
@@ -226,7 +226,7 @@ export default function Billing() {
               </div>
               
               {customers.length === 0 ? (
-                <div className="p-4 rounded-2xl shadow-neu-inner bg-neu-bg text-neu-danger font-medium text-sm flex justify-between items-center">
+                <div className="p-4 rounded-none border-4 border-[#059669] bg-white bg-neu-bg text-neu-danger font-bold text-sm flex justify-between items-center">
                   <span>No parties found. Please add a customer first.</span>
                   <button type="button" onClick={() => setIsAddCustomerModalOpen(true)} className="btn-primary text-xs py-1.5 px-3">
                     Add Customer
@@ -246,14 +246,14 @@ export default function Billing() {
                     onFocus={() => setIsDropdownOpen(true)}
                     onBlur={() => setTimeout(() => setIsDropdownOpen(false), 200)}
                     placeholder="Search party by name..."
-                    className="w-full bg-neu-bg text-neu-heading rounded-2xl px-4 py-4 outline-none focus:ring-2 focus:ring-neu-primary/30 shadow-neu-inner font-bold"
+                    className="w-full bg-neu-bg text-neu-heading rounded-none px-4 py-4 outline-none focus:ring-2 focus:ring-neu-primary/30 border-4 border-[#059669] bg-white font-bold"
                   />
                   
                   <AnimatePresence>
                     {isDropdownOpen && (
                       <motion.div 
                         initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }}
-                        className="absolute z-50 w-full mt-2 bg-neu-bg border border-white/50 shadow-neu rounded-2xl max-h-60 overflow-y-auto"
+                        className="absolute z-50 w-full mt-2 bg-neu-bg border border-4 border-[#059669] shadow-neu rounded-none max-h-60 overflow-y-auto"
                       >
                         {customers.filter(c => c.name.toLowerCase().includes(customerSearch.toLowerCase())).length > 0 ? (
                           customers.filter(c => c.name.toLowerCase().includes(customerSearch.toLowerCase())).map(c => (
@@ -267,7 +267,7 @@ export default function Billing() {
                               className="px-4 py-3 hover:bg-neu-primary/10 cursor-pointer border-b border-white/20 last:border-0 font-bold text-neu-heading flex justify-between"
                             >
                               <span>{c.name}</span>
-                              <span className="text-neu-danger font-medium text-sm">₹{Number(c.total_outstanding).toLocaleString()}</span>
+                              <span className="text-neu-danger font-bold text-sm">₹{Number(c.total_outstanding).toLocaleString()}</span>
                             </div>
                           ))
                         ) : (
@@ -296,7 +296,7 @@ export default function Billing() {
                   value={amount} 
                   onChange={e => setAmount(e.target.value)}
                   placeholder="0.00" 
-                  className="w-full bg-neu-bg text-neu-heading rounded-2xl pl-12 pr-4 py-4 outline-none focus:ring-2 focus:ring-neu-primary/30 shadow-neu-inner font-black text-xl"
+                  className="w-full bg-neu-bg text-neu-heading rounded-none pl-12 pr-4 py-4 outline-none focus:ring-2 focus:ring-neu-primary/30 border-4 border-[#059669] bg-white font-black text-xl"
                 />
               </div>
             </div>
@@ -312,7 +312,7 @@ export default function Billing() {
                 required 
                 value={dueDate} 
                 onChange={e => setDueDate(e.target.value)}
-                className="input-field font-medium uppercase"
+                className="input-field font-bold uppercase"
               />
             </div>
 

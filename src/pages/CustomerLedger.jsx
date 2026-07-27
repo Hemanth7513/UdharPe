@@ -392,17 +392,17 @@ export default function CustomerLedger() {
       {/* Customer Header Card */}
       <div className="neu-card p-6 sm:p-8 mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div className="flex items-center gap-4">
-          <div className="w-16 h-16 shadow-neu-inner rounded-full flex items-center justify-center text-neu-primary bg-neu-bg shrink-0">
+          <div className="w-16 h-16 border-4 border-[#059669] bg-white rounded-none flex items-center justify-center text-neu-primary bg-neu-bg shrink-0">
              <User size={30} />
           </div>
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-neu-heading tracking-tight">{customer.name}</h1>
-            {customer.phone && <p className="text-neu-text font-medium mt-1 text-sm">{customer.phone}</p>}
+            {customer.phone && <p className="text-neu-text font-bold mt-1 text-sm">{customer.phone}</p>}
           </div>
         </div>
         
         <div className="text-left md:text-right w-full md:w-auto flex flex-col md:items-end gap-3">
-          <div className="p-4 md:p-0 rounded-2xl md:rounded-none shadow-neu-inner md:shadow-none bg-neu-bg md:bg-transparent w-full md:w-auto">
+          <div className="p-4 md:p-0 rounded-none md:rounded-none border-4 border-[#059669] bg-white md:shadow-none bg-neu-bg md:bg-transparent w-full md:w-auto">
             <p className="text-sm text-neu-text font-bold uppercase tracking-wider mb-1">Total Outstanding</p>
             <p className="text-4xl font-black text-neu-danger">₹{Number(customer.total_outstanding).toLocaleString()}</p>
           </div>
@@ -464,19 +464,19 @@ export default function CustomerLedger() {
 
       <div className="space-y-4">
         {transactions.length === 0 ? (
-           <div className="neu-card p-10 text-center shadow-neu-inner border border-white/30">
-             <p className="text-neu-text font-medium">No transactions recorded yet.</p>
+           <div className="neu-card p-10 text-center border-4 border-[#059669] bg-white border border-4 border-[#059669]">
+             <p className="text-neu-text font-bold">No transactions recorded yet.</p>
            </div>
         ) : (
           transactions.map(t => (
             <div key={t.id} className="neu-card p-5 sm:p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:shadow-neu-hover transition-all">
               <div className="flex items-center gap-4">
                 {t.type === 'bill' ? (
-                  <div className="w-12 h-12 rounded-full shadow-neu-inner flex items-center justify-center text-neu-danger bg-neu-bg shrink-0">
+                  <div className="w-12 h-12 rounded-none border-4 border-[#059669] bg-white flex items-center justify-center text-neu-danger bg-neu-bg shrink-0">
                     <ArrowUpRight size={22} />
                   </div>
                 ) : (
-                  <div className="w-12 h-12 rounded-full shadow-neu-inner flex items-center justify-center text-neu-success bg-neu-bg shrink-0">
+                  <div className="w-12 h-12 rounded-none border-4 border-[#059669] bg-white flex items-center justify-center text-neu-success bg-neu-bg shrink-0">
                     <ArrowDownRight size={22} />
                   </div>
                 )}
@@ -487,11 +487,11 @@ export default function CustomerLedger() {
                       <span className="text-xs bg-neu-success/20 text-neu-success px-2 py-0.5 rounded uppercase tracking-wider font-bold">Paid</span>
                     )}
                   </h4>
-                  <p className="text-sm text-neu-text font-medium mt-0.5">
+                  <p className="text-sm text-neu-text font-bold mt-0.5">
                     {new Date(t.created_at).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}
                   </p>
                   {t.note && (
-                    <p className="text-sm text-neu-text/80 mt-2 bg-neu-bg/50 inline-block px-3 py-1 rounded-lg italic border border-white/20">
+                    <p className="text-sm text-neu-text/80 mt-2 bg-neu-bg/50 inline-block px-3 py-1 rounded-none italic border border-white/20">
                       "{t.note}"
                     </p>
                   )}
@@ -523,7 +523,7 @@ export default function CustomerLedger() {
                       setSelectedBillForPayment(t);
                       setIsPaymentModalOpen(true);
                     }}
-                    className="mt-2 text-xs font-bold text-neu-primary hover:text-neu-primary-hover border border-neu-primary px-3 py-1 rounded-lg transition-colors"
+                    className="mt-2 text-xs font-bold text-neu-primary hover:text-neu-primary-hover border border-neu-primary px-3 py-1 rounded-none transition-colors"
                   >
                     Apply Payment
                   </button>
@@ -537,7 +537,7 @@ export default function CustomerLedger() {
       {/* Floating Action Button for raising a bill pre-filled with this customer */}
       <button 
         onClick={() => navigate(`/billing?customer_id=${customer.id}`)}
-        className="fixed bottom-24 md:bottom-8 right-6 w-14 h-14 bg-neu-primary text-white rounded-full shadow-[0_10px_20px_rgba(79,70,229,0.4)] flex items-center justify-center hover:scale-105 hover:bg-neu-primary-hover transition-all z-40"
+        className="fixed bottom-24 md:bottom-8 right-6 w-14 h-14 bg-neu-primary text-white rounded-none shadow-[0_10px_20px_rgba(79,70,229,0.4)] flex items-center justify-center hover:scale-105 hover:bg-neu-primary-hover transition-all z-40"
         title="Raise Udhar for this customer"
       >
         <Receipt size={24} />
@@ -547,7 +547,7 @@ export default function CustomerLedger() {
       <Modal isOpen={isPaymentModalOpen} onClose={() => { setIsPaymentModalOpen(false); setSelectedBillForPayment(null); }} title={selectedBillForPayment ? `Record Payment for ${selectedBillForPayment.bill_no || 'Bill'}` : "Record Payment"}>
         <form onSubmit={handleRecordPayment} className="space-y-5">
           {selectedBillForPayment && (
-            <div className="bg-neu-primary/10 border border-neu-primary/20 rounded-xl p-4 mb-4 text-sm font-bold text-neu-primary">
+            <div className="bg-neu-primary/10 border border-neu-primary/20 rounded-none p-4 mb-4 text-sm font-bold text-neu-primary">
               Remaining Balance for this Bill: ₹{Number(selectedBillForPayment.remaining_amount).toLocaleString()}
             </div>
           )}
@@ -562,7 +562,7 @@ export default function CustomerLedger() {
                 type="number" required min="1" step="0.01"
                 value={paymentAmount} onChange={e => setPaymentAmount(e.target.value)}
                 placeholder="0.00" 
-                className="w-full bg-neu-bg text-neu-heading rounded-2xl pl-12 pr-4 py-4 outline-none focus:ring-2 focus:ring-neu-primary/30 shadow-neu-inner font-black text-xl"
+                className="w-full bg-neu-bg text-neu-heading rounded-none pl-12 pr-4 py-4 outline-none focus:ring-2 focus:ring-neu-primary/30 border-4 border-[#059669] bg-white font-black text-xl"
               />
             </div>
           </div>

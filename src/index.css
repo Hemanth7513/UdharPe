@@ -14,33 +14,33 @@
 }
 
 @layer components {
-  /* Premium Light Neumorphic Card -> Maximalist Card */
+  /* Maximalist Card - Bright */
   .neu-card {
-    @apply bg-neu-bg rounded-xl shadow-neu border-4 border-black;
+    @apply bg-white rounded-none shadow-neu border-4 border-[#059669];
   }
   
   /* Primary CTA Button */
   .btn-primary {
-    @apply relative bg-white text-neu-primary font-bold px-6 py-3 rounded-none border-4 border-black
+    @apply relative bg-white text-[#059669] font-black px-6 py-3 rounded-none border-4 border-[#059669]
            shadow-neu transition-all duration-150 ease-out 
-           hover:translate-x-1 hover:translate-y-1 hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:bg-neu-primary hover:text-white
+           hover:translate-x-1 hover:translate-y-1 hover:shadow-[2px_2px_0px_0px_#3B82F6] hover:bg-[#059669] hover:text-white
            active:translate-x-2 active:translate-y-2 active:shadow-none
            flex items-center justify-center gap-2 uppercase tracking-wider;
   }
   
   /* Secondary Action Button (Filled) */
   .btn-solid {
-    @apply relative bg-neu-primary text-white font-bold px-6 py-3 rounded-none border-4 border-black
+    @apply relative bg-[#059669] text-white font-black px-6 py-3 rounded-none border-4 border-[#059669]
            shadow-neu transition-all duration-150 ease-out 
-           hover:translate-x-1 hover:translate-y-1 hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:bg-black
+           hover:translate-x-1 hover:translate-y-1 hover:shadow-[2px_2px_0px_0px_#3B82F6] hover:bg-[#047857]
            active:translate-x-2 active:translate-y-2 active:shadow-none
            flex items-center justify-center gap-2 uppercase tracking-wider;
   }
 
   /* Input fields - Maximalist look */
   .input-field {
-    @apply w-full bg-white text-neu-heading placeholder-neu-text/60
+    @apply w-full bg-white text-[#1D4ED8] placeholder-[#1D4ED8]/60 font-bold
            rounded-none px-4 py-3 outline-none transition-all duration-150
-           border-4 border-black shadow-neu focus:translate-x-1 focus:translate-y-1 focus:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)];
+           border-4 border-[#059669] shadow-neu focus:translate-x-1 focus:translate-y-1 focus:shadow-[2px_2px_0px_0px_#3B82F6];
   }
 }

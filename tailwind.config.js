@@ -7,20 +7,20 @@ export default {
   theme: {
     extend: {
       colors: {
-        'neu-bg': '#FFFBEB',
-        'neu-text': '#000000',
-        'neu-heading': '#000000',
-        'neu-primary': '#FF0055',
-        'neu-primary-hover': '#000000',
-        'neu-danger': '#FF0000',
+        'neu-bg': '#FEF9C3',       /* Very light yellow background */
+        'neu-text': '#1D4ED8',      /* Bright Blue text */
+        'neu-heading': '#059669',   /* Vivid Green heading */
+        'neu-primary': '#F59E0B',   /* Vibrant Amber/Orange */
+        'neu-primary-hover': '#D97706', /* Slightly darker amber for hover */
+        'neu-danger': '#EF4444',    /* Bright Red */
       },
       fontFamily: {
         sans: ['Outfit', 'sans-serif'],
       },
       boxShadow: {
-        'neu': '6px 6px 0px 0px rgba(0,0,0,1)',
-        'neu-hover': '8px 8px 0px 0px rgba(0,0,0,1)',
-        'neu-inner': '4px 4px 0px 0px rgba(0,0,0,1)',
+        'neu': '6px 6px 0px 0px #3B82F6', /* Electric Blue shadow */
+        'neu-hover': '8px 8px 0px 0px #3B82F6',
+        'neu-inner': '4px 4px 0px 0px #3B82F6',
       },
       animation: {
         'fade-in': 'fadeIn 0.3s ease-out forwards',

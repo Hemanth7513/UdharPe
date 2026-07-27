@@ -191,7 +191,7 @@ export default function Customers() {
           </button>
           <div>
             <h1 className="text-3xl font-bold text-neu-heading tracking-tight">My Customers</h1>
-            <p className="text-neu-text mt-1 font-medium">{customers.length} total clients</p>
+            <p className="text-neu-text mt-1 font-bold">{customers.length} total clients</p>
           </div>
         </div>
         
@@ -213,18 +213,18 @@ export default function Customers() {
           placeholder="Search by name or phone..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full bg-neu-bg text-neu-heading placeholder-neu-text/60 rounded-2xl pl-14 pr-4 py-4 outline-none focus:ring-2 focus:ring-neu-primary/30 shadow-neu-inner transition-all font-medium"
+          className="w-full bg-neu-bg text-neu-heading placeholder-neu-text/60 rounded-none pl-14 pr-4 py-4 outline-none focus:ring-2 focus:ring-neu-primary/30 border-4 border-[#059669] bg-white transition-all font-bold"
         />
       </div>
 
       {/* Customer List */}
       {filteredCustomers.length === 0 ? (
-        <div className="neu-card p-12 text-center shadow-neu-inner">
-          <div className="w-20 h-20 mx-auto mb-6 shadow-neu rounded-full flex items-center justify-center text-neu-primary">
+        <div className="neu-card p-12 text-center border-4 border-[#059669] bg-white">
+          <div className="w-20 h-20 mx-auto mb-6 shadow-neu rounded-none flex items-center justify-center text-neu-primary">
             <UserPlus size={32} />
           </div>
           <h3 className="text-xl font-bold text-neu-heading mb-2">No customers found</h3>
-          <p className="text-neu-text font-medium max-w-md mx-auto">
+          <p className="text-neu-text font-bold max-w-md mx-auto">
             {searchQuery ? "We couldn't find anyone matching your search." : "You haven't added any customers yet. Add your first customer to start tracking Udhar."}
           </p>
           {!searchQuery && (
@@ -239,11 +239,11 @@ export default function Customers() {
             <div key={customer.id} className="neu-card p-6 flex flex-col justify-between hover:shadow-neu-hover transition-all group">
               <div>
                 <div className="flex justify-between items-start mb-4">
-                  <div className="w-12 h-12 shadow-neu rounded-full flex items-center justify-center text-neu-primary font-bold text-lg bg-neu-bg">
+                  <div className="w-12 h-12 shadow-neu rounded-none flex items-center justify-center text-neu-primary font-bold text-lg bg-neu-bg">
                     {customer.name.charAt(0).toUpperCase()}
                   </div>
                   <div className="text-right">
-                    <p className="text-xs text-neu-text font-medium uppercase tracking-wider mb-1">Outstanding</p>
+                    <p className="text-xs text-neu-text font-bold uppercase tracking-wider mb-1">Outstanding</p>
                     <p className="font-black text-neu-danger text-lg">₹{Number(customer.total_outstanding).toLocaleString()}</p>
                   </div>
                 </div>
@@ -252,12 +252,12 @@ export default function Customers() {
                 
                 <div className="space-y-2">
                   {customer.phone && (
-                    <div className="flex items-center gap-3 text-neu-text font-medium text-sm">
+                    <div className="flex items-center gap-3 text-neu-text font-bold text-sm">
                       <Phone size={14} className="text-neu-primary" /> {customer.phone}
                     </div>
                   )}
                   {customer.email && (
-                    <div className="flex items-center gap-3 text-neu-text font-medium text-sm">
+                    <div className="flex items-center gap-3 text-neu-text font-bold text-sm">
                       <Mail size={14} className="text-neu-primary" /> {customer.email}
                     </div>
                   )}
@@ -265,7 +265,7 @@ export default function Customers() {
                 
                 <button 
                   onClick={() => openEditModal(customer)}
-                  className="mt-4 text-xs font-bold text-neu-primary hover:text-neu-primary-hover border border-neu-primary px-3 py-1 rounded-lg transition-colors inline-block"
+                  className="mt-4 text-xs font-bold text-neu-primary hover:text-neu-primary-hover border border-neu-primary px-3 py-1 rounded-none transition-colors inline-block"
                 >
                   Edit Details
                 </button>
@@ -274,13 +274,13 @@ export default function Customers() {
               <div className="mt-6 flex flex-col sm:flex-row gap-3">
                 <button 
                   onClick={() => navigate(`/customers/${customer.id}`)}
-                  className="flex-1 py-2.5 rounded-lg shadow-neu text-neu-heading font-bold hover:text-neu-primary transition-colors flex items-center justify-center gap-2"
+                  className="flex-1 py-2.5 rounded-none shadow-neu text-neu-heading font-bold hover:text-neu-primary transition-colors flex items-center justify-center gap-2"
                 >
                   View Ledger
                 </button>
                 <button 
                   onClick={() => navigate('/billing')}
-                  className="flex-1 py-2.5 rounded-lg shadow-neu-inner text-neu-primary font-bold hover:bg-neu-primary hover:text-white transition-colors flex items-center justify-center gap-2"
+                  className="flex-1 py-2.5 rounded-none border-4 border-[#059669] bg-white text-neu-primary font-bold hover:bg-neu-primary hover:text-white transition-colors flex items-center justify-center gap-2"
                 >
                   <Plus size={18} /> Udhar
                 </button>
