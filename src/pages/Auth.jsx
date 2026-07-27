@@ -153,7 +153,7 @@ export default function Auth({ isRecovering }) {
               initial={{ scale: 0.5, rotate: -20, opacity: 0 }}
               animate={{ scale: 1, rotate: 0, opacity: 1 }}
               transition={{ type: "spring", stiffness: 300, damping: 15 }}
-              className="w-20 h-20 shadow-neu rounded-none flex items-center justify-center text-neu-primary bg-neu-bg border border-4 border-black"
+              className="w-20 h-20 shadow-neu rounded-full flex items-center justify-center text-neu-primary bg-neu-bg border border-white/50"
             >
               {iconState === 'Briefcase' && <Briefcase className="w-8 h-8" />}
               {iconState === 'Eye' && <Eye className="w-8 h-8" />}
@@ -175,7 +175,7 @@ export default function Auth({ isRecovering }) {
             {errorMsg && (
               <motion.div 
                 initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
-                className={`border-4 border-black shadow-none bg-white p-4 rounded-none mb-6 text-sm font-bold ${
+                className={`shadow-neu-inner p-4 rounded-xl mb-6 text-sm font-medium ${
                   errorMsg.includes('successful') || errorMsg.includes('sent') || errorMsg.includes('updated') 
                     ? 'bg-neu-primary/10 text-neu-primary' 
                     : 'bg-neu-bg text-neu-danger'
@@ -296,7 +296,7 @@ export default function Auth({ isRecovering }) {
           )}
 
           <div className="mt-8 pt-6 border-t border-white/20">
-            <p className="text-center text-sm font-bold text-neu-text mb-4">
+            <p className="text-center text-sm font-medium text-neu-text mb-4">
               {authMode === 'signup' ? "Already registered? " : "Don't have an account? "}
               <button 
                 onClick={() => { setAuthMode(authMode === 'signup' ? 'login' : 'signup'); setErrorMsg(''); }}
@@ -305,7 +305,7 @@ export default function Auth({ isRecovering }) {
                 {authMode === 'signup' ? 'Log In Here' : 'Register Firm'}
               </button>
             </p>
-            <div className="flex justify-center gap-4 text-xs font-bold text-neu-text/80">
+            <div className="flex justify-center gap-4 text-xs font-medium text-neu-text/80">
               <button onClick={() => navigate('/privacy-policy')} className="hover:text-neu-primary transition-colors">Privacy Policy</button>
               <span>•</span>
               <button onClick={() => navigate('/terms-of-service')} className="hover:text-neu-primary transition-colors">Terms of Service</button>

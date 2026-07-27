@@ -33,12 +33,12 @@ export default function Landing() {
       <motion.div 
         animate={{ y: [0, -20, 0], scale: [1, 1.05, 1] }} 
         transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute top-1/4 left-1/4 w-[300px] h-[300px] rounded-none shadow-neu opacity-40 bg-neu-bg -z-10"
+        className="absolute top-1/4 left-1/4 w-[300px] h-[300px] rounded-full shadow-neu opacity-40 bg-neu-bg -z-10"
       />
       <motion.div 
         animate={{ y: [0, 30, 0], scale: [1, 0.95, 1] }} 
         transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-        className="absolute bottom-1/4 right-1/4 w-[450px] h-[450px] rounded-none shadow-neu opacity-40 bg-neu-bg -z-10"
+        className="absolute bottom-1/4 right-1/4 w-[450px] h-[450px] rounded-full shadow-neu opacity-40 bg-neu-bg -z-10"
       />
 
       {/* Minimal Navbar */}
@@ -49,7 +49,7 @@ export default function Landing() {
         className="w-full px-6 py-5 flex justify-between items-center max-w-7xl mx-auto z-10"
       >
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-none shadow-neu flex items-center justify-center bg-neu-bg text-neu-primary">
+          <div className="w-12 h-12 rounded-xl shadow-neu flex items-center justify-center bg-neu-bg text-neu-primary">
             <Handshake size={28} />
           </div>
           <span className="text-3xl font-black tracking-tight text-neu-heading">UdharPe</span>
@@ -68,7 +68,7 @@ export default function Landing() {
             animate="visible"
             className="flex flex-col items-center text-center max-w-3xl"
           >
-            <motion.div variants={itemVariants} className="inline-block px-5 py-2 mb-8 rounded-none border-4 border-black shadow-none bg-white text-neu-primary font-bold text-sm tracking-wide bg-neu-bg">
+            <motion.div variants={itemVariants} className="inline-block px-5 py-2 mb-8 rounded-full shadow-neu-inner text-neu-primary font-bold text-sm tracking-wide bg-neu-bg">
               The Elegant Business Ledger
             </motion.div>
             
@@ -77,7 +77,7 @@ export default function Landing() {
               <span className="text-neu-primary">Managed Beautifully.</span>
             </motion.h1>
             
-            <motion.p variants={itemVariants} className="text-lg md:text-xl text-neu-text mb-12 max-w-2xl font-bold leading-relaxed">
+            <motion.p variants={itemVariants} className="text-lg md:text-xl text-neu-text mb-12 max-w-2xl font-medium leading-relaxed">
               No clutter, no confusing menus, no messy notebooks. UdharPe is the private, premium way to track what you're owed.
             </motion.p>
             
@@ -98,31 +98,31 @@ export default function Landing() {
         className="w-full max-w-7xl mx-auto px-6 pb-12 pt-8 mt-auto z-10"
       >
         <div className="grid md:grid-cols-3 gap-6">
-          <div className="flex items-center gap-4 p-5 rounded-none border-4 border-black shadow-none bg-white bg-neu-bg">
-            <div className="w-12 h-12 shadow-neu rounded-none flex shrink-0 items-center justify-center text-neu-primary">
+          <div className="flex items-center gap-4 p-5 rounded-2xl shadow-neu-inner bg-neu-bg">
+            <div className="w-12 h-12 shadow-neu rounded-full flex shrink-0 items-center justify-center text-neu-primary">
               <CheckCircle size={20} />
             </div>
             <div>
               <h4 className="font-bold text-neu-heading">Dead Simple</h4>
-              <p className="text-sm text-neu-text font-bold">Log entries in under 30s.</p>
+              <p className="text-sm text-neu-text font-medium">Log entries in under 30s.</p>
             </div>
           </div>
-          <div className="flex items-center gap-4 p-5 rounded-none border-4 border-black shadow-none bg-white bg-neu-bg">
-            <div className="w-12 h-12 shadow-neu rounded-none flex shrink-0 items-center justify-center text-neu-primary">
+          <div className="flex items-center gap-4 p-5 rounded-2xl shadow-neu-inner bg-neu-bg">
+            <div className="w-12 h-12 shadow-neu rounded-full flex shrink-0 items-center justify-center text-neu-primary">
               <Shield size={20} />
             </div>
             <div>
               <h4 className="font-bold text-neu-heading">100% Private</h4>
-              <p className="text-sm text-neu-text font-bold">Bank-grade data isolation.</p>
+              <p className="text-sm text-neu-text font-medium">Bank-grade data isolation.</p>
             </div>
           </div>
-          <div className="flex items-center gap-4 p-5 rounded-none border-4 border-black shadow-none bg-white bg-neu-bg">
-            <div className="w-12 h-12 shadow-neu rounded-none flex shrink-0 items-center justify-center text-neu-primary">
+          <div className="flex items-center gap-4 p-5 rounded-2xl shadow-neu-inner bg-neu-bg">
+            <div className="w-12 h-12 shadow-neu rounded-full flex shrink-0 items-center justify-center text-neu-primary">
               <TrendingUp size={20} />
             </div>
             <div>
               <h4 className="font-bold text-neu-heading">Get Paid Faster</h4>
-              <p className="text-sm text-neu-text font-bold">Track overdue bills instantly.</p>
+              <p className="text-sm text-neu-text font-medium">Track overdue bills instantly.</p>
             </div>
           </div>
         </div>
@@ -133,7 +133,7 @@ export default function Landing() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1, duration: 0.6 }}
-        className="w-full text-center pb-6 z-10 flex justify-center gap-4 text-xs font-bold text-neu-text/80"
+        className="w-full text-center pb-6 z-10 flex justify-center gap-4 text-xs font-medium text-neu-text/80"
       >
         <button onClick={() => navigate('/privacy-policy')} className="hover:text-neu-primary transition-colors">Privacy Policy</button>
         <span>•</span>

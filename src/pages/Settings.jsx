@@ -91,12 +91,12 @@ export default function Settings() {
     >
       <header className="mb-8 flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 shadow-neu rounded-none flex items-center justify-center text-neu-primary bg-neu-bg">
+          <div className="w-12 h-12 shadow-neu rounded-2xl flex items-center justify-center text-neu-primary bg-neu-bg">
             <SettingsIcon size={24} />
           </div>
           <div>
             <h1 className="text-3xl font-bold text-neu-heading tracking-tight">Settings</h1>
-            <p className="text-neu-text font-bold text-sm mt-1">Manage your firm profile</p>
+            <p className="text-neu-text font-medium text-sm mt-1">Manage your firm profile</p>
           </div>
         </div>
         
@@ -124,7 +124,7 @@ export default function Settings() {
               disabled={!isEditing}
               value={profile.firm_name}
               onChange={(e) => setProfile({...profile, firm_name: e.target.value})}
-              className={`w-full pl-12 pr-4 py-4 rounded-none font-bold text-neu-heading outline-none transition-all ${isEditing ? 'bg-neu-bg border-4 border-black shadow-none bg-white focus:ring-2 focus:ring-neu-primary/30 border border-4 border-black' : 'bg-transparent shadow-none'}`}
+              className={`w-full pl-12 pr-4 py-4 rounded-xl font-bold text-neu-heading outline-none transition-all ${isEditing ? 'bg-neu-bg shadow-neu-inner focus:ring-2 focus:ring-neu-primary/30 border border-gray-300' : 'bg-transparent shadow-none'}`}
             />
           </div>
         </div>
@@ -140,7 +140,7 @@ export default function Settings() {
               disabled={!isEditing}
               value={profile.owner_name}
               onChange={(e) => setProfile({...profile, owner_name: e.target.value})}
-              className={`w-full pl-12 pr-4 py-4 rounded-none font-bold text-neu-heading outline-none transition-all ${isEditing ? 'bg-neu-bg border-4 border-black shadow-none bg-white focus:ring-2 focus:ring-neu-primary/30 border border-4 border-black' : 'bg-transparent shadow-none'}`}
+              className={`w-full pl-12 pr-4 py-4 rounded-xl font-bold text-neu-heading outline-none transition-all ${isEditing ? 'bg-neu-bg shadow-neu-inner focus:ring-2 focus:ring-neu-primary/30 border border-gray-300' : 'bg-transparent shadow-none'}`}
             />
           </div>
         </div>
@@ -153,7 +153,7 @@ export default function Settings() {
               type="email" 
               disabled
               value={profile.email}
-              className="w-full pl-12 pr-4 py-4 rounded-none font-bold text-neu-heading bg-transparent shadow-none opacity-70"
+              className="w-full pl-12 pr-4 py-4 rounded-xl font-medium text-neu-heading bg-transparent shadow-none opacity-70"
             />
           </div>
           {isEditing && <p className="text-xs text-neu-text pl-1 mt-1 italic">Email cannot be changed here.</p>}
@@ -164,7 +164,7 @@ export default function Settings() {
             <button 
               type="button"
               onClick={handleCancel}
-              className="flex-1 py-4 rounded-none shadow-neu text-neu-heading font-bold hover:shadow-neu-hover transition-all flex items-center justify-center gap-2"
+              className="flex-1 py-4 rounded-xl shadow-neu text-neu-heading font-bold hover:shadow-neu-hover transition-all flex items-center justify-center gap-2"
             >
               <X size={18} /> Cancel
             </button>
@@ -183,7 +183,7 @@ export default function Settings() {
             <button 
               type="button"
               onClick={handleLogout}
-              className="w-full py-4 rounded-none shadow-neu flex items-center justify-center gap-2 text-neu-danger font-bold hover:shadow-neu-hover transition-all bg-neu-bg"
+              className="w-full py-4 rounded-xl shadow-neu flex items-center justify-center gap-2 text-neu-danger font-bold hover:shadow-neu-hover transition-all bg-neu-bg"
             >
               <LogOut size={20} /> Log Out Securely
             </button>
