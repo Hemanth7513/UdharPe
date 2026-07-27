@@ -85,7 +85,25 @@ export default function Auth() {
         setPassword('');
       }
     } catch (error) {
-      setErrorMsg(error.message);
+      console.error("Auth Error:", error); // Log the real error for debugging
+      // Security: Sanitize raw backend errors to prevent leaking user enumeration
+      let safeMessage = "An error occurred. Please try again.";
+      
+      if (authMode === 'login' || authMode === 'magic_link') {
+        safeMessage = "Invalid email or password.";
+      } else if (authMode === 'forgot_password') {
+        // Pretend it succeeded to prevent email enumeration attacks
+        safeMessage = "If this email is registered, you will receive a reset link shortly.";
+        setIconState('CheckCircle2');
+        setErrorMsg(safeMessage);
+        setAuthMode('login'); // Match the success UX
+        setLoading(false);
+        return;
+      } else if (authMode === 'signup') {
+        safeMessage = "Registration failed. Please check your details and try again.";
+      }
+      
+      setErrorMsg(safeMessage);
       setIconState('AlertCircle');
     } finally {
       setLoading(false);
