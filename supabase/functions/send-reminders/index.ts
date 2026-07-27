@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.110.8"
 import { corsHeaders } from "../_shared/cors.ts"
+import { checkRateLimit } from "../_shared/security.ts"
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
 
@@ -11,7 +12,11 @@ serve(async (req) => {
   }
 
   try {
-    // 1. Initialize Supabase Admin client
+    // 1. Security Checks
+    const clientIp = req.headers.get('x-real-ip') || req.headers.get('x-forwarded-for') || 'unknown';
+    checkRateLimit(clientIp, 60000, 5); // Max 5 calls per min to prevent cron abuse
+
+    // 2. Initialize Supabase Admin client
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''

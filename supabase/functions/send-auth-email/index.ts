@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.110.8"
 import { corsHeaders } from "../_shared/cors.ts"
+import { sanitizeStrings, validatePayloadSize, checkRateLimit } from "../_shared/security.ts"
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
 
@@ -10,7 +11,14 @@ serve(async (req) => {
   }
 
   try {
-    const { email, type, password, options } = await req.json()
+    // 1. Security Checks
+    const clientIp = req.headers.get('x-real-ip') || req.headers.get('x-forwarded-for') || 'unknown';
+    checkRateLimit(clientIp, 60000, 5); // Max 5 requests per minute per IP
+    await validatePayloadSize(req, 5120); // 5kb limit
+
+    const rawPayload = await req.json();
+    const sanitizedPayload = sanitizeStrings(rawPayload);
+    const { email, type, password, options } = sanitizedPayload;
 
     if (!email || !['recovery', 'magiclink', 'signup'].includes(type)) {
       throw new Error("Missing required parameters or invalid type.")

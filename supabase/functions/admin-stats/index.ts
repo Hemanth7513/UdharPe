@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.110.8"
 import { corsHeaders } from "../_shared/cors.ts"
+import { checkRateLimit } from "../_shared/security.ts"
 
 serve(async (req) => {
   // Handle CORS preflight
@@ -9,7 +10,11 @@ serve(async (req) => {
   }
 
   try {
-    // 1. Initialize Supabase Admin Client using Service Role Key
+    // 1. Security Checks
+    const clientIp = req.headers.get('x-real-ip') || req.headers.get('x-forwarded-for') || 'unknown';
+    checkRateLimit(clientIp, 60000, 20); // Max 20 admin stats requests per min
+
+    // 2. Initialize Supabase Admin Client using Service Role Key
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
