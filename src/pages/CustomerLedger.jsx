@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, User, Receipt, IndianRupee, ArrowDownRight, ArrowUpRight, MessageCircle, X, Download } from 'lucide-react';
+import { ArrowLeft, User, Receipt, IndianRupee, ArrowDownRight, ArrowUpRight, MessageCircle, X, Download, Mail } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Modal from '../components/Modal';
 import SkeletonLoader from '../components/SkeletonLoader';
@@ -22,6 +22,12 @@ export default function CustomerLedger() {
   const [paymentAmount, setPaymentAmount] = useState('');
   const [paymentNote, setPaymentNote] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Email state
+  const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
+  const [emailSubject, setEmailSubject] = useState('');
+  const [emailMessage, setEmailMessage] = useState('');
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
 
   useEffect(() => {
     fetchLedger();
@@ -151,10 +157,10 @@ export default function CustomerLedger() {
     window.open(`https://wa.me/${phoneStr}?text=${encodedMessage}`, '_blank');
   };
 
-  const generatePDF = () => {
+  const generatePDF = (returnBase64 = false) => {
     if (!customer || transactions.length === 0) {
-      toast.error("No data to generate PDF.");
-      return;
+      if (!returnBase64) toast.error("No data to generate PDF.");
+      return null;
     }
     
     const doc = new jsPDF();
@@ -188,8 +194,90 @@ export default function CustomerLedger() {
       headStyles: { fillColor: [79, 70, 229] } // neu-primary color
     });
 
-    doc.save(`${customer.name.replace(/\s+/g, '_')}_Statement.pdf`);
-    toast.success("PDF Statement downloaded!");
+    if (returnBase64) {
+      // Return base64 string without data:application/pdf;base64, prefix for Resend
+      const dataUri = doc.output('datauristring');
+      return dataUri.split(',')[1];
+    } else {
+      doc.save(`${customer.name.replace(/\s+/g, '_')}_Statement.pdf`);
+      toast.success("PDF Statement downloaded!");
+    }
+  };
+
+  const sendEmailToBackend = async (subject, html, attachments = []) => {
+    try {
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError) throw sessionError;
+
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-email`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${session?.access_token}`
+          },
+          body: JSON.stringify({
+            to: customer.email || 'customer@example.com', // fallback if email is not in db
+            subject,
+            html,
+            attachments
+          })
+        }
+      );
+
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Failed to send email');
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  const handleSendSupportEmail = async (e) => {
+    e.preventDefault();
+    if (!emailSubject || !emailMessage) {
+      toast.error("Please fill in both subject and message.");
+      return;
+    }
+
+    setIsSendingEmail(true);
+    try {
+      await sendEmailToBackend(emailSubject, `<p>${emailMessage.replace(/\n/g, '<br/>')}</p>`);
+      toast.success("Email sent successfully!");
+      setIsEmailModalOpen(false);
+      setEmailSubject('');
+      setEmailMessage('');
+    } catch (error) {
+      toast.error(error.message);
+    } finally {
+      setIsSendingEmail(false);
+    }
+  };
+
+  const handleEmailStatement = async () => {
+    setIsSendingEmail(true);
+    const pdfBase64 = generatePDF(true);
+    if (!pdfBase64) {
+      setIsSendingEmail(false);
+      return;
+    }
+
+    try {
+      await sendEmailToBackend(
+        `Statement for ${customer.name}`,
+        `<p>Hello ${customer.name},</p><p>Please find attached your latest statement.</p><p>Thank you!</p>`,
+        [{
+          filename: `${customer.name.replace(/\s+/g, '_')}_Statement.pdf`,
+          content: pdfBase64
+        }]
+      );
+      toast.success("Statement emailed successfully!");
+    } catch (error) {
+      toast.error("Failed to email statement: " + error.message);
+    } finally {
+      setIsSendingEmail(false);
+    }
   };
 
   if (loading) {
@@ -254,17 +342,31 @@ export default function CustomerLedger() {
               </button>
               <button 
                 onClick={handleWhatsAppRemind}
-                className="neu-card flex items-center justify-center w-10 h-10 text-[#25D366] hover:scale-105 transition-transform"
+                className="neu-card flex items-center justify-center w-10 h-10 text-[#25D366] hover:scale-105 transition-transform shrink-0"
                 title="Send WhatsApp Reminder"
               >
                 <MessageCircle size={20} />
               </button>
               <button 
+                onClick={handleEmailStatement}
+                disabled={isSendingEmail}
+                className="neu-card flex items-center justify-center w-10 h-10 text-neu-primary hover:scale-105 transition-transform shrink-0 disabled:opacity-50"
+                title="Email PDF Statement"
+              >
+                <Mail size={20} />
+              </button>
+              <button 
                 onClick={generatePDF}
-                className="neu-card flex items-center justify-center w-10 h-10 text-neu-primary hover:scale-105 transition-transform"
+                className="neu-card flex items-center justify-center w-10 h-10 text-neu-primary hover:scale-105 transition-transform shrink-0"
                 title="Download PDF Statement"
               >
                 <Download size={20} />
+              </button>
+              <button 
+                onClick={() => setIsEmailModalOpen(true)}
+                className="neu-card flex items-center justify-center py-2 px-4 text-neu-primary hover:text-white hover:bg-neu-primary transition-all font-bold text-sm shrink-0"
+              >
+                Support Email
               </button>
             </div>
           )}
@@ -355,6 +457,44 @@ export default function CustomerLedger() {
 
           <button type="submit" disabled={isSubmitting} className="btn-solid w-full mt-6 py-4">
             {isSubmitting ? 'Processing...' : 'Save Payment'}
+          </button>
+        </form>
+      </Modal>
+
+      {/* Support Email Modal */}
+      <Modal isOpen={isEmailModalOpen} onClose={() => setIsEmailModalOpen(false)} title="Send Email to Customer">
+        <form onSubmit={handleSendSupportEmail} className="space-y-5">
+          <div>
+            <label className="block text-sm font-bold text-neu-heading mb-2 pl-1 uppercase tracking-wide">
+              Subject
+            </label>
+            <input
+              type="text"
+              value={emailSubject}
+              onChange={(e) => setEmailSubject(e.target.value)}
+              className="input-field"
+              placeholder="e.g. Question about your recent bill"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-bold text-neu-heading mb-2 pl-1 uppercase tracking-wide">
+              Message
+            </label>
+            <textarea
+              value={emailMessage}
+              onChange={(e) => setEmailMessage(e.target.value)}
+              className="input-field min-h-[150px] resize-y"
+              placeholder="Type your message here..."
+              required
+            />
+          </div>
+          <button 
+            type="submit" 
+            className="btn-solid w-full mt-4 flex items-center justify-center gap-2"
+            disabled={isSendingEmail}
+          >
+            {isSendingEmail ? 'Sending...' : 'Send Email'} <Mail size={18} />
           </button>
         </form>
       </Modal>
