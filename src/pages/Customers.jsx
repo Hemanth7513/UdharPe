@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { Search, Plus, UserPlus, X, ChevronLeft, Phone, Mail } from 'lucide-react';
+import { Search, Plus, UserPlus, X, ChevronLeft, Phone, Mail, Download } from 'lucide-react';
 import toast from 'react-hot-toast';
+import * as XLSX from 'xlsx';
 import Modal from '../components/Modal';
 import SkeletonLoader from '../components/SkeletonLoader';
 
@@ -78,6 +79,25 @@ export default function Customers() {
     }
   };
 
+  const handleExportExcel = () => {
+    if (customers.length === 0) {
+      toast.error("No customers to export.");
+      return;
+    }
+    const exportData = customers.map(c => ({
+      'Party Name': c.name,
+      'Phone': c.phone || 'N/A',
+      'Email': c.email || 'N/A',
+      'Outstanding (₹)': Number(c.total_outstanding),
+      'Added On': new Date(c.created_at).toLocaleDateString()
+    }));
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Customers");
+    XLSX.writeFile(workbook, "UdharPe_Customers.xlsx");
+    toast.success("Excel downloaded!");
+  };
+
   const filteredCustomers = customers.filter(c => 
     c.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
     (c.phone && c.phone.includes(searchQuery))
@@ -114,9 +134,14 @@ export default function Customers() {
           </div>
         </div>
         
-        <button onClick={() => setIsModalOpen(true)} className="btn-solid w-full sm:w-auto">
-          <UserPlus size={20} /> Add Customer
-        </button>
+        <div className="flex w-full sm:w-auto gap-3">
+          <button onClick={handleExportExcel} className="neu-card px-4 py-2 flex items-center justify-center gap-2 text-neu-primary hover:bg-neu-primary hover:text-white transition-all font-bold">
+            <Download size={18} /> <span className="hidden sm:inline">Export</span>
+          </button>
+          <button onClick={() => setIsModalOpen(true)} className="btn-solid flex-1 sm:flex-none">
+            <UserPlus size={20} /> Add Customer
+          </button>
+        </div>
       </header>
       
       {/* Search Bar */}

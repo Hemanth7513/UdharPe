@@ -8,6 +8,7 @@ import Modal from '../components/Modal';
 import SkeletonLoader from '../components/SkeletonLoader';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
+import * as XLSX from 'xlsx';
 
 export default function CustomerLedger() {
   const { id } = useParams();
@@ -204,6 +205,33 @@ export default function CustomerLedger() {
     }
   };
 
+  const handleExportExcel = () => {
+    if (!customer || transactions.length === 0) {
+      toast.error("No data to export.");
+      return;
+    }
+    const exportData = transactions.map(t => ({
+      'Date': new Date(t.created_at).toLocaleString(),
+      'Type': t.type === 'bill' ? 'Udhar Given' : 'Payment Received',
+      'Note': t.note || '-',
+      'Amount (₹)': t.amount
+    }));
+    
+    // Add summary row
+    exportData.push({
+      'Date': 'Total Outstanding',
+      'Type': '',
+      'Note': '',
+      'Amount (₹)': Number(customer.total_outstanding)
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Ledger");
+    XLSX.writeFile(workbook, `${customer.name.replace(/\s+/g, '_')}_Ledger.xlsx`);
+    toast.success("Excel downloaded!");
+  };
+
   const sendEmailToBackend = async (subject, html, attachments = []) => {
     try {
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
@@ -361,6 +389,13 @@ export default function CustomerLedger() {
                 title="Download PDF Statement"
               >
                 <Download size={20} />
+              </button>
+              <button 
+                onClick={handleExportExcel}
+                className="neu-card flex items-center justify-center w-10 h-10 text-green-600 hover:scale-105 transition-transform shrink-0 font-bold"
+                title="Download Excel"
+              >
+                XL
               </button>
               <button 
                 onClick={() => setIsEmailModalOpen(true)}

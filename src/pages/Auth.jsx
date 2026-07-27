@@ -178,15 +178,17 @@ export default function Auth() {
                 className="space-y-6 overflow-hidden"
               >
                 <div>
-                  <label className="block text-sm font-semibold text-neu-heading mb-2 pl-1">Firm Name</label>
+                  <label htmlFor="firmName" className="block text-sm font-semibold text-neu-heading mb-2 pl-1">Firm Name</label>
                   <input 
+                    id="firmName"
                     type="text" required value={firmName} onChange={e => setFirmName(e.target.value)}
                     placeholder="e.g. Sharma Electronics" className="input-field"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-neu-heading mb-2 pl-1">Owner Name</label>
+                  <label htmlFor="ownerName" className="block text-sm font-semibold text-neu-heading mb-2 pl-1">Owner Name</label>
                   <input 
+                    id="ownerName"
                     type="text" required value={ownerName} onChange={e => setOwnerName(e.target.value)}
                     placeholder="e.g. Rajesh Sharma" className="input-field"
                   />
@@ -196,8 +198,9 @@ export default function Auth() {
 
             {authMode !== 'update_password' && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                <label className="block text-sm font-semibold text-neu-heading mb-2 pl-1">Email Address</label>
+                <label htmlFor="email" className="block text-sm font-semibold text-neu-heading mb-2 pl-1">Email Address</label>
                 <input 
+                  id="email"
                   type="email" required value={email} onChange={e => setEmail(e.target.value)}
                   onFocus={() => setIconState('Eye')} onBlur={() => setIconState('Briefcase')}
                   placeholder="you@example.com" className="input-field"
@@ -207,10 +210,11 @@ export default function Auth() {
 
             {(authMode === 'login' || authMode === 'signup' || authMode === 'update_password') && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                <label className="block text-sm font-semibold text-neu-heading mb-2 pl-1">
+                <label htmlFor="password" className="block text-sm font-semibold text-neu-heading mb-2 pl-1">
                   {authMode === 'update_password' ? 'New Password' : 'Password'}
                 </label>
                 <input 
+                  id="password"
                   type="password" required value={password} onChange={e => setPassword(e.target.value)}
                   onFocus={() => setIconState('EyeOff')} onBlur={() => setIconState('Briefcase')}
                   placeholder="••••••••" className="input-field"
