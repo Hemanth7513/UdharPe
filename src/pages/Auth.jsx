@@ -58,8 +58,8 @@ export default function Auth() {
         }
       }
       else if (authMode === 'forgot_password') {
-        const { error } = await supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: window.location.origin + '/auth'
+        const { error } = await supabase.functions.invoke('send-auth-email', {
+          body: { email, type: 'recovery' }
         });
         if (error) throw error;
         setIconState('CheckCircle2');
