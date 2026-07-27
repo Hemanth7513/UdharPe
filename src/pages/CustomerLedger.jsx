@@ -2,7 +2,12 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, User, Receipt, IndianRupee, ArrowDownRight, ArrowUpRight, MessageCircle, X } from 'lucide-react';
+import { ArrowLeft, User, Receipt, IndianRupee, ArrowDownRight, ArrowUpRight, MessageCircle, X, Download } from 'lucide-react';
+import toast from 'react-hot-toast';
+import Modal from '../components/Modal';
+import SkeletonLoader from '../components/SkeletonLoader';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
 export default function CustomerLedger() {
   const { id } = useParams();
@@ -17,7 +22,6 @@ export default function CustomerLedger() {
   const [paymentAmount, setPaymentAmount] = useState('');
   const [paymentNote, setPaymentNote] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errorMsg, setErrorMsg] = useState('');
 
   useEffect(() => {
     fetchLedger();
@@ -25,11 +29,15 @@ export default function CustomerLedger() {
 
   const fetchLedger = async () => {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
       // 1. Fetch Customer Details
       const { data: custData, error: custError } = await supabase
         .from('customers')
         .select('*')
         .eq('id', id)
+        .eq('business_id', user.id)
         .single();
         
       if (custError) throw custError;
@@ -39,7 +47,8 @@ export default function CustomerLedger() {
       const { data: billsData, error: billsError } = await supabase
         .from('bills')
         .select('id, amount, note, created_at')
-        .eq('customer_id', id);
+        .eq('customer_id', id)
+        .eq('business_id', user.id);
         
       if (billsError) throw billsError;
 
@@ -48,7 +57,8 @@ export default function CustomerLedger() {
       const { data: sData, error: sError } = await supabase
         .from('settlements')
         .select('id, amount_paid, note, created_at')
-        .eq('customer_id', id);
+        .eq('customer_id', id)
+        .eq('business_id', user.id);
 
       if (!sError) {
           settlementsData = sData;
@@ -74,12 +84,11 @@ export default function CustomerLedger() {
   const handleRecordPayment = async (e) => {
     e.preventDefault();
     if (!paymentAmount || isNaN(paymentAmount) || Number(paymentAmount) <= 0) {
-      setErrorMsg('Please enter a valid amount.');
+      toast.error('Please enter a valid amount.');
       return;
     }
 
     setIsSubmitting(true);
-    setErrorMsg('');
 
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -118,10 +127,11 @@ export default function CustomerLedger() {
       setIsPaymentModalOpen(false);
       setPaymentAmount('');
       setPaymentNote('');
+      toast.success('Payment recorded successfully!');
       fetchLedger(); // Refresh data
 
     } catch (error) {
-      setErrorMsg(error.message);
+      toast.error(error.message);
     } finally {
       setIsSubmitting(false);
     }
@@ -129,7 +139,7 @@ export default function CustomerLedger() {
 
   const handleWhatsAppRemind = () => {
     if (!customer.phone) {
-      alert("Customer does not have a phone number saved.");
+      toast.error("Customer does not have a phone number saved.");
       return;
     }
     const message = `Hello ${customer.name}, your total outstanding Udhar is ₹${Number(customer.total_outstanding).toLocaleString()}. Please clear it at your earliest convenience. Thank you!`;
@@ -141,10 +151,56 @@ export default function CustomerLedger() {
     window.open(`https://wa.me/${phoneStr}?text=${encodedMessage}`, '_blank');
   };
 
+  const generatePDF = () => {
+    if (!customer || transactions.length === 0) {
+      toast.error("No data to generate PDF.");
+      return;
+    }
+    
+    const doc = new jsPDF();
+    
+    // Header
+    doc.setFontSize(22);
+    doc.text("Customer Statement", 14, 20);
+    
+    doc.setFontSize(12);
+    doc.text(`Customer Name: ${customer.name}`, 14, 30);
+    if (customer.phone) doc.text(`Phone: ${customer.phone}`, 14, 37);
+    doc.text(`Total Outstanding: Rs. ${Number(customer.total_outstanding).toLocaleString()}`, 14, 44);
+    
+    // Table
+    const tableColumn = ["Date", "Type", "Note", "Amount"];
+    const tableRows = [];
+
+    transactions.forEach(t => {
+      const date = new Date(t.created_at).toLocaleDateString();
+      const type = t.type === 'bill' ? 'Udhar Given' : 'Payment Received';
+      const amount = `Rs. ${t.amount.toLocaleString()}`;
+      tableRows.push([date, type, t.note || '-', amount]);
+    });
+
+    doc.autoTable({
+      head: [tableColumn],
+      body: tableRows,
+      startY: 50,
+      theme: 'grid',
+      styles: { fontSize: 10, cellPadding: 3 },
+      headStyles: { fillColor: [79, 70, 229] } // neu-primary color
+    });
+
+    doc.save(`${customer.name.replace(/\s+/g, '_')}_Statement.pdf`);
+    toast.success("PDF Statement downloaded!");
+  };
+
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20">
-        <div className="animate-pulse text-neu-primary font-bold">Loading ledger...</div>
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <SkeletonLoader className="w-32 h-6 mb-6" />
+        <SkeletonLoader className="w-full h-32 mb-8" />
+        <SkeletonLoader className="w-48 h-8 mb-6" />
+        <div className="space-y-4">
+          <SkeletonLoader className="w-full h-24" count={3} />
+        </div>
       </div>
     );
   }
@@ -189,7 +245,7 @@ export default function CustomerLedger() {
           </div>
           
           {Number(customer.total_outstanding) > 0 && (
-            <div className="flex gap-2 w-full md:w-auto">
+            <div className="flex flex-wrap gap-2 w-full md:w-auto">
               <button 
                 onClick={() => setIsPaymentModalOpen(true)}
                 className="btn-solid flex-1 md:flex-none py-2 px-4 text-sm"
@@ -202,6 +258,13 @@ export default function CustomerLedger() {
                 title="Send WhatsApp Reminder"
               >
                 <MessageCircle size={20} />
+              </button>
+              <button 
+                onClick={generatePDF}
+                className="neu-card flex items-center justify-center w-10 h-10 text-neu-primary hover:scale-105 transition-transform"
+                title="Download PDF Statement"
+              >
+                <Download size={20} />
               </button>
             </div>
           )}
@@ -264,68 +327,37 @@ export default function CustomerLedger() {
       </button>
 
       {/* Record Payment Modal */}
-      <AnimatePresence>
-        {isPaymentModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div 
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-neu-bg/80 backdrop-blur-sm"
-              onClick={() => setIsPaymentModalOpen(false)}
-            />
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95, y: 20 }} 
-              animate={{ opacity: 1, scale: 1, y: 0 }} 
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-md z-10"
-            >
-              <div className="neu-card p-8 border border-white/60">
-                <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-2xl font-bold text-neu-heading">Record Payment</h2>
-                  <button type="button" onClick={() => setIsPaymentModalOpen(false)} className="w-8 h-8 rounded-full shadow-neu flex items-center justify-center text-neu-text hover:text-neu-danger transition-colors">
-                    <X size={18} />
-                  </button>
-                </div>
-                
-                {errorMsg && (
-                  <div className="bg-neu-bg shadow-neu-inner text-neu-danger p-3 rounded-lg mb-5 text-sm font-medium">
-                    {errorMsg}
-                  </div>
-                )}
-
-                <form onSubmit={handleRecordPayment} className="space-y-5">
-                  <div>
-                    <label className="block text-sm font-bold text-neu-heading mb-2 pl-1 uppercase tracking-wide">
-                      Amount Paid (₹) *
-                    </label>
-                    <div className="relative">
-                      <span className="absolute left-5 top-1/2 -translate-y-1/2 text-neu-heading font-black text-xl">₹</span>
-                      <input 
-                        type="number" required min="1" step="0.01"
-                        value={paymentAmount} onChange={e => setPaymentAmount(e.target.value)}
-                        placeholder="0.00" 
-                        className="w-full bg-neu-bg text-neu-heading rounded-2xl pl-12 pr-4 py-4 outline-none focus:ring-2 focus:ring-neu-primary/30 shadow-neu-inner font-black text-xl"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-bold text-neu-heading mb-2 pl-1 uppercase tracking-wide">
-                      Note (Optional)
-                    </label>
-                    <input 
-                      type="text" value={paymentNote} onChange={e => setPaymentNote(e.target.value)}
-                      placeholder="e.g. Cash, UPI, etc." className="input-field"
-                    />
-                  </div>
-
-                  <button type="submit" disabled={isSubmitting} className="btn-solid w-full mt-6 py-4">
-                    {isSubmitting ? 'Processing...' : 'Save Payment'}
-                  </button>
-                </form>
-              </div>
-            </motion.div>
+      <Modal isOpen={isPaymentModalOpen} onClose={() => setIsPaymentModalOpen(false)} title="Record Payment">
+        <form onSubmit={handleRecordPayment} className="space-y-5">
+          <div>
+            <label className="block text-sm font-bold text-neu-heading mb-2 pl-1 uppercase tracking-wide">
+              Amount Paid (₹) *
+            </label>
+            <div className="relative">
+              <span className="absolute left-5 top-1/2 -translate-y-1/2 text-neu-heading font-black text-xl">₹</span>
+              <input 
+                type="number" required min="1" step="0.01"
+                value={paymentAmount} onChange={e => setPaymentAmount(e.target.value)}
+                placeholder="0.00" 
+                className="w-full bg-neu-bg text-neu-heading rounded-2xl pl-12 pr-4 py-4 outline-none focus:ring-2 focus:ring-neu-primary/30 shadow-neu-inner font-black text-xl"
+              />
+            </div>
           </div>
-        )}
-      </AnimatePresence>
+          <div>
+            <label className="block text-sm font-bold text-neu-heading mb-2 pl-1 uppercase tracking-wide">
+              Note (Optional)
+            </label>
+            <input 
+              type="text" value={paymentNote} onChange={e => setPaymentNote(e.target.value)}
+              placeholder="e.g. Cash, UPI, etc." className="input-field"
+            />
+          </div>
+
+          <button type="submit" disabled={isSubmitting} className="btn-solid w-full mt-6 py-4">
+            {isSubmitting ? 'Processing...' : 'Save Payment'}
+          </button>
+        </form>
+      </Modal>
     </motion.div>
   );
 }

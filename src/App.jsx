@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Toaster } from 'react-hot-toast';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { supabase } from './lib/supabase';
 import Auth from './pages/Auth';
@@ -36,24 +37,27 @@ function App() {
   }
 
   return (
-    <Routes>
-      <Route path="/" element={!session ? <Landing /> : <Navigate to="/dashboard" replace />} />
-      <Route path="/auth" element={!session ? <Auth /> : <Navigate to="/dashboard" replace />} />
-      
-      {/* Protected Routes inside AuthLayout */}
-      {session && (
-        <Route element={<AuthLayout />}>
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/customers" element={<Customers />} />
-          <Route path="/customers/:id" element={<CustomerLedger />} />
-          <Route path="/billing" element={<Billing />} />
-          <Route path="/settings" element={<Settings />} />
-        </Route>
-      )}
+    <>
+      <Toaster position="top-center" toastOptions={{ className: 'font-bold' }} />
+      <Routes>
+        <Route path="/" element={!session ? <Landing /> : <Navigate to="/dashboard" replace />} />
+        <Route path="/auth" element={!session ? <Auth /> : <Navigate to="/dashboard" replace />} />
+        
+        {/* Protected Routes inside AuthLayout */}
+        {session && (
+          <Route element={<AuthLayout />}>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/customers" element={<Customers />} />
+            <Route path="/customers/:id" element={<CustomerLedger />} />
+            <Route path="/billing" element={<Billing />} />
+            <Route path="/settings" element={<Settings />} />
+          </Route>
+        )}
 
-      {/* Fallback */}
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+        {/* Fallback */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </>
   );
 }
 

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { ArrowRight, Briefcase } from 'lucide-react';
+import { ArrowRight, Briefcase, Eye, EyeOff, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 
 export default function Auth() {
   const navigate = useNavigate();
@@ -14,6 +14,7 @@ export default function Auth() {
   const [password, setPassword] = useState('');
   const [firmName, setFirmName] = useState('');
   const [ownerName, setOwnerName] = useState('');
+  const [iconState, setIconState] = useState('Briefcase');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -21,9 +22,11 @@ export default function Auth() {
     setErrorMsg('');
 
     try {
+      setIconState('Loader2');
       if (isLogin) {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
+        setIconState('CheckCircle2');
         navigate('/dashboard');
       } else {
         const { data, error } = await supabase.auth.signUp({
@@ -33,6 +36,7 @@ export default function Auth() {
         if (error) throw error;
         
         if (data?.session) {
+          setIconState('CheckCircle2');
           navigate('/dashboard');
         } else {
           setErrorMsg('Registration successful! Check your email or login now.');
@@ -41,6 +45,7 @@ export default function Auth() {
       }
     } catch (error) {
       setErrorMsg(error.message);
+      setIconState('AlertCircle');
     } finally {
       setLoading(false);
     }
@@ -57,9 +62,20 @@ export default function Auth() {
         <div className="neu-card p-8 sm:p-10">
           
           <div className="flex justify-center mb-6">
-            <div className="w-16 h-16 shadow-neu rounded-full flex items-center justify-center text-neu-primary">
-              <Briefcase className="w-7 h-7" />
-            </div>
+            <motion.div 
+              key={iconState}
+              initial={{ scale: 0.5, rotate: -20, opacity: 0 }}
+              animate={{ scale: 1, rotate: 0, opacity: 1 }}
+              transition={{ type: "spring", stiffness: 300, damping: 15 }}
+              className="w-20 h-20 shadow-neu rounded-full flex items-center justify-center text-neu-primary bg-neu-bg border border-white/50"
+            >
+              {iconState === 'Briefcase' && <Briefcase className="w-8 h-8" />}
+              {iconState === 'Eye' && <Eye className="w-8 h-8" />}
+              {iconState === 'EyeOff' && <EyeOff className="w-8 h-8" />}
+              {iconState === 'Loader2' && <Loader2 className="w-8 h-8 animate-spin" />}
+              {iconState === 'CheckCircle2' && <CheckCircle2 className="w-8 h-8 text-neu-success" />}
+              {iconState === 'AlertCircle' && <AlertCircle className="w-8 h-8 text-neu-danger" />}
+            </motion.div>
           </div>
 
           <h1 className="text-3xl font-bold text-center text-neu-heading mb-2 tracking-tight">
@@ -105,6 +121,7 @@ export default function Auth() {
               <label className="block text-sm font-semibold text-neu-heading mb-2 pl-1">Email Address</label>
               <input 
                 type="email" required value={email} onChange={e => setEmail(e.target.value)}
+                onFocus={() => setIconState('Eye')} onBlur={() => setIconState('Briefcase')}
                 placeholder="you@example.com" className="input-field"
               />
             </div>
@@ -113,6 +130,7 @@ export default function Auth() {
               <label className="block text-sm font-semibold text-neu-heading mb-2 pl-1">Password</label>
               <input 
                 type="password" required value={password} onChange={e => setPassword(e.target.value)}
+                onFocus={() => setIconState('EyeOff')} onBlur={() => setIconState('Briefcase')}
                 placeholder="••••••••" className="input-field"
               />
             </div>

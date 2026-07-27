@@ -3,6 +3,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { Receipt, CheckCircle, ArrowRight, UserPlus, X } from 'lucide-react';
+import toast from 'react-hot-toast';
+import Modal from '../components/Modal';
+import SkeletonLoader from '../components/SkeletonLoader';
 
 export default function Billing() {
   const navigate = useNavigate();
@@ -17,7 +20,6 @@ export default function Billing() {
   
   // Submit State
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errorMsg, setErrorMsg] = useState('');
   const [success, setSuccess] = useState(false);
 
   // Inline Add Customer State
@@ -38,6 +40,7 @@ export default function Billing() {
       const { data, error } = await supabase
         .from('customers')
         .select('id, name, total_outstanding')
+        .eq('business_id', user.id)
         .order('name', { ascending: true });
 
       if (error) throw error;
@@ -84,8 +87,9 @@ export default function Billing() {
       setIsAddCustomerModalOpen(false);
       setNewCustomerName('');
       setNewCustomerPhone('');
+      toast.success('Party added successfully!');
     } catch (error) {
-      alert("Error adding customer: " + error.message);
+      toast.error(error.message);
     } finally {
       setIsAddingCustomer(false);
     }
@@ -94,12 +98,11 @@ export default function Billing() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!selectedCustomerId || !amount || isNaN(amount) || Number(amount) <= 0) {
-      setErrorMsg('Please select a party and enter a valid amount.');
+      toast.error('Please select a party and enter a valid amount.');
       return;
     }
 
     setIsSubmitting(true);
-    setErrorMsg('');
 
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -142,15 +145,22 @@ export default function Billing() {
       }, 2000);
 
     } catch (error) {
-      setErrorMsg(error.message);
+      toast.error(error.message);
       setIsSubmitting(false);
     }
   };
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20">
-        <div className="animate-pulse text-neu-primary font-bold">Loading...</div>
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <div className="flex items-center gap-3 mb-8">
+          <SkeletonLoader className="w-12 h-12 rounded-2xl" />
+          <div>
+            <SkeletonLoader className="w-48 h-8 mb-2" />
+            <SkeletonLoader className="w-32 h-4" />
+          </div>
+        </div>
+        <SkeletonLoader className="w-full h-[400px]" />
       </div>
     );
   }
@@ -187,12 +197,6 @@ export default function Billing() {
         ) : (
           <form onSubmit={handleSubmit} className="space-y-6">
             
-            {errorMsg && (
-              <div className="bg-neu-bg shadow-neu-inner text-neu-danger p-4 rounded-xl text-sm font-medium">
-                {errorMsg}
-              </div>
-            )}
-
             {/* Customer / Party Selection */}
             <div className="relative">
               <div className="flex justify-between items-end mb-2">
@@ -287,53 +291,28 @@ export default function Billing() {
       </div>
 
       {/* Inline Add Customer Modal */}
-      <AnimatePresence>
-        {isAddCustomerModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div 
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-neu-bg/80 backdrop-blur-sm"
-              onClick={() => setIsAddCustomerModalOpen(false)}
+      <Modal isOpen={isAddCustomerModalOpen} onClose={() => setIsAddCustomerModalOpen(false)} title="Add Party">
+        <form onSubmit={handleAddCustomer} className="space-y-5">
+          <div>
+            <label className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">Party Name *</label>
+            <input 
+              type="text" required value={newCustomerName} onChange={e => setNewCustomerName(e.target.value)}
+              placeholder="e.g. Ramesh Singh" className="input-field"
             />
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95, y: 20 }} 
-              animate={{ opacity: 1, scale: 1, y: 0 }} 
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-md z-10"
-            >
-              <div className="neu-card p-8 border border-white/60">
-                <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-2xl font-bold text-neu-heading">Add Party</h2>
-                  <button type="button" onClick={() => setIsAddCustomerModalOpen(false)} className="w-8 h-8 rounded-full shadow-neu flex items-center justify-center text-neu-text hover:text-neu-danger transition-colors">
-                    <X size={18} />
-                  </button>
-                </div>
-                
-                <form onSubmit={handleAddCustomer} className="space-y-5">
-                  <div>
-                    <label className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">Party Name *</label>
-                    <input 
-                      type="text" required value={newCustomerName} onChange={e => setNewCustomerName(e.target.value)}
-                      placeholder="e.g. Ramesh Singh" className="input-field"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">Phone Number (Optional)</label>
-                    <input 
-                      type="tel" value={newCustomerPhone} onChange={e => setNewCustomerPhone(e.target.value)}
-                      placeholder="e.g. 9876543210" className="input-field"
-                    />
-                  </div>
-
-                  <button type="submit" disabled={isAddingCustomer} className="btn-solid w-full mt-6 py-4">
-                    {isAddingCustomer ? 'Saving...' : 'Save Party'}
-                  </button>
-                </form>
-              </div>
-            </motion.div>
           </div>
-        )}
-      </AnimatePresence>
+          <div>
+            <label className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">Phone Number (Optional)</label>
+            <input 
+              type="tel" value={newCustomerPhone} onChange={e => setNewCustomerPhone(e.target.value)}
+              placeholder="e.g. 9876543210" className="input-field"
+            />
+          </div>
+
+          <button type="submit" disabled={isAddingCustomer} className="btn-solid w-full mt-6 py-4">
+            {isAddingCustomer ? 'Saving...' : 'Save Party'}
+          </button>
+        </form>
+      </Modal>
     </motion.div>
   );
 }

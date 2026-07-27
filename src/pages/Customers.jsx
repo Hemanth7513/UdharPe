@@ -3,6 +3,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { Search, Plus, UserPlus, X, ChevronLeft, Phone, Mail } from 'lucide-react';
+import toast from 'react-hot-toast';
+import Modal from '../components/Modal';
+import SkeletonLoader from '../components/SkeletonLoader';
 
 export default function Customers() {
   const navigate = useNavigate();
@@ -14,7 +17,6 @@ export default function Customers() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newCustomer, setNewCustomer] = useState({ name: '', phone: '', email: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errorMsg, setErrorMsg] = useState('');
 
   useEffect(() => {
     fetchCustomers();
@@ -28,6 +30,7 @@ export default function Customers() {
       const { data, error } = await supabase
         .from('customers')
         .select('*')
+        .eq('business_id', user.id)
         .order('name', { ascending: true });
 
       if (error) throw error;
@@ -42,7 +45,6 @@ export default function Customers() {
   const handleAddCustomer = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setErrorMsg('');
 
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -68,8 +70,9 @@ export default function Customers() {
       // Close modal and reset form
       setIsModalOpen(false);
       setNewCustomer({ name: '', phone: '', email: '' });
+      toast.success('Customer added successfully!');
     } catch (error) {
-      setErrorMsg(error.message);
+      toast.error(error.message);
     } finally {
       setIsSubmitting(false);
     }
@@ -82,8 +85,12 @@ export default function Customers() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse text-neu-primary font-bold text-xl">Loading Customers...</div>
+      <div className="max-w-6xl mx-auto p-4 sm:p-6 lg:p-8">
+        <SkeletonLoader className="w-48 h-10 mb-8" />
+        <SkeletonLoader className="w-full h-16 mb-8" />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <SkeletonLoader className="w-full h-48" count={6} />
+        </div>
       </div>
     );
   }
@@ -191,59 +198,28 @@ export default function Customers() {
       )}
 
       {/* Add Customer Modal */}
-      <AnimatePresence>
-        {isModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div 
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-neu-bg/80 backdrop-blur-sm"
-              onClick={() => setIsModalOpen(false)}
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Add Party">
+        <form onSubmit={handleAddCustomer} className="space-y-5">
+          <div>
+            <label className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">Party Name *</label>
+            <input 
+              type="text" required value={newCustomer.name} onChange={e => setNewCustomer({...newCustomer, name: e.target.value})}
+              placeholder="e.g. Ramesh Singh" className="input-field"
             />
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95, y: 20 }} 
-              animate={{ opacity: 1, scale: 1, y: 0 }} 
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-md z-10"
-            >
-              <div className="neu-card p-8 border border-white/60">
-                <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-2xl font-bold text-neu-heading">Add Party</h2>
-                  <button type="button" onClick={() => setIsModalOpen(false)} className="w-8 h-8 rounded-full shadow-neu flex items-center justify-center text-neu-text hover:text-neu-danger transition-colors">
-                    <X size={18} />
-                  </button>
-                </div>
-                
-                {errorMsg && (
-                  <div className="bg-neu-bg shadow-neu-inner text-neu-danger p-3 rounded-lg mb-5 text-sm font-medium">
-                    {errorMsg}
-                  </div>
-                )}
-
-                <form onSubmit={handleAddCustomer} className="space-y-5">
-                  <div>
-                    <label className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">Party Name *</label>
-                    <input 
-                      type="text" required value={newCustomer.name} onChange={e => setNewCustomer({...newCustomer, name: e.target.value})}
-                      placeholder="e.g. Ramesh Singh" className="input-field"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">Phone Number (Optional)</label>
-                    <input 
-                      type="tel" value={newCustomer.phone} onChange={e => setNewCustomer({...newCustomer, phone: e.target.value})}
-                      placeholder="e.g. 9876543210" className="input-field"
-                    />
-                  </div>
-
-                  <button type="submit" disabled={isSubmitting} className="btn-solid w-full mt-6 py-4">
-                    {isSubmitting ? 'Saving...' : 'Save Party'}
-                  </button>
-                </form>
-              </div>
-            </motion.div>
           </div>
-        )}
-      </AnimatePresence>
+          <div>
+            <label className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">Phone Number (Optional)</label>
+            <input 
+              type="tel" value={newCustomer.phone} onChange={e => setNewCustomer({...newCustomer, phone: e.target.value})}
+              placeholder="e.g. 9876543210" className="input-field"
+            />
+          </div>
+
+          <button type="submit" disabled={isSubmitting} className="btn-solid w-full mt-6 py-4">
+            {isSubmitting ? 'Saving...' : 'Save Party'}
+          </button>
+        </form>
+      </Modal>
 
     </motion.div>
   );

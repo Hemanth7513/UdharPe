@@ -8,6 +8,8 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [totalOutstanding, setTotalOutstanding] = useState(0);
+  const [paymentsReceived, setPaymentsReceived] = useState(0);
+  const [newUdhar, setNewUdhar] = useState(0);
   const [recentBills, setRecentBills] = useState([]);
   const [firmName, setFirmName] = useState('Your Business');
   const [customerCount, setCustomerCount] = useState(0);
@@ -24,7 +26,9 @@ export default function Dashboard() {
 
       // Fetch customers for total outstanding & count
       const { data: customersData, error: custError } = await supabase
-        .from('customers').select('total_outstanding');
+        .from('customers')
+        .select('total_outstanding')
+        .eq('business_id', user.id);
       
       if (!custError && customersData) {
         const total = customersData.reduce((sum, cust) => sum + Number(cust.total_outstanding), 0);
@@ -32,10 +36,37 @@ export default function Dashboard() {
         setCustomerCount(customersData.length);
       }
 
+      const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString();
+
+      // Fetch payments received this month
+      const { data: settlementsData, error: settError } = await supabase
+        .from('settlements')
+        .select('amount_paid')
+        .eq('business_id', user.id)
+        .gte('created_at', startOfMonth);
+
+      if (!settError && settlementsData) {
+        const received = settlementsData.reduce((sum, s) => sum + Number(s.amount_paid), 0);
+        setPaymentsReceived(received);
+      }
+
+      // Fetch new udhar given this month
+      const { data: udharData, error: udharError } = await supabase
+        .from('bills')
+        .select('amount')
+        .eq('business_id', user.id)
+        .gte('created_at', startOfMonth);
+
+      if (!udharError && udharData) {
+        const given = udharData.reduce((sum, b) => sum + Number(b.amount), 0);
+        setNewUdhar(given);
+      }
+
       // Fetch recent un-settled bills
       const { data: billsData, error: billsError } = await supabase
         .from('bills')
         .select(`id, amount, remaining_amount, created_at, status, customers ( name )`)
+        .eq('business_id', user.id)
         .in('status', ['pending', 'partial'])
         .order('created_at', { ascending: false })
         .limit(5);
@@ -70,18 +101,46 @@ export default function Dashboard() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {/* Total Outstanding Card - Highlighted */}
-        <div className="neu-card p-8 md:col-span-2 relative overflow-hidden flex flex-col justify-center border border-white/50">
+        <div className="neu-card p-8 relative overflow-hidden flex flex-col justify-center border border-white/50 bg-neu-primary/5">
           <div className="flex items-center gap-2 text-neu-text mb-3">
-            <div className="w-10 h-10 shadow-neu rounded-full flex items-center justify-center text-neu-primary">
+            <div className="w-10 h-10 shadow-neu rounded-full flex items-center justify-center text-neu-primary bg-neu-bg">
               <Wallet size={18} />
             </div>
-            <h3 className="font-bold text-lg">Total Udhar in Market</h3>
+            <h3 className="font-bold text-lg">Total Udhar</h3>
           </div>
-          <p className="text-5xl sm:text-6xl font-black text-neu-danger tracking-tight mt-2">
+          <p className="text-4xl sm:text-5xl font-black text-neu-danger tracking-tight mt-2 truncate">
             ₹{totalOutstanding.toLocaleString('en-IN')}
           </p>
         </div>
 
+        {/* Payments Received This Month */}
+        <div className="neu-card p-8 relative overflow-hidden flex flex-col justify-center border border-white/50">
+          <div className="flex items-center gap-2 text-neu-text mb-3">
+            <div className="w-10 h-10 shadow-neu rounded-full flex items-center justify-center text-neu-success bg-neu-bg">
+              <Receipt size={18} />
+            </div>
+            <h3 className="font-bold text-lg">Received (This Month)</h3>
+          </div>
+          <p className="text-4xl sm:text-5xl font-black text-neu-success tracking-tight mt-2 truncate">
+            ₹{paymentsReceived.toLocaleString('en-IN')}
+          </p>
+        </div>
+
+        {/* New Udhar This Month */}
+        <div className="neu-card p-8 relative overflow-hidden flex flex-col justify-center border border-white/50">
+          <div className="flex items-center gap-2 text-neu-text mb-3">
+            <div className="w-10 h-10 shadow-neu rounded-full flex items-center justify-center text-neu-danger bg-neu-bg">
+              <Wallet size={18} />
+            </div>
+            <h3 className="font-bold text-lg">Given (This Month)</h3>
+          </div>
+          <p className="text-4xl sm:text-5xl font-black text-neu-danger tracking-tight mt-2 truncate">
+            ₹{newUdhar.toLocaleString('en-IN')}
+          </p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* Quick Actions / Stats */}
         <div className="flex flex-col gap-6">
           <div 
