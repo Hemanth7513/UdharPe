@@ -295,15 +295,17 @@ export default function Customers() {
         <form onSubmit={modalMode === 'add' ? handleAddCustomer : handleEditCustomer} className="space-y-5">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div>
-              <label className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">Party Name *</label>
+              <label htmlFor="customerName" className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">Party Name *</label>
               <input 
+                id="customerName"
                 type="text" required value={newCustomer.name} onChange={e => setNewCustomer({...newCustomer, name: e.target.value})}
                 placeholder="e.g. Ramesh Singh" className="input-field"
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">Firm Name</label>
+              <label htmlFor="customerFirm" className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">Firm Name</label>
               <input 
+                id="customerFirm"
                 type="text" value={newCustomer.firm_name} onChange={e => setNewCustomer({...newCustomer, firm_name: e.target.value})}
                 placeholder="e.g. Ramesh Electronics" className="input-field"
               />
@@ -312,15 +314,17 @@ export default function Customers() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div>
-              <label className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">Phone Number</label>
+              <label htmlFor="customerPhone" className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">Phone Number</label>
               <input 
+                id="customerPhone"
                 type="tel" value={newCustomer.phone} onChange={e => setNewCustomer({...newCustomer, phone: e.target.value})}
                 placeholder="e.g. 9876543210" className="input-field"
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">Email Address (For Reminders)</label>
+              <label htmlFor="customerEmail" className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">Email Address (For Reminders)</label>
               <input 
+                id="customerEmail"
                 type="email" value={newCustomer.email} onChange={e => setNewCustomer({...newCustomer, email: e.target.value})}
                 placeholder="ramesh@example.com" className="input-field"
               />
@@ -328,16 +332,18 @@ export default function Customers() {
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">GST Number (Optional)</label>
+            <label htmlFor="customerGst" className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">GST Number (Optional)</label>
             <input 
+              id="customerGst"
               type="text" value={newCustomer.gst_details} onChange={e => setNewCustomer({...newCustomer, gst_details: e.target.value})}
               placeholder="e.g. 29ABCDE1234F1Z5" className="input-field uppercase"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">Address</label>
+            <label htmlFor="customerAddress" className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">Address</label>
             <textarea 
+              id="customerAddress"
               rows="2" value={newCustomer.address} onChange={e => setNewCustomer({...newCustomer, address: e.target.value})}
               placeholder="Full address of the party" className="input-field resize-none"
             />

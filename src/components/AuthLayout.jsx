@@ -83,9 +83,8 @@ export default function AuthLayout() {
           </div>
         </div>
 
-        {/* Mobile Navigation Bar (Bottom of screen on mobile) */}
-        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-neu-bg shadow-[0_-10px_20px_rgba(163,177,198,0.3)] z-50 px-4 py-3 pb-safe">
-          <div className="flex justify-around items-center">
+        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-neu-bg shadow-[0_-10px_20px_rgba(163,177,198,0.3)] z-50 px-2 py-2 pb-safe min-h-[5rem]">
+          <div className="flex justify-around items-center h-full">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = location.pathname === item.path;
@@ -93,12 +92,12 @@ export default function AuthLayout() {
                 <button
                   key={item.name}
                   onClick={() => navigate(item.path)}
-                  className={`p-3 rounded-2xl flex flex-col items-center gap-1 transition-all ${
+                  className={`p-2 flex-1 mx-1 rounded-2xl flex flex-col items-center justify-center gap-1 transition-all ${
                     isActive ? 'shadow-neu-inner text-neu-primary' : 'text-neu-text'
                   }`}
                 >
-                  <Icon size={20} />
-                  <span className="text-[10px] font-bold">{item.name}</span>
+                  <Icon size={20} className="shrink-0" />
+                  <span className="text-xs text-center font-bold break-words w-full">{item.name}</span>
                 </button>
               );
             })}

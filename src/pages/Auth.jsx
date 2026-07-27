@@ -296,7 +296,7 @@ export default function Auth({ isRecovering }) {
           )}
 
           <div className="mt-8 pt-6 border-t border-white/20">
-            <p className="text-center text-sm font-medium text-neu-text">
+            <p className="text-center text-sm font-medium text-neu-text mb-4">
               {authMode === 'signup' ? "Already registered? " : "Don't have an account? "}
               <button 
                 onClick={() => { setAuthMode(authMode === 'signup' ? 'login' : 'signup'); setErrorMsg(''); }}
@@ -305,6 +305,11 @@ export default function Auth({ isRecovering }) {
                 {authMode === 'signup' ? 'Log In Here' : 'Register Firm'}
               </button>
             </p>
+            <div className="flex justify-center gap-4 text-xs font-medium text-neu-text/80">
+              <button onClick={() => navigate('/privacy-policy')} className="hover:text-neu-primary transition-colors">Privacy Policy</button>
+              <span>•</span>
+              <button onClick={() => navigate('/terms-of-service')} className="hover:text-neu-primary transition-colors">Terms of Service</button>
+            </div>
           </div>
 
         </div>

@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { corsHeaders } from "../_shared/cors.ts"
+import { checkRateLimit } from "../_shared/security.ts"
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
 
@@ -10,7 +11,15 @@ serve(async (req) => {
   }
 
   try {
-    const { to, subject, html, attachments } = await req.json()
+    const clientIp = req.headers.get('x-real-ip') || req.headers.get('x-forwarded-for') || 'unknown';
+    checkRateLimit(clientIp, 60000, 5); // Max 5 emails per minute
+
+    const bodyText = await req.text();
+    if (new Blob([bodyText]).size > 5120) {
+      throw new Error("Payload too large");
+    }
+
+    const { to, subject, html, attachments } = JSON.parse(bodyText);
 
     if (!to || !subject || !html) {
       throw new Error('Missing required fields: to, subject, html')

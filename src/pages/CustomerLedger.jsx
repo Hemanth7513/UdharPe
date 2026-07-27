@@ -552,12 +552,13 @@ export default function CustomerLedger() {
             </div>
           )}
           <div>
-            <label className="block text-sm font-bold text-neu-heading mb-2 pl-1 uppercase tracking-wide">
+            <label htmlFor="paymentAmount" className="block text-sm font-bold text-neu-heading mb-2 pl-1 uppercase tracking-wide">
               Amount Paid (₹) *
             </label>
             <div className="relative">
               <span className="absolute left-5 top-1/2 -translate-y-1/2 text-neu-heading font-black text-xl">₹</span>
               <input 
+                id="paymentAmount"
                 type="number" required min="1" step="0.01"
                 value={paymentAmount} onChange={e => setPaymentAmount(e.target.value)}
                 placeholder="0.00" 
@@ -566,10 +567,11 @@ export default function CustomerLedger() {
             </div>
           </div>
           <div>
-            <label className="block text-sm font-bold text-neu-heading mb-2 pl-1 uppercase tracking-wide">
+            <label htmlFor="paymentNote" className="block text-sm font-bold text-neu-heading mb-2 pl-1 uppercase tracking-wide">
               Note (Optional)
             </label>
             <input 
+              id="paymentNote"
               type="text" value={paymentNote} onChange={e => setPaymentNote(e.target.value)}
               placeholder="e.g. Cash, UPI, etc." className="input-field"
             />
@@ -585,10 +587,11 @@ export default function CustomerLedger() {
       <Modal isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} title="Edit Note">
         <form onSubmit={handleEditTransaction} className="space-y-5">
           <div>
-            <label className="block text-sm font-bold text-neu-heading mb-2 pl-1 uppercase tracking-wide">
+            <label htmlFor="editNote" className="block text-sm font-bold text-neu-heading mb-2 pl-1 uppercase tracking-wide">
               Transaction Note
             </label>
             <input 
+              id="editNote"
               type="text" value={editNote} onChange={e => setEditNote(e.target.value)}
               placeholder="e.g. Cash, UPI, etc." className="input-field"
             />
@@ -603,10 +606,11 @@ export default function CustomerLedger() {
       <Modal isOpen={isEmailModalOpen} onClose={() => setIsEmailModalOpen(false)} title="Send Email to Customer">
         <form onSubmit={handleSendSupportEmail} className="space-y-5">
           <div>
-            <label className="block text-sm font-bold text-neu-heading mb-2 pl-1 uppercase tracking-wide">
+            <label htmlFor="emailSubject" className="block text-sm font-bold text-neu-heading mb-2 pl-1 uppercase tracking-wide">
               Subject
             </label>
             <input
+              id="emailSubject"
               type="text"
               value={emailSubject}
               onChange={(e) => setEmailSubject(e.target.value)}
@@ -616,10 +620,11 @@ export default function CustomerLedger() {
             />
           </div>
           <div>
-            <label className="block text-sm font-bold text-neu-heading mb-2 pl-1 uppercase tracking-wide">
+            <label htmlFor="emailMessage" className="block text-sm font-bold text-neu-heading mb-2 pl-1 uppercase tracking-wide">
               Message
             </label>
             <textarea
+              id="emailMessage"
               value={emailMessage}
               onChange={(e) => setEmailMessage(e.target.value)}
               className="input-field min-h-[150px] resize-y"

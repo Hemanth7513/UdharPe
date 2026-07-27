@@ -127,6 +127,18 @@ export default function Landing() {
           </div>
         </div>
       </motion.div>
+      
+      {/* Footer Links */}
+      <motion.footer 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1, duration: 0.6 }}
+        className="w-full text-center pb-6 z-10 flex justify-center gap-4 text-xs font-medium text-neu-text/80"
+      >
+        <button onClick={() => navigate('/privacy-policy')} className="hover:text-neu-primary transition-colors">Privacy Policy</button>
+        <span>•</span>
+        <button onClick={() => navigate('/terms-of-service')} className="hover:text-neu-primary transition-colors">Terms of Service</button>
+      </motion.footer>
     </div>
   );
 }

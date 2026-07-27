@@ -211,7 +211,7 @@ export default function Billing() {
             {/* Customer / Party Selection */}
             <div className="relative">
               <div className="flex justify-between items-end mb-2">
-                <label className="block text-sm font-bold text-neu-heading pl-1 uppercase tracking-wide">
+                <label htmlFor="customerSearch" className="block text-sm font-bold text-neu-heading pl-1 uppercase tracking-wide">
                   Customer / Party *
                 </label>
                 {customers.length > 0 && (
@@ -235,6 +235,7 @@ export default function Billing() {
               ) : (
                 <div className="relative">
                   <input
+                    id="customerSearch"
                     type="text"
                     value={customerSearch}
                     onChange={(e) => {
@@ -281,12 +282,13 @@ export default function Billing() {
 
             {/* Amount */}
             <div>
-              <label className="block text-sm font-bold text-neu-heading mb-2 pl-1 uppercase tracking-wide">
+              <label htmlFor="amount" className="block text-sm font-bold text-neu-heading mb-2 pl-1 uppercase tracking-wide">
                 Amount (₹) *
               </label>
               <div className="relative">
                 <span className="absolute left-5 top-1/2 -translate-y-1/2 text-neu-heading font-black text-xl">₹</span>
                 <input 
+                  id="amount"
                   type="number" 
                   required 
                   min="1"
@@ -301,10 +303,11 @@ export default function Billing() {
 
             {/* Due Date */}
             <div>
-              <label className="block text-sm font-bold text-neu-heading mb-2 pl-1 uppercase tracking-wide">
+              <label htmlFor="dueDate" className="block text-sm font-bold text-neu-heading mb-2 pl-1 uppercase tracking-wide">
                 Due Date (Time Period) *
               </label>
               <input 
+                id="dueDate"
                 type="date" 
                 required 
                 value={dueDate} 
@@ -315,10 +318,11 @@ export default function Billing() {
 
             {/* Description / Note */}
             <div>
-              <label className="block text-sm font-bold text-neu-heading mb-2 pl-1 uppercase tracking-wide">
+              <label htmlFor="description" className="block text-sm font-bold text-neu-heading mb-2 pl-1 uppercase tracking-wide">
                 Description / Note (Optional)
               </label>
               <input 
+                id="description"
                 type="text" 
                 value={description} 
                 onChange={e => setDescription(e.target.value)}
@@ -345,15 +349,17 @@ export default function Billing() {
         <form onSubmit={handleAddCustomer} className="space-y-5">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div>
-              <label className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">Party Name *</label>
+              <label htmlFor="newCustomerName" className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">Party Name *</label>
               <input 
+                id="newCustomerName"
                 type="text" required value={newCustomer.name} onChange={e => setNewCustomer({...newCustomer, name: e.target.value})}
                 placeholder="e.g. Ramesh Singh" className="input-field"
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">Firm Name</label>
+              <label htmlFor="newCustomerFirm" className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">Firm Name</label>
               <input 
+                id="newCustomerFirm"
                 type="text" value={newCustomer.firm_name} onChange={e => setNewCustomer({...newCustomer, firm_name: e.target.value})}
                 placeholder="e.g. Ramesh Electronics" className="input-field"
               />
@@ -362,15 +368,17 @@ export default function Billing() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div>
-              <label className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">Phone Number</label>
+              <label htmlFor="newCustomerPhone" className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">Phone Number</label>
               <input 
+                id="newCustomerPhone"
                 type="tel" value={newCustomer.phone} onChange={e => setNewCustomer({...newCustomer, phone: e.target.value})}
                 placeholder="e.g. 9876543210" className="input-field"
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">Email Address (For Reminders)</label>
+              <label htmlFor="newCustomerEmail" className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">Email Address (For Reminders)</label>
               <input 
+                id="newCustomerEmail"
                 type="email" value={newCustomer.email} onChange={e => setNewCustomer({...newCustomer, email: e.target.value})}
                 placeholder="ramesh@example.com" className="input-field"
               />
@@ -378,16 +386,18 @@ export default function Billing() {
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">GST Number (Optional)</label>
+            <label htmlFor="newCustomerGst" className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">GST Number (Optional)</label>
             <input 
+              id="newCustomerGst"
               type="text" value={newCustomer.gst_details} onChange={e => setNewCustomer({...newCustomer, gst_details: e.target.value})}
               placeholder="e.g. 29ABCDE1234F1Z5" className="input-field uppercase"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">Address</label>
+            <label htmlFor="newCustomerAddress" className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">Address</label>
             <textarea 
+              id="newCustomerAddress"
               rows="2" value={newCustomer.address} onChange={e => setNewCustomer({...newCustomer, address: e.target.value})}
               placeholder="Full address of the party" className="input-field resize-none"
             />
