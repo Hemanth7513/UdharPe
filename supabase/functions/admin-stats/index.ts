@@ -96,7 +96,7 @@ serve(async (req) => {
     // Total Transactions & Volume (across all businesses)
     const { data: bills, error: billsErr } = await supabaseAdmin
       .from('bills')
-      .select('amount, type');
+      .select('amount');
 
     let totalVolume = 0;
     let totalTransactions = bills?.length || 0;
@@ -114,12 +114,12 @@ serve(async (req) => {
       totalTransactions,
       totalVolume,
       adminEmail: user.email,
-      businesses: users.users.map(u => ({
+      businesses: users && users.users ? users.users.map(u => ({
         id: u.id,
         email: u.email,
         created_at: u.created_at,
         last_sign_in_at: u.last_sign_in_at
-      }))
+      })) : []
     }
 
     return new Response(
