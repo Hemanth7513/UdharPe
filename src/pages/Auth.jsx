@@ -4,9 +4,9 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { ArrowRight, Briefcase, Eye, EyeOff, Loader2, CheckCircle2, AlertCircle, Mail, Key } from 'lucide-react';
 
-export default function Auth() {
+export default function Auth({ isRecovering }) {
   const navigate = useNavigate();
-  const [authMode, setAuthMode] = useState('login'); // 'login', 'signup', 'forgot_password', 'magic_link', 'update_password'
+  const [authMode, setAuthMode] = useState(isRecovering ? 'update_password' : 'login'); // 'login', 'signup', 'forgot_password', 'magic_link', 'update_password'
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   
@@ -15,6 +15,12 @@ export default function Auth() {
   const [firmName, setFirmName] = useState('');
   const [ownerName, setOwnerName] = useState('');
   const [iconState, setIconState] = useState('Briefcase');
+
+  useEffect(() => {
+    if (isRecovering) {
+      setAuthMode('update_password');
+    }
+  }, [isRecovering]);
 
   useEffect(() => {
     // Check if the user is coming from a password recovery email

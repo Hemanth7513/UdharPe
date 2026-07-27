@@ -50,7 +50,7 @@ function App() {
       <Toaster position="top-center" toastOptions={{ className: 'font-bold' }} />
       <Routes>
         <Route path="/" element={!session ? <Landing /> : <Navigate to="/dashboard" replace />} />
-        <Route path="/auth" element={(!session || isRecovering) ? <Auth /> : <Navigate to="/dashboard" replace />} />
+        <Route path="/auth" element={(!session || isRecovering) ? <Auth isRecovering={isRecovering} /> : <Navigate to="/dashboard" replace />} />
         
         {/* Protected Routes inside AuthLayout */}
         {session && (
