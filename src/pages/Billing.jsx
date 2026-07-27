@@ -17,6 +17,9 @@ export default function Billing() {
   const [selectedCustomerId, setSelectedCustomerId] = useState('');
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
+  const [dueDate, setDueDate] = useState('');
+  const [customerSearch, setCustomerSearch] = useState('');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   
   // Submit State
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -24,8 +27,7 @@ export default function Billing() {
 
   // Inline Add Customer State
   const [isAddCustomerModalOpen, setIsAddCustomerModalOpen] = useState(false);
-  const [newCustomerName, setNewCustomerName] = useState('');
-  const [newCustomerPhone, setNewCustomerPhone] = useState('');
+  const [newCustomer, setNewCustomer] = useState({ name: '', phone: '', email: '', firm_name: '', address: '', gst_details: '' });
   const [isAddingCustomer, setIsAddingCustomer] = useState(false);
 
   useEffect(() => {
@@ -50,7 +52,9 @@ export default function Billing() {
       const searchParams = new URLSearchParams(location.search);
       const prefilledId = searchParams.get('customer_id');
       if (prefilledId && data && data.some(c => c.id === prefilledId)) {
-        setSelectedCustomerId(prefilledId);
+        const c = data.find(c => c.id === prefilledId);
+        setSelectedCustomerId(c.id);
+        setCustomerSearch(c.name);
       }
 
     } catch (error) {
@@ -71,8 +75,12 @@ export default function Billing() {
         .from('customers')
         .insert([{ 
           business_id: user.id, 
-          name: newCustomerName, 
-          phone: newCustomerPhone 
+          name: newCustomer.name, 
+          phone: newCustomer.phone,
+          email: newCustomer.email,
+          firm_name: newCustomer.firm_name,
+          address: newCustomer.address,
+          gst_details: newCustomer.gst_details
         }])
         .select();
 
@@ -81,12 +89,12 @@ export default function Billing() {
       if (data && data.length > 0) {
         const newCust = data[0];
         setCustomers(prev => [...prev, newCust].sort((a, b) => a.name.localeCompare(b.name)));
-        setSelectedCustomerId(newCust.id); // Auto-select the new customer
+        setSelectedCustomerId(newCust.id);
+        setCustomerSearch(newCust.name);
       }
       
       setIsAddCustomerModalOpen(false);
-      setNewCustomerName('');
-      setNewCustomerPhone('');
+      setNewCustomer({ name: '', phone: '', email: '', firm_name: '', address: '', gst_details: '' });
       toast.success('Party added successfully!');
     } catch (error) {
       toast.error(error.message);
@@ -97,8 +105,8 @@ export default function Billing() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!selectedCustomerId || !amount || isNaN(amount) || Number(amount) <= 0) {
-      toast.error('Please select a party and enter a valid amount.');
+    if (!selectedCustomerId || !amount || isNaN(amount) || Number(amount) <= 0 || !dueDate) {
+      toast.error('Please select a party, valid amount, and a due date.');
       return;
     }
 
@@ -110,6 +118,8 @@ export default function Billing() {
 
       const numericAmount = Number(amount);
 
+      const bill_no = `INV-${Date.now().toString().slice(-6)}`;
+
       // 1. Insert the new bill/udhar entry
       const { error: billError } = await supabase
         .from('bills')
@@ -120,7 +130,8 @@ export default function Billing() {
           remaining_amount: numericAmount,
           status: 'pending',
           note: description,
-          due_date: new Date().toISOString().split('T')[0] // default to today since we removed due date UI
+          bill_no: bill_no,
+          due_date: dueDate 
         }]);
 
       if (billError) throw billError;
@@ -223,22 +234,47 @@ export default function Billing() {
                 </div>
               ) : (
                 <div className="relative">
-                  <select 
-                    value={selectedCustomerId} 
-                    onChange={e => setSelectedCustomerId(e.target.value)}
-                    required
-                    className="w-full bg-neu-bg text-neu-heading rounded-2xl px-4 py-4 outline-none focus:ring-2 focus:ring-neu-primary/30 shadow-neu-inner font-bold appearance-none cursor-pointer"
-                  >
-                    <option value="" disabled>Select a party...</option>
-                    {customers.map(c => (
-                      <option key={c.id} value={c.id}>
-                        {c.name} (Current Udhar: ₹{Number(c.total_outstanding).toLocaleString()})
-                      </option>
-                    ))}
-                  </select>
-                  <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-neu-primary">
-                    ▼
-                  </div>
+                  <input
+                    type="text"
+                    value={customerSearch}
+                    onChange={(e) => {
+                      setCustomerSearch(e.target.value);
+                      setIsDropdownOpen(true);
+                      if (e.target.value === '') setSelectedCustomerId('');
+                    }}
+                    onFocus={() => setIsDropdownOpen(true)}
+                    onBlur={() => setTimeout(() => setIsDropdownOpen(false), 200)}
+                    placeholder="Search party by name..."
+                    className="w-full bg-neu-bg text-neu-heading rounded-2xl px-4 py-4 outline-none focus:ring-2 focus:ring-neu-primary/30 shadow-neu-inner font-bold"
+                  />
+                  
+                  <AnimatePresence>
+                    {isDropdownOpen && (
+                      <motion.div 
+                        initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }}
+                        className="absolute z-50 w-full mt-2 bg-neu-bg border border-white/50 shadow-neu rounded-2xl max-h-60 overflow-y-auto"
+                      >
+                        {customers.filter(c => c.name.toLowerCase().includes(customerSearch.toLowerCase())).length > 0 ? (
+                          customers.filter(c => c.name.toLowerCase().includes(customerSearch.toLowerCase())).map(c => (
+                            <div 
+                              key={c.id}
+                              onClick={() => {
+                                setSelectedCustomerId(c.id);
+                                setCustomerSearch(c.name);
+                                setIsDropdownOpen(false);
+                              }}
+                              className="px-4 py-3 hover:bg-neu-primary/10 cursor-pointer border-b border-white/20 last:border-0 font-bold text-neu-heading flex justify-between"
+                            >
+                              <span>{c.name}</span>
+                              <span className="text-neu-danger font-medium text-sm">₹{Number(c.total_outstanding).toLocaleString()}</span>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="px-4 py-3 text-neu-text text-sm">No match found.</div>
+                        )}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               )}
             </div>
@@ -261,6 +297,20 @@ export default function Billing() {
                   className="w-full bg-neu-bg text-neu-heading rounded-2xl pl-12 pr-4 py-4 outline-none focus:ring-2 focus:ring-neu-primary/30 shadow-neu-inner font-black text-xl"
                 />
               </div>
+            </div>
+
+            {/* Due Date */}
+            <div>
+              <label className="block text-sm font-bold text-neu-heading mb-2 pl-1 uppercase tracking-wide">
+                Due Date (Time Period) *
+              </label>
+              <input 
+                type="date" 
+                required 
+                value={dueDate} 
+                onChange={e => setDueDate(e.target.value)}
+                className="input-field font-medium uppercase"
+              />
             </div>
 
             {/* Description / Note */}
@@ -293,18 +343,53 @@ export default function Billing() {
       {/* Inline Add Customer Modal */}
       <Modal isOpen={isAddCustomerModalOpen} onClose={() => setIsAddCustomerModalOpen(false)} title="Add Party">
         <form onSubmit={handleAddCustomer} className="space-y-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div>
+              <label className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">Party Name *</label>
+              <input 
+                type="text" required value={newCustomer.name} onChange={e => setNewCustomer({...newCustomer, name: e.target.value})}
+                placeholder="e.g. Ramesh Singh" className="input-field"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">Firm Name</label>
+              <input 
+                type="text" value={newCustomer.firm_name} onChange={e => setNewCustomer({...newCustomer, firm_name: e.target.value})}
+                placeholder="e.g. Ramesh Electronics" className="input-field"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div>
+              <label className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">Phone Number</label>
+              <input 
+                type="tel" value={newCustomer.phone} onChange={e => setNewCustomer({...newCustomer, phone: e.target.value})}
+                placeholder="e.g. 9876543210" className="input-field"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">Email Address (For Reminders)</label>
+              <input 
+                type="email" value={newCustomer.email} onChange={e => setNewCustomer({...newCustomer, email: e.target.value})}
+                placeholder="ramesh@example.com" className="input-field"
+              />
+            </div>
+          </div>
+
           <div>
-            <label className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">Party Name *</label>
+            <label className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">GST Number (Optional)</label>
             <input 
-              type="text" required value={newCustomerName} onChange={e => setNewCustomerName(e.target.value)}
-              placeholder="e.g. Ramesh Singh" className="input-field"
+              type="text" value={newCustomer.gst_details} onChange={e => setNewCustomer({...newCustomer, gst_details: e.target.value})}
+              placeholder="e.g. 29ABCDE1234F1Z5" className="input-field uppercase"
             />
           </div>
+
           <div>
-            <label className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">Phone Number (Optional)</label>
-            <input 
-              type="tel" value={newCustomerPhone} onChange={e => setNewCustomerPhone(e.target.value)}
-              placeholder="e.g. 9876543210" className="input-field"
+            <label className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">Address</label>
+            <textarea 
+              rows="2" value={newCustomer.address} onChange={e => setNewCustomer({...newCustomer, address: e.target.value})}
+              placeholder="Full address of the party" className="input-field resize-none"
             />
           </div>
 

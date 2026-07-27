@@ -12,6 +12,7 @@ export default function Auth({ isRecovering }) {
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [firmName, setFirmName] = useState('');
   const [ownerName, setOwnerName] = useState('');
   const [iconState, setIconState] = useState('Briefcase');
@@ -82,16 +83,26 @@ export default function Auth({ isRecovering }) {
         setAuthMode('login');
       }
       else if (authMode === 'update_password') {
+        if (password !== confirmPassword) {
+          throw new Error("Passwords do not match");
+        }
         const { error } = await supabase.auth.updateUser({ password });
         if (error) throw error;
+        
+        // Force manual login after reset
+        await supabase.auth.signOut();
+        
         setIconState('CheckCircle2');
-        // They are already authenticated via the recovery link, so send them to the dashboard!
-        navigate('/dashboard');
+        setErrorMsg('Password updated successfully! Please log in with your new password.');
+        setAuthMode('login');
+        setPassword('');
+        setConfirmPassword('');
       }
     } catch (error) {
-      console.error("Auth Error:", error); // Log the real error for debugging
-      // Security: Sanitize raw backend errors to prevent leaking user enumeration
-      let safeMessage = "An error occurred. Please try again.";
+      console.error("Auth Error:", error); 
+      let safeMessage = error.message === "Passwords do not match" 
+        ? "Passwords do not match." 
+        : "An error occurred. Please try again.";
       
       if (authMode === 'login' || authMode === 'magic_link') {
         safeMessage = "Invalid email or password.";
@@ -214,16 +225,32 @@ export default function Auth({ isRecovering }) {
             )}
 
             {(authMode === 'login' || authMode === 'signup' || authMode === 'update_password') && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                <label htmlFor="password" className="block text-sm font-semibold text-neu-heading mb-2 pl-1">
-                  {authMode === 'update_password' ? 'New Password' : 'Password'}
-                </label>
-                <input 
-                  id="password"
-                  type="password" required value={password} onChange={e => setPassword(e.target.value)}
-                  onFocus={() => setIconState('EyeOff')} onBlur={() => setIconState('Briefcase')}
-                  placeholder="••••••••" className="input-field"
-                />
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+                <div>
+                  <label htmlFor="password" className="block text-sm font-semibold text-neu-heading mb-2 pl-1">
+                    {authMode === 'update_password' ? 'New Password' : 'Password'}
+                  </label>
+                  <input 
+                    id="password"
+                    type="password" required value={password} onChange={e => setPassword(e.target.value)}
+                    onFocus={() => setIconState('EyeOff')} onBlur={() => setIconState('Briefcase')}
+                    placeholder="••••••••" className="input-field"
+                  />
+                </div>
+                
+                {authMode === 'update_password' && (
+                  <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}>
+                    <label htmlFor="confirmPassword" className="block text-sm font-semibold text-neu-heading mb-2 pl-1">
+                      Confirm New Password
+                    </label>
+                    <input 
+                      id="confirmPassword"
+                      type="password" required value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)}
+                      onFocus={() => setIconState('EyeOff')} onBlur={() => setIconState('Briefcase')}
+                      placeholder="••••••••" className="input-field"
+                    />
+                  </motion.div>
+                )}
               </motion.div>
             )}
 

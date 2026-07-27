@@ -23,6 +23,7 @@ export default function CustomerLedger() {
   const [paymentAmount, setPaymentAmount] = useState('');
   const [paymentNote, setPaymentNote] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedBillForPayment, setSelectedBillForPayment] = useState(null);
 
   // Email state
   const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
@@ -53,7 +54,7 @@ export default function CustomerLedger() {
       // 2. Fetch Bills (Udhar given)
       const { data: billsData, error: billsError } = await supabase
         .from('bills')
-        .select('id, amount, note, created_at')
+        .select('id, amount, note, created_at, bill_no, remaining_amount, status')
         .eq('customer_id', id)
         .eq('business_id', user.id);
         
@@ -103,8 +104,14 @@ export default function CustomerLedger() {
 
       const numericAmount = Number(paymentAmount);
 
-      if (numericAmount > Number(customer.total_outstanding)) {
-          throw new Error('Payment amount cannot be greater than the outstanding Udhar.');
+      if (selectedBillForPayment) {
+        if (numericAmount > Number(selectedBillForPayment.remaining_amount)) {
+            throw new Error('Payment amount cannot be greater than the remaining amount for this bill.');
+        }
+      } else {
+        if (numericAmount > Number(customer.total_outstanding)) {
+            throw new Error('Payment amount cannot be greater than the outstanding Udhar.');
+        }
       }
 
       // 1. Insert the new settlement entry
@@ -114,15 +121,26 @@ export default function CustomerLedger() {
           business_id: user.id,
           customer_id: id,
           amount_paid: numericAmount,
-          note: paymentNote
+          note: paymentNote + (selectedBillForPayment ? ` (Ref: ${selectedBillForPayment.bill_no || 'Bill'})` : '')
         }]);
 
       if (settlementError) throw settlementError;
 
-      // 2. Fetch current outstanding for the customer and subtract the payment
-      const newTotal = Number(customer.total_outstanding) - numericAmount;
+      // 2. Update specific bill if applicable
+      if (selectedBillForPayment) {
+        const newRemaining = Number(selectedBillForPayment.remaining_amount) - numericAmount;
+        const newStatus = newRemaining <= 0 ? 'paid' : 'pending';
+        
+        const { error: billUpdateError } = await supabase
+          .from('bills')
+          .update({ remaining_amount: newRemaining, status: newStatus })
+          .eq('id', selectedBillForPayment.id);
+          
+        if (billUpdateError) throw billUpdateError;
+      }
 
       // 3. Update the customer's total_outstanding balance
+      const newTotal = Number(customer.total_outstanding) - numericAmount;
       const { error: updateError } = await supabase
         .from('customers')
         .update({ total_outstanding: newTotal })
@@ -132,6 +150,7 @@ export default function CustomerLedger() {
 
       // Reset modal and refetch
       setIsPaymentModalOpen(false);
+      setSelectedBillForPayment(null);
       setPaymentAmount('');
       setPaymentNote('');
       toast.success('Payment recorded successfully!');
@@ -363,7 +382,10 @@ export default function CustomerLedger() {
           {Number(customer.total_outstanding) > 0 && (
             <div className="flex flex-wrap gap-2 w-full md:w-auto">
               <button 
-                onClick={() => setIsPaymentModalOpen(true)}
+                onClick={() => {
+                  setSelectedBillForPayment(null);
+                  setIsPaymentModalOpen(true);
+                }}
                 className="btn-solid flex-1 md:flex-none py-2 px-4 text-sm"
               >
                 Record Payment
@@ -431,23 +453,42 @@ export default function CustomerLedger() {
                   </div>
                 )}
                 <div>
-                  <h4 className="font-bold text-neu-heading text-lg">
-                    {t.type === 'bill' ? 'Udhar Given' : 'Payment Received'}
+                  <h4 className="font-bold text-neu-heading text-lg flex items-center gap-2">
+                    {t.type === 'bill' ? (t.bill_no || 'Udhar Given') : 'Payment Received'}
+                    {t.type === 'bill' && t.status === 'paid' && (
+                      <span className="text-xs bg-neu-success/20 text-neu-success px-2 py-0.5 rounded uppercase tracking-wider font-bold">Paid</span>
+                    )}
                   </h4>
                   <p className="text-sm text-neu-text font-medium mt-0.5">
                     {new Date(t.created_at).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}
                   </p>
                   {t.note && (
-                    <p className="text-sm text-neu-text/80 mt-2 bg-neu-bg/50 inline-block px-3 py-1 rounded-lg italic">
+                    <p className="text-sm text-neu-text/80 mt-2 bg-neu-bg/50 inline-block px-3 py-1 rounded-lg italic border border-white/20">
                       "{t.note}"
+                    </p>
+                  )}
+                  {t.type === 'bill' && t.remaining_amount > 0 && (
+                    <p className="text-sm text-neu-danger font-bold mt-2">
+                      Remaining: ₹{Number(t.remaining_amount).toLocaleString()}
                     </p>
                   )}
                 </div>
               </div>
-              <div className="text-right w-full sm:w-auto mt-2 sm:mt-0 pt-4 sm:pt-0 border-t border-white/20 sm:border-t-0">
+              <div className="text-right w-full sm:w-auto mt-2 sm:mt-0 pt-4 sm:pt-0 border-t border-white/20 sm:border-t-0 flex flex-col items-end">
                 <p className={`font-black text-2xl ${t.type === 'bill' ? 'text-neu-danger' : 'text-neu-success'}`}>
                   {t.type === 'bill' ? '+' : '-'}₹{t.amount.toLocaleString()}
                 </p>
+                {t.type === 'bill' && t.remaining_amount > 0 && (
+                  <button 
+                    onClick={() => {
+                      setSelectedBillForPayment(t);
+                      setIsPaymentModalOpen(true);
+                    }}
+                    className="mt-2 text-xs font-bold text-neu-primary hover:text-neu-primary-hover border border-neu-primary px-3 py-1 rounded-lg transition-colors"
+                  >
+                    Apply Payment
+                  </button>
+                )}
               </div>
             </div>
           ))
@@ -464,8 +505,13 @@ export default function CustomerLedger() {
       </button>
 
       {/* Record Payment Modal */}
-      <Modal isOpen={isPaymentModalOpen} onClose={() => setIsPaymentModalOpen(false)} title="Record Payment">
+      <Modal isOpen={isPaymentModalOpen} onClose={() => { setIsPaymentModalOpen(false); setSelectedBillForPayment(null); }} title={selectedBillForPayment ? `Record Payment for ${selectedBillForPayment.bill_no || 'Bill'}` : "Record Payment"}>
         <form onSubmit={handleRecordPayment} className="space-y-5">
+          {selectedBillForPayment && (
+            <div className="bg-neu-primary/10 border border-neu-primary/20 rounded-xl p-4 mb-4 text-sm font-bold text-neu-primary">
+              Remaining Balance for this Bill: ₹{Number(selectedBillForPayment.remaining_amount).toLocaleString()}
+            </div>
+          )}
           <div>
             <label className="block text-sm font-bold text-neu-heading mb-2 pl-1 uppercase tracking-wide">
               Amount Paid (₹) *

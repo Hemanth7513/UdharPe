@@ -16,7 +16,7 @@ export default function Customers() {
   
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [newCustomer, setNewCustomer] = useState({ name: '', phone: '', email: '' });
+  const [newCustomer, setNewCustomer] = useState({ name: '', phone: '', email: '', firm_name: '', address: '', gst_details: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -57,7 +57,10 @@ export default function Customers() {
           business_id: user.id, 
           name: newCustomer.name, 
           phone: newCustomer.phone, 
-          email: newCustomer.email 
+          email: newCustomer.email,
+          firm_name: newCustomer.firm_name,
+          address: newCustomer.address,
+          gst_details: newCustomer.gst_details
         }])
         .select();
 
@@ -70,7 +73,7 @@ export default function Customers() {
       
       // Close modal and reset form
       setIsModalOpen(false);
-      setNewCustomer({ name: '', phone: '', email: '' });
+      setNewCustomer({ name: '', phone: '', email: '', firm_name: '', address: '', gst_details: '' });
       toast.success('Customer added successfully!');
     } catch (error) {
       toast.error(error.message);
@@ -86,8 +89,11 @@ export default function Customers() {
     }
     const exportData = customers.map(c => ({
       'Party Name': c.name,
+      'Firm Name': c.firm_name || 'N/A',
       'Phone': c.phone || 'N/A',
       'Email': c.email || 'N/A',
+      'GSTIN': c.gst_details || 'N/A',
+      'Address': c.address || 'N/A',
       'Outstanding (₹)': Number(c.total_outstanding),
       'Added On': new Date(c.created_at).toLocaleDateString()
     }));
@@ -225,18 +231,53 @@ export default function Customers() {
       {/* Add Customer Modal */}
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Add Party">
         <form onSubmit={handleAddCustomer} className="space-y-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div>
+              <label className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">Party Name *</label>
+              <input 
+                type="text" required value={newCustomer.name} onChange={e => setNewCustomer({...newCustomer, name: e.target.value})}
+                placeholder="e.g. Ramesh Singh" className="input-field"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">Firm Name</label>
+              <input 
+                type="text" value={newCustomer.firm_name} onChange={e => setNewCustomer({...newCustomer, firm_name: e.target.value})}
+                placeholder="e.g. Ramesh Electronics" className="input-field"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div>
+              <label className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">Phone Number</label>
+              <input 
+                type="tel" value={newCustomer.phone} onChange={e => setNewCustomer({...newCustomer, phone: e.target.value})}
+                placeholder="e.g. 9876543210" className="input-field"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">Email Address (For Reminders)</label>
+              <input 
+                type="email" value={newCustomer.email} onChange={e => setNewCustomer({...newCustomer, email: e.target.value})}
+                placeholder="ramesh@example.com" className="input-field"
+              />
+            </div>
+          </div>
+
           <div>
-            <label className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">Party Name *</label>
+            <label className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">GST Number (Optional)</label>
             <input 
-              type="text" required value={newCustomer.name} onChange={e => setNewCustomer({...newCustomer, name: e.target.value})}
-              placeholder="e.g. Ramesh Singh" className="input-field"
+              type="text" value={newCustomer.gst_details} onChange={e => setNewCustomer({...newCustomer, gst_details: e.target.value})}
+              placeholder="e.g. 29ABCDE1234F1Z5" className="input-field uppercase"
             />
           </div>
+
           <div>
-            <label className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">Phone Number (Optional)</label>
-            <input 
-              type="tel" value={newCustomer.phone} onChange={e => setNewCustomer({...newCustomer, phone: e.target.value})}
-              placeholder="e.g. 9876543210" className="input-field"
+            <label className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">Address</label>
+            <textarea 
+              rows="2" value={newCustomer.address} onChange={e => setNewCustomer({...newCustomer, address: e.target.value})}
+              placeholder="Full address of the party" className="input-field resize-none"
             />
           </div>
 
