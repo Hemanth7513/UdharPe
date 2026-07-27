@@ -2,7 +2,6 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.110.8"
 import { corsHeaders } from "../_shared/cors.ts"
 
-// Initialize Resend API Key
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
 
 serve(async (req) => {
@@ -11,36 +10,75 @@ serve(async (req) => {
   }
 
   try {
-    const { email, type } = await req.json()
+    const { email, type, password, options } = await req.json()
 
-    if (!email || type !== 'recovery') {
+    if (!email || !['recovery', 'magiclink', 'signup'].includes(type)) {
       throw new Error("Missing required parameters or invalid type.")
     }
+    
+    if (type === 'signup' && !password) {
+      throw new Error("Password is required for signup.")
+    }
 
-    // 1. Initialize Admin Supabase Client to generate the link
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
       { auth: { autoRefreshToken: false, persistSession: false } }
     )
 
-    // 2. Generate the recovery link
-    const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
-      type: 'recovery',
+    // 1. Generate the Auth Link using Admin API
+    const generateOptions: any = {
+      type: type,
       email: email,
       options: {
-        redirectTo: Deno.env.get('FRONTEND_URL') || 'http://localhost:5173/auth'
+        redirectTo: Deno.env.get('FRONTEND_URL') || 'http://localhost:5173/dashboard'
       }
-    })
+    };
+    
+    // Recovery redirects to auth instead of dashboard
+    if (type === 'recovery') {
+      generateOptions.options.redirectTo = Deno.env.get('FRONTEND_URL') || 'http://localhost:5173/auth';
+    }
+    
+    if (type === 'signup') {
+      generateOptions.password = password;
+      if (options?.data) {
+        generateOptions.options.data = options.data;
+      }
+    }
+
+    const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink(generateOptions)
 
     if (linkError) {
       console.error("Link Generation Error:", linkError)
-      throw new Error("Could not generate recovery link.")
+      throw new Error("Could not generate auth link.")
     }
 
-    const resetLink = linkData.properties.action_link
+    const actionLink = linkData.properties.action_link
 
-    // 3. Construct the beautiful HTML Email using the generated link
+    // 2. Determine Email Content based on Type
+    let subject = "";
+    let title = "";
+    let message = "";
+    let buttonText = "";
+    
+    if (type === 'recovery') {
+      subject = "Reset Your UdharPe Password";
+      title = "Password Reset Request";
+      message = "We received a request to reset your UdharPe password. Click the button below to set a new password.";
+      buttonText = "Reset My Password";
+    } else if (type === 'magiclink') {
+      subject = "Your UdharPe Magic Link";
+      title = "Magic Link Login";
+      message = "Click the button below to securely log into your UdharPe account. No password required!";
+      buttonText = "Log In to UdharPe";
+    } else if (type === 'signup') {
+      subject = "Welcome to UdharPe! Confirm your email";
+      title = "Confirm Your Email";
+      message = "Welcome to UdharPe! Please confirm your email address by clicking the button below so you can start managing your ledgers.";
+      buttonText = "Confirm Email Address";
+    }
+
     const htmlContent = `
     <!DOCTYPE html>
     <html>
@@ -63,12 +101,11 @@ serve(async (req) => {
           <h1>UdharPe Security</h1>
         </div>
         <div class="content">
-          <h2>Password Reset Request</h2>
-          <p>We received a request to reset your UdharPe password. Click the button below to set a new password.</p>
-          <a href="${resetLink}" class="btn" style="color: white;">Reset My Password</a>
+          <h2>${title}</h2>
+          <p>${message}</p>
+          <a href="${actionLink}" class="btn" style="color: white;">${buttonText}</a>
           <div class="footer">
-            This link will expire in <strong>15 minutes</strong> and can only be used once.<br><br>
-            If you did not request a password reset, you can safely ignore this email. Your password will not change.
+            If you did not request this email, you can safely ignore it.
           </div>
         </div>
       </div>
@@ -76,7 +113,7 @@ serve(async (req) => {
     </html>
     `
 
-    // 4. Send the email directly via Resend API
+    // 3. Send via Resend
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
@@ -84,9 +121,9 @@ serve(async (req) => {
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "UdharPe Security <onboarding@resend.dev>", // Or your verified domain
+        from: "UdharPe Security <onboarding@resend.dev>", 
         to: [email],
-        subject: "Reset Your UdharPe Password",
+        subject: subject,
         html: htmlContent,
       }),
     })

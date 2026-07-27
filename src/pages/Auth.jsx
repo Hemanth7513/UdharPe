@@ -43,19 +43,19 @@ export default function Auth() {
         navigate('/dashboard');
       } 
       else if (authMode === 'signup') {
-        const { data, error } = await supabase.auth.signUp({
-          email, password,
-          options: { data: { firm_name: firmName, owner_name: ownerName } }
+        const { error } = await supabase.functions.invoke('send-auth-email', {
+          body: { 
+            email, 
+            password, 
+            type: 'signup',
+            options: { data: { firm_name: firmName, owner_name: ownerName } }
+          }
         });
         if (error) throw error;
         
-        if (data?.session) {
-          setIconState('CheckCircle2');
-          navigate('/dashboard');
-        } else {
-          setErrorMsg('Registration successful! Check your email or login now.');
-          setAuthMode('login');
-        }
+        setIconState('CheckCircle2');
+        setErrorMsg('Registration successful! Check your email or login now.');
+        setAuthMode('login');
       }
       else if (authMode === 'forgot_password') {
         const { error } = await supabase.functions.invoke('send-auth-email', {
@@ -67,9 +67,8 @@ export default function Auth() {
         setAuthMode('login');
       }
       else if (authMode === 'magic_link') {
-        const { error } = await supabase.auth.signInWithOtp({
-          email,
-          options: { emailRedirectTo: window.location.origin + '/dashboard' }
+        const { error } = await supabase.functions.invoke('send-auth-email', {
+          body: { email, type: 'magiclink' }
         });
         if (error) throw error;
         setIconState('CheckCircle2');
