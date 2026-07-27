@@ -8,7 +8,7 @@ export default function SkeletonLoader({ className, count = 1 }) {
       {skeletons.map((_, index) => (
         <div 
           key={index} 
-          className={`animate-pulse bg-neu-bg border-4 border-[#059669] bg-white rounded-none ${className}`}
+          className={`animate-pulse bg-neu-bg shadow-neu-inner rounded-xl ${className}`}
         ></div>
       ))}
     </>
