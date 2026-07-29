@@ -118,35 +118,15 @@ export default function Billing() {
 
       const numericAmount = Number(amount);
 
-      const bill_no = `INV-${Date.now().toString().slice(-6)}`;
-
-      // 1. Insert the new bill/udhar entry
-      const { error: billError } = await supabase
-        .from('bills')
-        .insert([{
-          business_id: user.id,
-          customer_id: selectedCustomerId,
-          amount: numericAmount,
-          remaining_amount: numericAmount,
-          status: 'pending',
-          note: description,
-          bill_no: bill_no,
-          due_date: dueDate 
-        }]);
+      const { error: billError } = await supabase.rpc('create_bill', {
+        p_customer_id: selectedCustomerId,
+        p_amount: numericAmount,
+        p_due_date: dueDate,
+        p_note: description || null,
+        p_bill_no: `INV-${Date.now().toString().slice(-6)}`,
+      });
 
       if (billError) throw billError;
-
-      // 2. Fetch current outstanding for the customer
-      const customer = customers.find(c => c.id === selectedCustomerId);
-      const newTotal = Number(customer.total_outstanding) + numericAmount;
-
-      // 3. Update the customer's total_outstanding balance
-      const { error: updateError } = await supabase
-        .from('customers')
-        .update({ total_outstanding: newTotal })
-        .eq('id', selectedCustomerId);
-
-      if (updateError) throw updateError;
 
       setSuccess(true);
       

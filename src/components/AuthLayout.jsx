@@ -1,7 +1,8 @@
+import { useState, useEffect } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import { isSuperAdminUser } from '../lib/admin';
 import { LayoutDashboard, Users, PlusCircle, LogOut, Settings, ShieldAlert, Handshake } from 'lucide-react';
-import { useState, useEffect } from 'react';
 
 export default function AuthLayout() {
   const navigate = useNavigate();
@@ -11,9 +12,7 @@ export default function AuthLayout() {
   useEffect(() => {
     const checkAdmin = async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (user?.email === 'hemaxtth@gmail.com') {
-        setIsAdmin(true);
-      }
+      setIsAdmin(isSuperAdminUser(user));
     };
     checkAdmin();
   }, []);

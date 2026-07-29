@@ -1,136 +1,156 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.110.8"
-import { corsHeaders } from "../_shared/cors.ts"
-import { checkRateLimit } from "../_shared/security.ts"
+import { getCorsHeaders } from "../_shared/cors.ts"
+import { checkRateLimit, getClientIp, isSuperAdmin } from "../_shared/security.ts"
 
 serve(async (req) => {
-  // Handle CORS preflight
+  const corsHeaders = getCorsHeaders(req)
+
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
 
   try {
-    // 1. Security Checks
-    const clientIp = req.headers.get('x-real-ip') || req.headers.get('x-forwarded-for') || 'unknown';
-    checkRateLimit(clientIp, 60000, 20); // Max 20 admin stats requests per min
+    if (req.method !== 'POST' && req.method !== 'GET') {
+      throw new Error('Method not allowed')
+    }
 
-    // 2. Initialize Supabase Admin Client using Service Role Key
+    const clientIp = getClientIp(req)
+    checkRateLimit(`admin-stats:${clientIp}`, 60000, 20)
+
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
-      {
-        auth: {
-          autoRefreshToken: false,
-          persistSession: false
-        }
-      }
-    );
+      { auth: { autoRefreshToken: false, persistSession: false } }
+    )
 
-    // 2. Verify requesting user is the Admin
     const authHeader = req.headers.get('Authorization')
-    if (!authHeader) {
-      throw new Error("No authorization header")
+    if (!authHeader?.startsWith('Bearer ')) {
+      throw new Error('No authorization header')
     }
 
     const token = authHeader.replace('Bearer ', '')
     const { data: { user }, error: userError } = await supabaseAdmin.auth.getUser(token)
-    
+
     if (userError || !user) {
-      throw new Error("Unauthorized")
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
     }
 
-    // Strict check: Only hemaxtth@gmail.com is allowed
-    if (user.email !== 'hemaxtth@gmail.com') {
+    if (!isSuperAdmin(user)) {
       return new Response(
-        JSON.stringify({ error: "Forbidden: You do not have superadmin privileges." }),
+        JSON.stringify({ error: 'Forbidden: You do not have superadmin privileges.' }),
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    // 3. Parse Action (if any)
-    let action = 'dashboard';
-    let businessId = null;
-    
-    // We try to parse the body. Since we added size limits, we can safely do this.
+    let action = 'dashboard'
+    let businessId: string | null = null
+
     try {
-      const bodyText = await req.text();
+      const bodyText = await req.text()
       if (bodyText) {
-        const body = JSON.parse(bodyText);
-        action = body.action || 'dashboard';
-        businessId = body.businessId;
+        const body = JSON.parse(bodyText)
+        action = body.action || 'dashboard'
+        businessId = body.businessId || null
       }
-    } catch (e) {
-      // ignore
+    } catch {
+      // ignore empty/invalid body — default dashboard
     }
 
     if (action === 'get_businesses') {
-      const { data: users, error: authErr } = await supabaseAdmin.auth.admin.listUsers();
-      if (authErr) throw authErr;
-      
-      const businesses = users.users.map(u => ({
+      const { data: users, error: authErr } = await supabaseAdmin.auth.admin.listUsers({ perPage: 1000 })
+      if (authErr) throw authErr
+
+      const businesses = (users.users || []).map((u) => ({
         id: u.id,
         email: u.email,
         created_at: u.created_at,
-        last_sign_in_at: u.last_sign_in_at
-      }));
+        last_sign_in_at: u.last_sign_in_at,
+      }))
 
-      return new Response(JSON.stringify({ businesses }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 });
+      return new Response(JSON.stringify({ businesses }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+      })
     }
 
+    // Aggregates only — no raw customer/bill PII
     if (action === 'get_business_details' && businessId) {
-      const { data: customers } = await supabaseAdmin.from('customers').select('*').eq('business_id', businessId);
-      const { data: bills } = await supabaseAdmin.from('bills').select('*').eq('business_id', businessId);
-      
-      return new Response(JSON.stringify({ customers: customers || [], bills: bills || [] }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 });
+      const { count: customerCount } = await supabaseAdmin
+        .from('customers')
+        .select('*', { count: 'exact', head: true })
+        .eq('business_id', businessId)
+
+      const { count: billCount } = await supabaseAdmin
+        .from('bills')
+        .select('*', { count: 'exact', head: true })
+        .eq('business_id', businessId)
+
+      const { data: outstandingRows } = await supabaseAdmin
+        .from('customers')
+        .select('total_outstanding')
+        .eq('business_id', businessId)
+
+      const totalOutstanding = (outstandingRows || []).reduce(
+        (sum, row) => sum + Number(row.total_outstanding || 0),
+        0
+      )
+
+      return new Response(JSON.stringify({
+        customerCount: customerCount || 0,
+        billCount: billCount || 0,
+        totalOutstanding,
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+      })
     }
 
-    // Default: Dashboard Stats
-    const { data: users, error: authErr } = await supabaseAdmin.auth.admin.listUsers()
-    const totalBusinesses = users?.users?.length || 0;
+    const { data: users, error: authErr } = await supabaseAdmin.auth.admin.listUsers({ perPage: 1000 })
+    if (authErr) throw authErr
+    const totalBusinesses = users?.users?.length || 0
 
-    // Total Customers (across all businesses)
-    const { count: totalCustomers, error: custErr } = await supabaseAdmin
+    const { count: totalCustomers } = await supabaseAdmin
       .from('customers')
-      .select('*', { count: 'exact', head: true });
+      .select('*', { count: 'exact', head: true })
 
-    // Total Transactions & Volume (across all businesses)
-    const { data: bills, error: billsErr } = await supabaseAdmin
+    const { data: bills } = await supabaseAdmin
       .from('bills')
-      .select('amount');
+      .select('amount')
 
-    let totalVolume = 0;
-    let totalTransactions = bills?.length || 0;
-
+    let totalVolume = 0
+    const totalTransactions = bills?.length || 0
     if (bills) {
-      bills.forEach(bill => {
-        totalVolume += Number(bill.amount);
-      });
+      bills.forEach((bill) => {
+        totalVolume += Number(bill.amount)
+      })
     }
 
-    // Send back the payload
     const payload = {
       totalBusinesses,
       totalCustomers: totalCustomers || 0,
       totalTransactions,
       totalVolume,
       adminEmail: user.email,
-      businesses: users && users.users ? users.users.map(u => ({
+      businesses: (users?.users || []).map((u) => ({
         id: u.id,
         email: u.email,
         created_at: u.created_at,
-        last_sign_in_at: u.last_sign_in_at
-      })) : []
+        last_sign_in_at: u.last_sign_in_at,
+      })),
     }
 
-    return new Response(
-      JSON.stringify(payload),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
-    )
-
+    return new Response(JSON.stringify(payload), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      status: 200,
+    })
   } catch (error) {
     return new Response(
       JSON.stringify({ error: error.message }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+      { headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' }, status: 400 }
     )
   }
 })

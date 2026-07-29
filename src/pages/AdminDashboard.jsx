@@ -2,8 +2,10 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { ShieldAlert, Users, TrendingUp, Building, Receipt, Activity, ChevronLeft, Eye, X } from 'lucide-react';
+import { isSuperAdminUser } from '../lib/admin';
+import { ShieldAlert, Users, TrendingUp, Building, Receipt, Activity, ChevronLeft, Eye } from 'lucide-react';
 import Modal from '../components/Modal';
+import SkeletonLoader from '../components/SkeletonLoader';
 import toast from 'react-hot-toast';
 
 export default function AdminDashboard() {
@@ -13,10 +15,9 @@ export default function AdminDashboard() {
   const [error, setError] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
   
-  // Deep Dive State
   const [isDeepDiveOpen, setIsDeepDiveOpen] = useState(false);
   const [selectedBusiness, setSelectedBusiness] = useState(null);
-  const [deepDiveData, setDeepDiveData] = useState({ customers: [], bills: [] });
+  const [deepDiveData, setDeepDiveData] = useState({ customerCount: 0, billCount: 0, totalOutstanding: 0 });
   const [loadingDeepDive, setLoadingDeepDive] = useState(false);
 
   useEffect(() => {
@@ -32,7 +33,7 @@ export default function AdminDashboard() {
         return;
       }
 
-      if (user.email !== 'hemaxtth@gmail.com') {
+      if (!isSuperAdminUser(user)) {
         setError("Unauthorized. You are not the platform administrator.");
         setLoading(false);
         return;
@@ -40,10 +41,10 @@ export default function AdminDashboard() {
 
       setIsAdmin(true);
 
-      // Fetch global stats using our edge function
       const { data, error: invokeError } = await supabase.functions.invoke('admin-stats');
       
       if (invokeError) throw invokeError;
+      if (data?.error) throw new Error(data.error);
       
       setStats(data);
     } catch (err) {
@@ -65,7 +66,12 @@ export default function AdminDashboard() {
       });
       
       if (invokeError) throw invokeError;
-      setDeepDiveData({ customers: data.customers || [], bills: data.bills || [] });
+      if (data?.error) throw new Error(data.error);
+      setDeepDiveData({
+        customerCount: data.customerCount || 0,
+        billCount: data.billCount || 0,
+        totalOutstanding: data.totalOutstanding || 0,
+      });
     } catch (err) {
       toast.error('Failed to load business details');
       setIsDeepDiveOpen(false);
@@ -258,11 +264,15 @@ export default function AdminDashboard() {
             <div className="grid grid-cols-2 gap-4">
               <div className="neu-card p-4 text-center">
                 <p className="text-sm font-bold text-neu-text uppercase tracking-wider mb-1">Customers</p>
-                <p className="text-3xl font-black text-neu-heading">{deepDiveData.customers.length}</p>
+                <p className="text-3xl font-black text-neu-heading">{deepDiveData.customerCount}</p>
               </div>
               <div className="neu-card p-4 text-center">
                 <p className="text-sm font-bold text-neu-text uppercase tracking-wider mb-1">Bills Logged</p>
-                <p className="text-3xl font-black text-neu-heading">{deepDiveData.bills.length}</p>
+                <p className="text-3xl font-black text-neu-heading">{deepDiveData.billCount}</p>
+              </div>
+              <div className="neu-card p-4 text-center col-span-2">
+                <p className="text-sm font-bold text-neu-text uppercase tracking-wider mb-1">Total Outstanding</p>
+                <p className="text-3xl font-black text-neu-danger">₹{Number(deepDiveData.totalOutstanding || 0).toLocaleString()}</p>
               </div>
             </div>
             

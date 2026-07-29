@@ -48,6 +48,9 @@ export default function Settings() {
     e.preventDefault();
     setSaving(true);
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
       const { error } = await supabase.auth.updateUser({
         data: {
           firm_name: profile.firm_name,
@@ -55,6 +58,16 @@ export default function Settings() {
         }
       });
       if (error) throw error;
+
+      // Keep profiles table in sync for reminders / server-side firm name
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .upsert({
+          id: user.id,
+          firm_name: profile.firm_name || 'My Business',
+          owner_name: profile.owner_name || null,
+        });
+      if (profileError) throw profileError;
       
       setOriginalProfile(profile);
       setIsEditing(false);

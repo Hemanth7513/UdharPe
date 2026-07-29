@@ -119,47 +119,21 @@ export default function CustomerLedger() {
         }
       }
 
-      // 1. Insert the new settlement entry
-      const { error: settlementError } = await supabase
-        .from('settlements')
-        .insert([{
-          business_id: user.id,
-          customer_id: id,
-          amount_paid: numericAmount,
-          note: paymentNote + (selectedBillForPayment ? ` (Ref: ${selectedBillForPayment.bill_no || 'Bill'})` : '')
-        }]);
+      const { error: paymentError } = await supabase.rpc('record_payment', {
+        p_customer_id: id,
+        p_amount: numericAmount,
+        p_note: paymentNote || null,
+        p_bill_id: selectedBillForPayment?.id || null,
+      });
 
-      if (settlementError) throw settlementError;
+      if (paymentError) throw paymentError;
 
-      // 2. Update specific bill if applicable
-      if (selectedBillForPayment) {
-        const newRemaining = Number(selectedBillForPayment.remaining_amount) - numericAmount;
-        const newStatus = newRemaining <= 0 ? 'paid' : 'pending';
-        
-        const { error: billUpdateError } = await supabase
-          .from('bills')
-          .update({ remaining_amount: newRemaining, status: newStatus })
-          .eq('id', selectedBillForPayment.id);
-          
-        if (billUpdateError) throw billUpdateError;
-      }
-
-      // 3. Update the customer's total_outstanding balance
-      const newTotal = Number(customer.total_outstanding) - numericAmount;
-      const { error: updateError } = await supabase
-        .from('customers')
-        .update({ total_outstanding: newTotal })
-        .eq('id', id);
-
-      if (updateError) throw updateError;
-
-      // Reset modal and refetch
       setIsPaymentModalOpen(false);
       setSelectedBillForPayment(null);
       setPaymentAmount('');
       setPaymentNote('');
       toast.success('Payment recorded successfully!');
-      fetchLedger(); // Refresh data
+      fetchLedger();
 
     } catch (error) {
       toast.error(error.message);
@@ -279,34 +253,24 @@ export default function CustomerLedger() {
     toast.success("Excel downloaded!");
   };
 
-  const sendEmailToBackend = async (subject, html, attachments = []) => {
-    try {
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-      if (sessionError) throw sessionError;
-
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-email`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${session?.access_token}`
-          },
-          body: JSON.stringify({
-            to: customer.email || 'customer@example.com', // fallback if email is not in db
-            subject,
-            html,
-            attachments
-          })
-        }
-      );
-
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.error || 'Failed to send email');
-      return result;
-    } catch (error) {
-      throw error;
+  const sendEmailToBackend = async ({ subject, message, template, attachments = [] }) => {
+    if (!customer?.email) {
+      throw new Error('Customer does not have an email address on file');
     }
+
+    const { data, error } = await supabase.functions.invoke('send-email', {
+      body: {
+        customer_id: customer.id,
+        subject,
+        message,
+        template,
+        attachments,
+      },
+    });
+
+    if (error) throw error;
+    if (data?.error) throw new Error(data.error);
+    return data;
   };
 
   const handleSendSupportEmail = async (e) => {
@@ -315,10 +279,14 @@ export default function CustomerLedger() {
       toast.error("Please fill in both subject and message.");
       return;
     }
+    if (!customer.email) {
+      toast.error("Customer does not have an email address on file.");
+      return;
+    }
 
     setIsSendingEmail(true);
     try {
-      await sendEmailToBackend(emailSubject, `<p>${emailMessage.replace(/\n/g, '<br/>')}</p>`);
+      await sendEmailToBackend({ subject: emailSubject, message: emailMessage });
       toast.success("Email sent successfully!");
       setIsEmailModalOpen(false);
       setEmailSubject('');
@@ -331,6 +299,11 @@ export default function CustomerLedger() {
   };
 
   const handleEmailStatement = async () => {
+    if (!customer.email) {
+      toast.error("Customer does not have an email address on file.");
+      return;
+    }
+
     setIsSendingEmail(true);
     const pdfBase64 = generatePDF(true);
     if (!pdfBase64) {
@@ -339,14 +312,14 @@ export default function CustomerLedger() {
     }
 
     try {
-      await sendEmailToBackend(
-        `Statement for ${customer.name}`,
-        `<p>Hello ${customer.name},</p><p>Please find attached your latest statement.</p><p>Thank you!</p>`,
-        [{
+      await sendEmailToBackend({
+        subject: `Statement for ${customer.name}`,
+        template: 'statement',
+        attachments: [{
           filename: `${customer.name.replace(/\s+/g, '_')}_Statement.pdf`,
           content: pdfBase64
-        }]
-      );
+        }],
+      });
       toast.success("Statement emailed successfully!");
     } catch (error) {
       toast.error("Failed to email statement: " + error.message);
@@ -485,6 +458,9 @@ export default function CustomerLedger() {
                     {t.type === 'bill' ? (t.bill_no || 'Udhar Given') : 'Payment Received'}
                     {t.type === 'bill' && t.status === 'paid' && (
                       <span className="text-xs bg-neu-success/20 text-neu-success px-2 py-0.5 rounded uppercase tracking-wider font-bold">Paid</span>
+                    )}
+                    {t.type === 'bill' && t.status === 'partial' && (
+                      <span className="text-xs bg-amber-500/20 text-amber-700 px-2 py-0.5 rounded uppercase tracking-wider font-bold">Partial</span>
                     )}
                   </h4>
                   <p className="text-sm text-neu-text font-medium mt-0.5">

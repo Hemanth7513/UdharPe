@@ -57,6 +57,7 @@ create table settlements (
   id uuid default uuid_generate_v4() primary key,
   business_id uuid references auth.users on delete cascade not null,
   customer_id uuid references customers on delete cascade not null,
+  bill_id uuid references bills on delete set null,
   amount_paid numeric(12,2) not null,
   note text,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
