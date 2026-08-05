@@ -107,7 +107,19 @@ export default function Auth({ isRecovering }) {
       if (authMode === 'login' || authMode === 'magic_link') {
         safeMessage = "Invalid email or password.";
       } else if (authMode === 'forgot_password') {
-        // Pretend it succeeded to prevent email enumeration attacks
+        // If it's a rate limit error, show it to the user.
+        const isRateLimit = error.message && (
+          error.message.toLowerCase().includes('rate limit') || 
+          error.message.toLowerCase().includes('wait') || 
+          error.status === 429
+        );
+        if (isRateLimit) {
+          setErrorMsg(error.message);
+          setIconState('AlertCircle');
+          setLoading(false);
+          return;
+        }
+        // Otherwise, pretend it succeeded to prevent email enumeration attacks
         safeMessage = "If this email is registered, you will receive a reset link shortly.";
         setIconState('CheckCircle2');
         setErrorMsg(safeMessage);

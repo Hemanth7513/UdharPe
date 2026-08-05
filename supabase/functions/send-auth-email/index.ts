@@ -81,6 +81,16 @@ serve(async (req) => {
 
     if (linkError) {
       console.error('Link Generation Error:', linkError.message)
+      const isRateLimit = linkError.message.includes('once every') || 
+                          linkError.message.includes('rate limit') || 
+                          linkError.message.includes('seconds') ||
+                          linkError.status === 429;
+      if (isRateLimit) {
+        return new Response(JSON.stringify({ error: 'Please wait before requesting another reset link.' }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 429,
+        })
+      }
       if (type === 'recovery' || type === 'magiclink') {
         return genericOk()
       }
