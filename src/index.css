@@ -14,31 +14,31 @@
 }
 
 @layer components {
-  /* Premium Light Neumorphic Card */
+  /* Premium Minimalist Card */
   .neu-card {
-    @apply bg-neu-bg rounded-2xl shadow-neu border border-white/40;
+    @apply bg-white rounded-2xl shadow-neu border border-slate-200/80 transition-all duration-200;
   }
   
   /* Primary CTA Button */
   .btn-primary {
-    @apply relative overflow-hidden bg-neu-bg text-neu-primary font-bold px-6 py-3 rounded-xl 
+    @apply relative overflow-hidden bg-neu-primary text-white font-bold px-6 py-3 rounded-xl 
            shadow-neu transition-all duration-300 ease-out 
-           hover:shadow-neu-hover hover:text-neu-primary-hover
-           active:shadow-neu-inner active:scale-[0.98]
+           hover:bg-neu-primary-hover hover:shadow-neu-hover
+           active:scale-[0.98]
            flex items-center justify-center gap-2;
   }
   
   /* Secondary Action Button (Filled) */
   .btn-solid {
-    @apply relative overflow-hidden bg-neu-primary text-white font-bold px-6 py-3 rounded-xl 
-           shadow-neu transition-all duration-300 ease-out hover:bg-neu-primary-hover
+    @apply relative overflow-hidden bg-slate-900 text-white font-bold px-6 py-3 rounded-xl 
+           shadow-neu transition-all duration-300 ease-out hover:bg-slate-800
            active:scale-[0.98] flex items-center justify-center gap-2;
   }
 
-  /* Input fields - Inner shadow for pressed-in look */
+  /* Input fields - Clean border focus style */
   .input-field {
-    @apply w-full bg-neu-bg text-neu-heading placeholder-neu-text/60
+    @apply w-full bg-white text-neu-heading placeholder-neu-text/40
            rounded-xl px-4 py-3 outline-none transition-all duration-200
-           border border-gray-300 shadow-neu-inner focus:ring-2 focus:ring-neu-primary/30;
+           border border-slate-200 focus:border-neu-primary focus:ring-4 focus:ring-neu-primary/10;
   }
 }

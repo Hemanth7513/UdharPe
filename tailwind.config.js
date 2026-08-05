@@ -7,20 +7,20 @@ export default {
   theme: {
     extend: {
       colors: {
-        'neu-bg': '#e0e5ec',
-        'neu-text': '#4a5568',
-        'neu-heading': '#2d3748',
-        'neu-primary': '#5a67d8',
-        'neu-primary-hover': '#4c51bf',
-        'neu-danger': '#e53e3e',
+        'neu-bg': '#f8fafc',
+        'neu-text': '#475569',
+        'neu-heading': '#0f172a',
+        'neu-primary': '#4f46e5',
+        'neu-primary-hover': '#4338ca',
+        'neu-danger': '#ef4444',
       },
       fontFamily: {
         sans: ['Outfit', 'sans-serif'],
       },
       boxShadow: {
-        'neu': '9px 9px 16px rgba(163,177,198,0.5), -9px -9px 16px rgba(255,255,255,0.8)',
-        'neu-hover': '12px 12px 20px rgba(163,177,198,0.6), -12px -12px 20px rgba(255,255,255,0.9)',
-        'neu-inner': 'inset 6px 6px 10px 0 rgba(163,177,198,0.5), inset -6px -6px 10px 0 rgba(255,255,255,0.8)',
+        'neu': '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1)',
+        'neu-hover': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1)',
+        'neu-inner': 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.05)',
       },
       animation: {
         'fade-in': 'fadeIn 0.3s ease-out forwards',
