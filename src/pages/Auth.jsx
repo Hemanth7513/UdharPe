@@ -25,7 +25,7 @@ export default function Auth({ isRecovering }) {
 
   useEffect(() => {
     // Check if the user is coming from a password recovery email
-    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: authListener } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'PASSWORD_RECOVERY') {
         setAuthMode('update_password');
       }
@@ -165,7 +165,7 @@ export default function Auth({ isRecovering }) {
               initial={{ scale: 0.5, rotate: -20, opacity: 0 }}
               animate={{ scale: 1, rotate: 0, opacity: 1 }}
               transition={{ type: "spring", stiffness: 300, damping: 15 }}
-              className="w-20 h-20 shadow-neu rounded-full flex items-center justify-center text-neu-primary bg-neu-bg border border-white/50"
+              className="w-20 h-20 shadow-sm rounded-full flex items-center justify-center text-neu-primary bg-slate-50 border border-slate-200"
             >
               {iconState === 'Briefcase' && <Briefcase className="w-8 h-8" />}
               {iconState === 'Eye' && <Eye className="w-8 h-8" />}
@@ -187,10 +187,10 @@ export default function Auth({ isRecovering }) {
             {errorMsg && (
               <motion.div 
                 initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
-                className={`shadow-neu-inner p-4 rounded-xl mb-6 text-sm font-medium ${
+                className={`p-4 rounded-xl mb-6 text-sm font-medium border ${
                   errorMsg.includes('successful') || errorMsg.includes('sent') || errorMsg.includes('updated') 
-                    ? 'bg-neu-primary/10 text-neu-primary' 
-                    : 'bg-neu-bg text-neu-danger'
+                    ? 'bg-indigo-50/50 border-indigo-100 text-indigo-700' 
+                    : 'bg-red-50/50 border-red-100 text-red-700'
                 }`}
               >
                 {errorMsg}
@@ -307,12 +307,12 @@ export default function Auth({ isRecovering }) {
             </button>
           )}
 
-          <div className="mt-8 pt-6 border-t border-white/20">
+          <div className="mt-8 pt-6 border-t border-slate-100">
             <p className="text-center text-sm font-medium text-neu-text mb-4">
               {authMode === 'signup' ? "Already registered? " : "Don't have an account? "}
               <button 
                 onClick={() => { setAuthMode(authMode === 'signup' ? 'login' : 'signup'); setErrorMsg(''); }}
-                className="text-neu-primary font-bold hover:text-neu-primary-hover transition-colors px-2 py-1 rounded shadow-neu ml-2"
+                className="text-neu-primary font-bold hover:text-neu-primary-hover transition-colors px-2 py-1 ml-1 hover:underline"
               >
                 {authMode === 'signup' ? 'Log In Here' : 'Register Firm'}
               </button>

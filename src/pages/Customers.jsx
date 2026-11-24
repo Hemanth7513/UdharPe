@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect, useCallback } from 'react';
+import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { Search, Plus, UserPlus, X, ChevronLeft, Phone, Mail, Download } from 'lucide-react';
+import { Search, Plus, UserPlus, ChevronLeft, Phone, Mail, Download } from 'lucide-react';
 import toast from 'react-hot-toast';
 import * as XLSX from 'xlsx';
 import Modal from '../components/Modal';
@@ -21,11 +21,7 @@ export default function Customers() {
   const [newCustomer, setNewCustomer] = useState({ name: '', phone: '', email: '', firm_name: '', address: '', gst_details: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useEffect(() => {
-    fetchCustomers();
-  }, []);
-
-  const fetchCustomers = async () => {
+  const fetchCustomers = useCallback(async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
@@ -43,7 +39,11 @@ export default function Customers() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchCustomers();
+  }, [fetchCustomers]);
 
   const handleAddCustomer = async (e) => {
     e.preventDefault();

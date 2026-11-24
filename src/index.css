@@ -35,10 +35,22 @@
            active:scale-[0.98] flex items-center justify-center gap-2;
   }
 
-  /* Input fields - Clean border focus style */
+  /* Input fields - Clean accessible high-contrast border and focus ring */
   .input-field {
-    @apply w-full bg-white text-neu-heading placeholder-neu-text/40
+    @apply w-full bg-white text-neu-heading placeholder-neu-text/50
            rounded-xl px-4 py-3 outline-none transition-all duration-200
-           border border-slate-200 focus:border-neu-primary focus:ring-4 focus:ring-neu-primary/10;
+           border border-slate-300 shadow-sm
+           focus:border-neu-primary focus:ring-4 focus:ring-neu-primary/20
+           hover:border-slate-400;
   }
 }
+
+/* Override default browser autofill background/text color */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px white inset !important;
+  -webkit-text-fill-color: #0f172a !important;
+}
+

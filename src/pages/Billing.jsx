@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { Receipt, CheckCircle, ArrowRight, UserPlus, X } from 'lucide-react';
+import { Receipt, CheckCircle, ArrowRight, UserPlus } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Modal from '../components/Modal';
 import SkeletonLoader from '../components/SkeletonLoader';
@@ -30,11 +30,7 @@ export default function Billing() {
   const [newCustomer, setNewCustomer] = useState({ name: '', phone: '', email: '', firm_name: '', address: '', gst_details: '' });
   const [isAddingCustomer, setIsAddingCustomer] = useState(false);
 
-  useEffect(() => {
-    fetchCustomers();
-  }, []);
-
-  const fetchCustomers = async () => {
+  const fetchCustomers = useCallback(async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
@@ -62,7 +58,11 @@ export default function Billing() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [location.search]);
+
+  useEffect(() => {
+    fetchCustomers();
+  }, [fetchCustomers]);
 
   const handleAddCustomer = async (e) => {
     e.preventDefault();

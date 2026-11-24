@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
@@ -20,11 +20,7 @@ export default function AdminDashboard() {
   const [deepDiveData, setDeepDiveData] = useState({ customerCount: 0, billCount: 0, totalOutstanding: 0 });
   const [loadingDeepDive, setLoadingDeepDive] = useState(false);
 
-  useEffect(() => {
-    checkAdminAndFetchStats();
-  }, []);
-
-  const checkAdminAndFetchStats = async () => {
+  const checkAdminAndFetchStats = useCallback(async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       
@@ -53,7 +49,11 @@ export default function AdminDashboard() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [navigate]);
+
+  useEffect(() => {
+    checkAdminAndFetchStats();
+  }, [checkAdminAndFetchStats]);
 
   const handleDeepDive = async (business) => {
     setSelectedBusiness(business);
@@ -72,7 +72,7 @@ export default function AdminDashboard() {
         billCount: data.billCount || 0,
         totalOutstanding: data.totalOutstanding || 0,
       });
-    } catch (err) {
+    } catch {
       toast.error('Failed to load business details');
       setIsDeepDiveOpen(false);
     } finally {

@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, User, Receipt, IndianRupee, ArrowDownRight, ArrowUpRight, MessageCircle, X, Download, Mail } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { ArrowLeft, User, Receipt, ArrowDownRight, ArrowUpRight, MessageCircle, Download, Mail } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Modal from '../components/Modal';
 import SkeletonLoader from '../components/SkeletonLoader';
@@ -36,11 +36,7 @@ export default function CustomerLedger() {
   const [emailMessage, setEmailMessage] = useState('');
   const [isSendingEmail, setIsSendingEmail] = useState(false);
 
-  useEffect(() => {
-    fetchLedger();
-  }, [id]);
-
-  const fetchLedger = async () => {
+  const fetchLedger = useCallback(async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
@@ -92,7 +88,11 @@ export default function CustomerLedger() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
+
+  useEffect(() => {
+    fetchLedger();
+  }, [fetchLedger]);
 
   const handleRecordPayment = async (e) => {
     e.preventDefault();
@@ -170,7 +170,7 @@ export default function CustomerLedger() {
       toast.error("Customer does not have a phone number saved.");
       return;
     }
-    const message = `Hello ${customer.name}, your total outstanding Udhar is ₹${Number(customer.total_outstanding).toLocaleString()}. Please clear it at your earliest convenience. Thank you!`;
+    const message = `Namaste ${customer.name},\nThis is a friendly reminder regarding your outstanding balance of ₹${Number(customer.total_outstanding).toLocaleString('en-IN')} with our business. Kindly arrange for the settlement at your convenience. Thank you!`;
     const encodedMessage = encodeURIComponent(message);
     // Assumes Indian numbers if no country code, for a real app we'd format better
     let phoneStr = customer.phone.replace(/\D/g, '');
@@ -189,21 +189,21 @@ export default function CustomerLedger() {
     
     // Header
     doc.setFontSize(22);
-    doc.text("Customer Statement", 14, 20);
+    doc.text("Khata Statement", 14, 20);
     
     doc.setFontSize(12);
-    doc.text(`Customer Name: ${customer.name}`, 14, 30);
+    doc.text(`Party / Customer Name: ${customer.name}`, 14, 30);
     if (customer.phone) doc.text(`Phone: ${customer.phone}`, 14, 37);
-    doc.text(`Total Outstanding: Rs. ${Number(customer.total_outstanding).toLocaleString()}`, 14, 44);
+    doc.text(`Total Outstanding (Baki): Rs. ${Number(customer.total_outstanding).toLocaleString('en-IN')}`, 14, 44);
     
     // Table
-    const tableColumn = ["Date", "Type", "Note", "Amount"];
+    const tableColumn = ["Date", "Entry Type", "Remarks / Note", "Amount (Rs.)"];
     const tableRows = [];
 
     transactions.forEach(t => {
-      const date = new Date(t.created_at).toLocaleDateString();
-      const type = t.type === 'bill' ? 'Udhar Given' : 'Payment Received';
-      const amount = `Rs. ${t.amount.toLocaleString()}`;
+      const date = new Date(t.created_at).toLocaleDateString('en-IN');
+      const type = t.type === 'bill' ? 'Udhar (Given)' : 'Jama (Received)';
+      const amount = `Rs. ${t.amount.toLocaleString('en-IN')}`;
       tableRows.push([date, type, t.note || '-', amount]);
     });
 

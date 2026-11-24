@@ -147,7 +147,7 @@ export default function Dashboard() {
             <div className="w-10 h-10 shadow-neu rounded-full flex items-center justify-center text-neu-primary bg-neu-bg">
               <Wallet size={18} />
             </div>
-            <h3 className="font-bold text-lg">Total Udhar</h3>
+            <h3 className="font-bold text-lg">Total Udhar (Baki)</h3>
           </div>
           <p className="text-4xl sm:text-5xl font-black text-neu-danger tracking-tight mt-2 truncate">
             ₹{totalOutstanding.toLocaleString('en-IN')}
@@ -160,7 +160,7 @@ export default function Dashboard() {
             <div className="w-10 h-10 shadow-neu rounded-full flex items-center justify-center text-neu-success bg-neu-bg">
               <Receipt size={18} />
             </div>
-            <h3 className="font-bold text-lg">Received (This Month)</h3>
+            <h3 className="font-bold text-lg">Jama / Received (This Month)</h3>
           </div>
           <p className="text-4xl sm:text-5xl font-black text-neu-success tracking-tight mt-2 truncate">
             ₹{paymentsReceived.toLocaleString('en-IN')}
@@ -173,7 +173,7 @@ export default function Dashboard() {
             <div className="w-10 h-10 shadow-neu rounded-full flex items-center justify-center text-neu-danger bg-neu-bg">
               <Wallet size={18} />
             </div>
-            <h3 className="font-bold text-lg">Given (This Month)</h3>
+            <h3 className="font-bold text-lg">Udhar Given (This Month)</h3>
           </div>
           <p className="text-4xl sm:text-5xl font-black text-neu-danger tracking-tight mt-2 truncate">
             ₹{newUdhar.toLocaleString('en-IN')}

@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.110.8"
 import { getCorsHeaders } from "../_shared/cors.ts"
-import { checkRateLimit, escapeHtml, getClientIp, sanitizeStrings } from "../_shared/security.ts"
+import { checkRateLimit, escapeHtml, sanitizeStrings } from "../_shared/security.ts"
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
 const FROM_EMAIL = Deno.env.get('RESEND_FROM_EMAIL') || 'UdharPe Support <onboarding@resend.dev>'
@@ -101,7 +101,7 @@ serve(async (req) => {
 
     const safeAttachments = Array.isArray(attachments)
       ? attachments.slice(0, 3).map((a: { filename?: string; content?: string }) => ({
-          filename: String(a.filename || 'attachment.pdf').replace(/[^\w.\-]/g, '_').slice(0, 120),
+          filename: String(a.filename || 'attachment.pdf').replace(/[^\w.-]/g, '_').slice(0, 120),
           content: String(a.content || ''),
         })).filter((a: { content: string }) => a.content.length > 0 && a.content.length < 1_400_000)
       : []
