@@ -68,11 +68,6 @@ export default function Landing() {
             animate="visible"
             className="flex flex-col items-center text-center max-w-3xl"
           >
-            <motion.div variants={itemVariants} className="inline-flex items-center gap-2 px-4 py-1.5 mb-8 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700 font-semibold text-xs tracking-wide">
-              <span className="w-2 h-2 rounded-full bg-indigo-600 animate-pulse"></span>
-              The Digital Khata for Modern Business
-            </motion.div>
-            
             <motion.h1 variants={itemVariants} className="text-5xl md:text-6xl lg:text-7xl font-extrabold font-display text-slate-900 leading-[1.1] mb-6 tracking-tight">
               Business Credit.<br />
               <span className="text-indigo-600">Tracked Accurately. Cleared on Time.</span>
