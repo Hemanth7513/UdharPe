@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { Wallet, Users, Receipt } from 'lucide-react';
+import { Wallet, Users, Receipt, Plus, ArrowUpRight, ArrowDownRight, Sparkles } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 export default function Dashboard() {
@@ -135,10 +135,65 @@ export default function Dashboard() {
       className="px-4 sm:px-6 lg:px-8 animate-fade-in space-y-8"
       initial={{ opacity: 0 }} animate={{ opacity: 1 }}
     >
-      <header className="mb-6">
-        <h1 className="text-3xl font-bold text-neu-heading tracking-tight">Overview</h1>
-        <p className="text-neu-text mt-1 font-medium">{firmName}</p>
+      <header className="mb-2 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-neu-heading tracking-tight">Overview</h1>
+          <p className="text-neu-text mt-1 font-medium">{firmName}</p>
+        </div>
+
+        {/* Quick Action Toolbar */}
+        <div className="flex flex-wrap gap-2.5 items-center">
+          <button
+            onClick={() => navigate('/billing')}
+            className="btn-solid flex items-center gap-1.5 py-2 px-4 text-xs font-bold"
+          >
+            <ArrowUpRight size={15} /> Give Credit (Udhar)
+          </button>
+          <button
+            onClick={() => navigate('/settlement')}
+            className="neu-card flex items-center gap-1.5 py-2 px-4 text-xs font-bold text-emerald-700 hover:text-emerald-800 transition-colors"
+          >
+            <ArrowDownRight size={15} className="text-emerald-600" /> Record Payment (Jama)
+          </button>
+          <button
+            onClick={() => navigate('/customers')}
+            className="neu-card flex items-center gap-1.5 py-2 px-3.5 text-xs font-bold text-neu-heading hover:text-neu-primary transition-colors"
+          >
+            <Plus size={15} /> Add Party
+          </button>
+        </div>
       </header>
+
+      {/* Getting Started Guide if 0 customers */}
+      {customerCount === 0 && (
+        <div className="neu-card p-6 sm:p-8 border border-indigo-200/60 bg-gradient-to-br from-indigo-50/50 to-white">
+          <div className="flex items-center gap-3 text-neu-primary mb-2">
+            <Sparkles size={22} />
+            <h2 className="text-lg font-bold text-neu-heading">Welcome to your digital ledger!</h2>
+          </div>
+          <p className="text-xs sm:text-sm text-slate-600 max-w-xl mb-5">
+            Your business workspace is set up and ready. Begin tracking your credits and automated payment reminders:
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div 
+              onClick={() => navigate('/customers')}
+              className="p-4 rounded-xl border border-slate-200 bg-white hover:border-neu-primary cursor-pointer transition-all shadow-sm"
+            >
+              <div className="text-[11px] font-bold text-neu-primary uppercase tracking-wider mb-1">Step 1</div>
+              <h4 className="font-bold text-slate-800 text-sm mb-1">Add Your First Customer / Party</h4>
+              <p className="text-xs text-slate-500">Save their phone number to send 1-click WhatsApp payment reminders.</p>
+            </div>
+            <div 
+              onClick={() => navigate('/billing')}
+              className="p-4 rounded-xl border border-slate-200 bg-white hover:border-neu-primary cursor-pointer transition-all shadow-sm"
+            >
+              <div className="text-[11px] font-bold text-neu-primary uppercase tracking-wider mb-1">Step 2</div>
+              <h4 className="font-bold text-slate-800 text-sm mb-1">Record Credit or Bill</h4>
+              <p className="text-xs text-slate-500">Enter bill amount and due date to automatically build your financial ledger.</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {/* Total Outstanding Card - Highlighted */}

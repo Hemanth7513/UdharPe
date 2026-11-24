@@ -73,12 +73,25 @@ export default function CustomerLedger() {
           settlementsData = sData;
       }
 
-      // 4. Combine and Sort by Date (newest first)
+      // 4. Combine and Sort by Date (chronological first to compute running balance)
       const combined = [
         ...(billsData || []).map(b => ({ ...b, type: 'bill', amount: Number(b.amount) })),
         ...settlementsData.map(s => ({ ...s, type: 'payment', amount: Number(s.amount_paid) }))
       ];
 
+      // Sort chronological (oldest to newest) to compute balance tally
+      combined.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+      let currentTally = 0;
+      combined.forEach(t => {
+        if (t.type === 'bill') {
+          currentTally += t.amount;
+        } else {
+          currentTally = Math.max(0, currentTally - t.amount);
+        }
+        t.runningBalance = currentTally;
+      });
+
+      // Sort newest first for reverse chronological UI stream
       combined.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
       
       setTransactions(combined);
@@ -491,8 +504,13 @@ export default function CustomerLedger() {
               </div>
               <div className="text-right w-full sm:w-auto mt-2 sm:mt-0 pt-4 sm:pt-0 border-t border-white/20 sm:border-t-0 flex flex-col items-end">
                 <p className={`font-black text-2xl ${t.type === 'bill' ? 'text-neu-danger' : 'text-neu-success'}`}>
-                  {t.type === 'bill' ? '+' : '-'}₹{t.amount.toLocaleString()}
+                  {t.type === 'bill' ? '+' : '-'}₹{t.amount.toLocaleString('en-IN')}
                 </p>
+                {t.runningBalance !== undefined && (
+                  <p className="text-xs font-mono font-semibold text-slate-500 mt-1">
+                    Balance: ₹{t.runningBalance.toLocaleString('en-IN')}
+                  </p>
+                )}
                 {t.type === 'bill' && t.remaining_amount > 0 && (
                   <button 
                     onClick={() => {
@@ -541,6 +559,41 @@ export default function CustomerLedger() {
                 className="w-full bg-neu-bg text-neu-heading rounded-2xl pl-12 pr-4 py-4 outline-none focus:ring-2 focus:ring-neu-primary/30 shadow-neu-inner font-black text-xl"
               />
             </div>
+            {/* Quick Amount Suggestion Chips */}
+            {(() => {
+              const maxPayable = selectedBillForPayment ? Number(selectedBillForPayment.remaining_amount) : Number(customer?.total_outstanding || 0);
+              if (maxPayable <= 0) return null;
+              return (
+                <div className="flex flex-wrap gap-2 mt-3">
+                  <button
+                    type="button"
+                    onClick={() => setPaymentAmount(String(maxPayable))}
+                    className="px-3 py-1 rounded-full text-xs font-bold bg-neu-primary/10 text-neu-primary border border-neu-primary/30 hover:bg-neu-primary hover:text-white transition-colors"
+                  >
+                    Full Balance (₹{maxPayable.toLocaleString('en-IN')})
+                  </button>
+                  {maxPayable > 100 && (
+                    <button
+                      type="button"
+                      onClick={() => setPaymentAmount(String(Math.round(maxPayable / 2)))}
+                      className="px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors"
+                    >
+                      50% (₹{Math.round(maxPayable / 2).toLocaleString('en-IN')})
+                    </button>
+                  )}
+                  {[500, 1000, 2000, 5000].filter(amt => amt < maxPayable).map(amt => (
+                    <button
+                      key={amt}
+                      type="button"
+                      onClick={() => setPaymentAmount(String(amt))}
+                      className="px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors"
+                    >
+                      +₹{amt.toLocaleString('en-IN')}
+                    </button>
+                  ))}
+                </div>
+              );
+            })()}
           </div>
           <div>
             <label htmlFor="paymentNote" className="block text-sm font-bold text-neu-heading mb-2 pl-1 uppercase tracking-wide">
