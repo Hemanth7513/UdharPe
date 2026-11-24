@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad4" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#090D16"/>
+      <stop offset="100%" stop-color="#111827"/>
+    </linearGradient>
+    <linearGradient id="uStemGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#6366F1"/>
+      <stop offset="100%" stop-color="#3B82F6"/>
+    </linearGradient>
+    <linearGradient id="pLoopGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10B981"/>
+      <stop offset="100%" stop-color="#06B6D4"/>
+    </linearGradient>
+    <filter id="glow4" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="16" stdDeviation="24" flood-color="#3B82F6" flood-opacity="0.4"/>
+    </filter>
+  </defs>
+
+  <!-- Rounded Premium App Icon Canvas -->
+  <rect x="50" y="50" width="400" height="400" rx="96" fill="url(#bgGrad4)"/>
+  <rect x="50" y="50" width="400" height="400" rx="96" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="3"/>
+
+  <!-- Minimalist Monogram: U + P Seamless Bridge -->
+  <g filter="url(#glow4)">
+    <!-- Left Pillar of 'U' -->
+    <rect x="130" y="130" width="40" height="150" rx="20" fill="url(#uStemGrad)"/>
+
+    <!-- 'U' Bottom Curve merging into 'P' Stem -->
+    <path d="M 150 240 
+             C 150 330, 240 330, 240 240 
+             L 240 130" 
+          fill="none" 
+          stroke="url(#uStemGrad)" 
+          stroke-width="40" 
+          stroke-linecap="round"/>
+
+    <!-- 'P' Loop wrapping around to form credit-growth arc -->
+    <path d="M 240 130 
+             L 300 130 
+             C 350 130, 360 215, 300 220 
+             L 240 220" 
+          fill="none" 
+          stroke="url(#pLoopGrad)" 
+          stroke-width="36" 
+          stroke-linecap="round" 
+          stroke-linejoin="round"/>
+
+    <!-- Central Settlement Node (Token of Credit) -->
+    <circle cx="240" cy="220" r="14" fill="#FFFFFF"/>
+    <circle cx="340" cy="175" r="8" fill="#10B981"/>
+  </g>
+</svg>
