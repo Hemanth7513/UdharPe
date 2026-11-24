@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <!-- Tier-1 Dynamic Chevron-U (Like Linear / Stripe - Pure velocity & balance) -->
+  <defs>
+    <linearGradient id="beam1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0F172A"/>
+      <stop offset="100%" stop-color="#1E293B"/>
+    </linearGradient>
+    <linearGradient id="beam2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6366F1"/>
+      <stop offset="100%" stop-color="#4F46E5"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="512" height="512" rx="128" fill="#0B0F19"/>
+
+  <g transform="translate(126, 126)">
+    <!-- Primary Angular Blade (Debit / Udhar) -->
+    <path d="M 40 30 
+             L 40 180 
+             L 130 240 
+             L 130 190 
+             L 85 155 
+             L 85 30 Z" 
+          fill="#FFFFFF"/>
+
+    <!-- Counter Blade (Credit / Settlement) Intersecting in Harmony -->
+    <path d="M 220 30 
+             L 220 180 
+             L 130 240 
+             L 130 190 
+             L 175 155 
+             L 175 30 Z" 
+          fill="url(#beam2)"/>
+
+    <!-- Horizontal Credit Line intersecting the blades -->
+    <rect x="40" y="90" width="180" height="18" rx="9" fill="#6366F1" opacity="0.9"/>
+  </g>
+</svg>

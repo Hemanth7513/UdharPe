@@ -68,22 +68,23 @@ export default function Landing() {
             animate="visible"
             className="flex flex-col items-center text-center max-w-3xl"
           >
-            <motion.div variants={itemVariants} className="inline-block px-5 py-2 mb-8 rounded-full shadow-neu-inner text-neu-primary font-bold text-sm tracking-wide bg-neu-bg">
-              The Elegant Business Ledger
+            <motion.div variants={itemVariants} className="inline-flex items-center gap-2 px-4 py-1.5 mb-8 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700 font-semibold text-xs tracking-wide">
+              <span className="w-2 h-2 rounded-full bg-indigo-600 animate-pulse"></span>
+              The Digital Khata for Modern Business
             </motion.div>
             
-            <motion.h1 variants={itemVariants} className="text-5xl md:text-6xl lg:text-7xl font-black text-neu-heading leading-[1.1] mb-6">
-              Business Udhar.<br />
-              <span className="text-neu-primary">Managed Beautifully.</span>
+            <motion.h1 variants={itemVariants} className="text-5xl md:text-6xl lg:text-7xl font-extrabold font-display text-slate-900 leading-[1.1] mb-6 tracking-tight">
+              Business Credit.<br />
+              <span className="text-indigo-600">Tracked Accurately. Cleared on Time.</span>
             </motion.h1>
             
-            <motion.p variants={itemVariants} className="text-lg md:text-xl text-neu-text mb-12 max-w-2xl font-medium leading-relaxed">
-              No clutter, no confusing menus, no messy notebooks. UdharPe is the private, premium way to track what you're owed.
+            <motion.p variants={itemVariants} className="text-lg md:text-xl text-slate-600 mb-10 max-w-2xl font-normal leading-relaxed">
+              Replace messy paper notebooks with a secure, cloud-synced ledger. Record daily credit, track settlements, and maintain zero-dispute accounts with your parties.
             </motion.p>
             
-            <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-5 w-full sm:w-auto">
-              <button onClick={() => navigate('/auth')} className="btn-solid text-lg px-10 py-4 w-full sm:w-auto shadow-neu-hover">
-                Open Your Ledger <ArrowRight size={22} className="ml-2" />
+            <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+              <button onClick={() => navigate('/auth')} className="btn-primary text-base px-8 py-3.5 w-full sm:w-auto shadow-lg shadow-indigo-600/25">
+                Open Your Free Ledger <ArrowRight size={20} className="ml-1.5" />
               </button>
             </motion.div>
           </motion.div>

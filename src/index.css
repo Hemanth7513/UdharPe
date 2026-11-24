@@ -1,51 +1,50 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   body {
-    @apply bg-neu-bg text-neu-text antialiased min-h-screen overflow-x-hidden selection:bg-neu-primary selection:text-white;
+    @apply bg-slate-50 text-slate-800 antialiased min-h-screen overflow-x-hidden selection:bg-indigo-600 selection:text-white font-sans;
   }
   h1, h2, h3, h4, h5, h6 {
-    @apply text-neu-heading;
+    @apply text-slate-900 font-display tracking-tight font-bold;
   }
 }
 
 @layer components {
-  /* Premium Minimalist Card */
+  /* Tier-1 Minimalist Card: Elevated Pure White with Hairline Border */
   .neu-card {
-    @apply bg-white rounded-2xl shadow-neu border border-slate-200/80 transition-all duration-200;
+    @apply bg-white rounded-2xl shadow-sm border border-slate-200/80 transition-all duration-200
+           hover:shadow-md hover:border-slate-300;
   }
   
-  /* Primary CTA Button */
+  /* Tier-1 Primary Button (Linear / Stripe style) */
   .btn-primary {
-    @apply relative overflow-hidden bg-neu-primary text-white font-bold px-6 py-3 rounded-xl 
-           shadow-neu transition-all duration-300 ease-out 
-           hover:bg-neu-primary-hover hover:shadow-neu-hover
+    @apply relative overflow-hidden bg-indigo-600 text-white font-semibold px-5 py-2.5 rounded-xl 
+           shadow-sm transition-all duration-200 ease-out 
+           hover:bg-indigo-700 hover:shadow-indigo-500/20 hover:shadow-md
            active:scale-[0.98]
            flex items-center justify-center gap-2;
   }
   
-  /* Secondary Action Button (Filled) */
+  /* Tier-1 Secondary Action Button */
   .btn-solid {
-    @apply relative overflow-hidden bg-slate-900 text-white font-bold px-6 py-3 rounded-xl 
-           shadow-neu transition-all duration-300 ease-out hover:bg-slate-800
+    @apply relative overflow-hidden bg-slate-900 text-white font-semibold px-5 py-2.5 rounded-xl 
+           shadow-sm transition-all duration-200 ease-out hover:bg-slate-800
            active:scale-[0.98] flex items-center justify-center gap-2;
   }
 
-  /* Input fields - Clean accessible high-contrast border and focus ring */
+  /* Tier-1 Accessible High-Contrast Input */
   .input-field {
-    @apply w-full bg-white text-neu-heading placeholder-neu-text/50
-           rounded-xl px-4 py-3 outline-none transition-all duration-200
+    @apply w-full bg-white text-slate-900 placeholder-slate-400
+           rounded-xl px-4 py-2.5 outline-none transition-all duration-150
            border border-slate-300 shadow-sm
-           focus:border-neu-primary focus:ring-4 focus:ring-neu-primary/20
-           hover:border-slate-400;
+           focus:border-indigo-600 focus:ring-4 focus:ring-indigo-600/10
+           hover:border-slate-400 text-sm font-medium;
   }
 }
 
-/* Override default browser autofill background/text color */
+/* Chrome/Safari Autofill fix */
 input:-webkit-autofill,
 input:-webkit-autofill:hover, 
 input:-webkit-autofill:focus, 

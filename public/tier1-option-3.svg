@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <!-- Tier-1 Ultra Clean Monogram: Brex / Ramp aesthetic. Sharp 45° Chamfered 'U' with negative-space currency bar -->
+  <defs>
+    <linearGradient id="indigoCore" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4F46E5"/>
+      <stop offset="100%" stop-color="#3730A3"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="512" height="512" rx="128" fill="#F8FAFC"/>
+  <rect x="2" y="2" width="508" height="508" rx="126" fill="none" stroke="#E2E8F0" stroke-width="4"/>
+
+  <!-- 45-degree chamfered geometric glyph -->
+  <g transform="translate(136, 126)">
+    <!-- Left Stanchion -->
+    <path d="M 30 20 L 30 160 L 120 250 L 120 180 L 70 130 L 70 20 Z" fill="#0F172A"/>
+    
+    <!-- Right Stanchion (Mirrored & Elevated) -->
+    <path d="M 210 20 L 210 160 L 120 250 L 120 180 L 170 130 L 170 20 Z" fill="url(#indigoCore)"/>
+
+    <!-- High-Precision Center Cashflow Notch -->
+    <circle cx="120" cy="90" r="16" fill="#0F172A"/>
+  </g>
+</svg>

@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <!-- Tier-1 Silicon Valley: Pure Modernist Ribbon Fold (Continuous 2.5D Ribbon) -->
+  <defs>
+    <linearGradient id="darkBg2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0B0F17"/>
+      <stop offset="100%" stop-color="#020617"/>
+    </linearGradient>
+    <linearGradient id="frontRibbon" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#818CF8"/>
+      <stop offset="50%" stop-color="#6366F1"/>
+      <stop offset="100%" stop-color="#4F46E5"/>
+    </linearGradient>
+    <linearGradient id="backRibbon" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#312E81"/>
+      <stop offset="100%" stop-color="#1E1B4B"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="512" height="512" rx="128" fill="url(#darkBg2)"/>
+
+  <!-- Minimal Continuous Ribbon forming 'U' with an isometric fold -->
+  <g transform="translate(136, 126)">
+    <!-- Back Turn Shadow Layer -->
+    <path d="M 70 50 
+             L 70 160 
+             C 70 215, 170 215, 170 160 
+             L 170 50" 
+          fill="none" 
+          stroke="url(#backRibbon)" 
+          stroke-width="52" 
+          stroke-linecap="round"/>
+
+    <!-- Front Glowing Sharp Geometric Fold -->
+    <path d="M 40 40 
+             L 40 145 
+             C 40 215, 140 215, 140 145 
+             L 140 80 
+             C 140 30, 200 30, 200 80 
+             L 200 170" 
+          fill="none" 
+          stroke="url(#frontRibbon)" 
+          stroke-width="44" 
+          stroke-linecap="round"/>
+  </g>
+</svg>

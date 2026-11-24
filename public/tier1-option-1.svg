@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <!-- Tier-1 Minimal: Two offset precision-cut precision slabs forming dynamic 'U' & upward velocity -->
+  <defs>
+    <linearGradient id="mercuryGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0F172A"/>
+      <stop offset="100%" stop-color="#020617"/>
+    </linearGradient>
+    <linearGradient id="t1Accent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6366F1"/>
+      <stop offset="100%" stop-color="#4338CA"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Clean Canvas -->
+  <rect width="512" height="512" rx="128" fill="#FFFFFF"/>
+
+  <!-- Iconic Pure Geometry: Precision Optical Stroke -->
+  <g transform="translate(106, 110)">
+    <!-- Left Pillar -->
+    <path d="M 30 20 
+             L 30 190 
+             C 30 250, 80 280, 150 280 
+             C 220 280, 270 250, 270 190 
+             L 270 20" 
+          fill="none" 
+          stroke="#0F172A" 
+          stroke-width="48" 
+          stroke-linecap="round"/>
+
+    <!-- Negative Space Center Precision Beam (The Balance Notch) -->
+    <path d="M 150 120 L 150 200" 
+          stroke="url(#t1Accent)" 
+          stroke-width="36" 
+          stroke-linecap="round"/>
+
+    <!-- Small floating precision settlement dot (Signature Stripe/Linear mark) -->
+    <circle cx="270" cy="20" r="14" fill="#6366F1"/>
+  </g>
+</svg>
