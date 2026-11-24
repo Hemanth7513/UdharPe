@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import { isSuperAdminUser } from '../lib/admin';
 import { ArrowRight, Briefcase, Eye, EyeOff, Loader2, CheckCircle2, AlertCircle, Mail, Key } from 'lucide-react';
 
 export default function Auth({ isRecovering }) {
@@ -44,10 +45,11 @@ export default function Auth({ isRecovering }) {
 
     try {
       if (authMode === 'login') {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         setIconState('CheckCircle2');
-        navigate('/dashboard');
+        const isAdmin = isSuperAdminUser(data.user);
+        navigate(isAdmin ? '/admin' : '/dashboard');
       } 
       else if (authMode === 'signup') {
         // First try custom branded edge function; fallback to standard Supabase Auth

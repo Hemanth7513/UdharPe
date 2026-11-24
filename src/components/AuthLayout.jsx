@@ -40,20 +40,23 @@ export default function AuthLayout() {
     navigate('/auth');
   };
 
-  const navItems = [
-    { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
-    { name: 'Customers', path: '/customers', icon: Users },
-    { name: 'Raise Bill', path: '/billing', icon: PlusCircle },
-    { name: 'Settings', path: '/settings', icon: Settings },
-  ];
+  const navItems = isAdmin
+    ? [
+        { name: 'Platform Command Center', path: '/admin', icon: ShieldAlert },
+        { name: 'Settings', path: '/settings', icon: Settings },
+      ]
+    : [
+        { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
+        { name: 'Customers', path: '/customers', icon: Users },
+        { name: 'Raise Bill', path: '/billing', icon: PlusCircle },
+        { name: 'Settings', path: '/settings', icon: Settings },
+      ];
 
-  if (isAdmin) {
-    navItems.push({ name: 'Admin', path: '/admin', icon: ShieldAlert });
-  }
-
-  const firmName = currentUser?.user_metadata?.firm_name || 'My Business';
+  const firmName = isAdmin 
+    ? 'Platform Superadmin' 
+    : (currentUser?.user_metadata?.firm_name || 'My Business');
   const ownerName = currentUser?.user_metadata?.owner_name || '';
-  const userInitials = (firmName || currentUser?.email || 'U').slice(0, 2).toUpperCase();
+  const userInitials = isAdmin ? 'SA' : (firmName || currentUser?.email || 'U').slice(0, 2).toUpperCase();
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col selection:bg-indigo-600 selection:text-white">
@@ -66,7 +69,7 @@ export default function AuthLayout() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               className="flex items-center gap-3 cursor-pointer" 
-              onClick={() => navigate('/dashboard')}
+              onClick={() => navigate(isAdmin ? '/admin' : '/dashboard')}
             >
               <div className="w-11 h-11 rounded-2xl bg-indigo-600 shadow-lg shadow-indigo-600/25 flex items-center justify-center text-white">
                 <Handshake size={24} />
@@ -162,17 +165,28 @@ export default function AuthLayout() {
                         <Settings size={15} className="text-slate-500" /> Business Profile &amp; Settings
                       </button>
 
-                      {isAdmin && (
-                        <button
-                          onClick={() => {
-                            setIsProfileMenuOpen(false);
-                            navigate('/admin');
-                          }}
-                          className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-indigo-600 hover:bg-indigo-50 transition-colors text-left"
-                        >
-                          <ShieldAlert size={15} /> Platform Super Admin
-                        </button>
-                      )}
+                      {isAdmin ? (
+                        <>
+                          <button
+                            onClick={() => {
+                              setIsProfileMenuOpen(false);
+                              navigate('/admin');
+                            }}
+                            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-indigo-600 hover:bg-indigo-50 transition-colors text-left"
+                          >
+                            <ShieldAlert size={15} /> Platform Command Center
+                          </button>
+                          <button
+                            onClick={() => {
+                              setIsProfileMenuOpen(false);
+                              navigate('/dashboard');
+                            }}
+                            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-600 hover:bg-slate-100 transition-colors text-left"
+                          >
+                            <LayoutDashboard size={15} className="text-slate-400" /> Preview Merchant View
+                          </button>
+                        </>
+                      ) : null}
 
                       <div className="my-1 border-t border-slate-100" />
 

@@ -2,6 +2,7 @@ import { useEffect, useState, Suspense, lazy } from 'react';
 import { Toaster } from 'react-hot-toast';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { supabase } from './lib/supabase';
+import { isSuperAdminUser } from './lib/admin';
 import { AnimatePresence } from 'framer-motion';
 
 // Lazy loaded pages
@@ -62,8 +63,8 @@ function App() {
           </div>
         }>
           <Routes location={location} key={location.pathname}>
-            <Route path="/" element={!session ? <Landing /> : <Navigate to="/dashboard" replace />} />
-            <Route path="/auth" element={(!session || isRecovering) ? <Auth isRecovering={isRecovering} /> : <Navigate to="/dashboard" replace />} />
+            <Route path="/" element={!session ? <Landing /> : <Navigate to={isSuperAdminUser(session.user) ? "/admin" : "/dashboard"} replace />} />
+            <Route path="/auth" element={(!session || isRecovering) ? <Auth isRecovering={isRecovering} /> : <Navigate to={isSuperAdminUser(session.user) ? "/admin" : "/dashboard"} replace />} />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/terms-of-service" element={<TermsOfService />} />
             
