@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { Search, Plus, UserPlus, ChevronLeft, Phone, Mail, Download } from 'lucide-react';
 import toast from 'react-hot-toast';
-import * as XLSX from 'xlsx';
 import Modal from '../components/Modal';
 import SkeletonLoader from '../components/SkeletonLoader';
 
@@ -142,21 +141,30 @@ export default function Customers() {
       toast.error("No customers to export.");
       return;
     }
-    const exportData = customers.map(c => ({
-      'Party Name': c.name,
-      'Firm Name': c.firm_name || 'N/A',
-      'Phone': c.phone || 'N/A',
-      'Email': c.email || 'N/A',
-      'GSTIN': c.gst_details || 'N/A',
-      'Address': c.address || 'N/A',
-      'Outstanding (₹)': Number(c.total_outstanding),
-      'Added On': new Date(c.created_at).toLocaleDateString()
-    }));
-    const worksheet = XLSX.utils.json_to_sheet(exportData);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Customers");
-    XLSX.writeFile(workbook, "UdharPe_Customers.xlsx");
-    toast.success("Excel downloaded!");
+    const headers = ['Party Name', 'Firm Name', 'Phone', 'Email', 'GSTIN', 'Address', 'Outstanding (INR)', 'Added On'];
+    const rows = customers.map(c => [
+      c.name || '',
+      c.firm_name || 'N/A',
+      c.phone || 'N/A',
+      c.email || 'N/A',
+      c.gst_details || 'N/A',
+      c.address || 'N/A',
+      Number(c.total_outstanding || 0),
+      new Date(c.created_at).toLocaleDateString()
+    ]);
+    const csvContent = '\uFEFF' + [headers, ...rows]
+      .map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+      .join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'UdharPe_Customers.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    toast.success("Customer list exported (.csv)!");
   };
 
   const filteredCustomers = customers.filter(c => 

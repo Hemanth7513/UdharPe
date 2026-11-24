@@ -1,26 +1,3 @@
-/**
- * Recursively sanitizes string inputs in an object/array.
- * Removes dangerous HTML tags and script injections.
- */
-export function sanitizeStrings(obj: any): any {
-  if (typeof obj === 'string') {
-    return obj.replace(/<[^>]*>?/gm, '');
-  }
-  if (Array.isArray(obj)) {
-    return obj.map((item) => sanitizeStrings(item));
-  }
-  if (obj !== null && typeof obj === 'object') {
-    const sanitizedObj: any = {};
-    for (const key in obj) {
-      if (Object.prototype.hasOwnProperty.call(obj, key)) {
-        sanitizedObj[key] = sanitizeStrings(obj[key]);
-      }
-    }
-    return sanitizedObj;
-  }
-  return obj;
-}
-
 /** Escape text for safe HTML email interpolation. */
 export function escapeHtml(value: unknown): string {
   return String(value ?? '')
@@ -74,18 +51,12 @@ export function getClientIp(req: Request): string {
     || 'unknown';
 }
 
+/**
+ * Verify superadmin privileges.
+ * Relies exclusively on cryptographic app_metadata.role from Supabase Auth token.
+ */
 export function isSuperAdmin(user: { email?: string | null; app_metadata?: Record<string, unknown> }): boolean {
-  if (user.app_metadata?.role === 'superadmin') return true;
-
-  const defaultAdmins = ['hemaxtth@gmail.com'];
-  const allowlist = (Deno.env.get('SUPERADMIN_EMAILS') || '')
-    .split(',')
-    .map((s) => s.trim().toLowerCase())
-    .filter(Boolean);
-
-  const merged = [...new Set([...defaultAdmins, ...allowlist])];
-
-  return !!(user.email && merged.includes(user.email.toLowerCase()));
+  return user.app_metadata?.role === 'superadmin';
 }
 
 export function timingSafeEqual(a: string, b: string): boolean {

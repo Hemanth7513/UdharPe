@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.110.8"
 import { getCorsHeaders } from "../_shared/cors.ts"
-import { checkRateLimit, escapeHtml, getClientIp, sanitizeStrings, validatePayloadSize } from "../_shared/security.ts"
+import { checkRateLimit, escapeHtml, getClientIp, validatePayloadSize } from "../_shared/security.ts"
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
 const FROM_EMAIL = Deno.env.get('RESEND_FROM_EMAIL') || 'UdharPe Security <onboarding@resend.dev>'
@@ -23,8 +23,7 @@ serve(async (req) => {
     await validatePayloadSize(req, 5120)
 
     const rawPayload = await req.json()
-    const sanitizedPayload = sanitizeStrings(rawPayload)
-    const { email, type, password, options } = sanitizedPayload
+    const { email, type, password, options } = rawPayload
 
     if (!email || typeof email !== 'string' || !['recovery', 'magiclink', 'signup'].includes(type)) {
       throw new Error('Missing required parameters or invalid type.')

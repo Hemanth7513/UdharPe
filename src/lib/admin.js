@@ -1,16 +1,10 @@
-/** Platform superadmin checks — prefer app_metadata.role = 'superadmin'. */
+/**
+ * Platform superadmin verification.
+ * Relies strictly on cryptographic app_metadata.role assigned via Supabase Auth.
+ * Client-side user_metadata or hardcoded emails are explicitly rejected.
+ */
 export function isSuperAdminUser(user) {
   if (!user) return false;
-  if (user.app_metadata?.role === 'superadmin') return true;
-
-  const defaultAdmins = ['hemaxtth@gmail.com'];
-  const envAdmins = (import.meta.env.VITE_SUPERADMIN_EMAILS || import.meta.env.VITE_SUPERADMIN_EMAIL || '')
-    .split(',')
-    .map((s) => s.trim().toLowerCase())
-    .filter(Boolean);
-
-  const allowlist = [...new Set([...defaultAdmins, ...envAdmins])];
-
-  return !!(user.email && allowlist.includes(user.email.toLowerCase()));
+  return user.app_metadata?.role === 'superadmin';
 }
 

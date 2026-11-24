@@ -1,16 +1,40 @@
-# React + Vite
+# UdharPe
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+UdharPe is a credit tracking and digital ledger platform designed for local businesses and merchants.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Merchant Dashboard**: Real-time overview of outstanding balances, payments, and recent ledger activity.
+- **Customer Ledgers**: Individual customer ledger tracking with chronological credit and payment entries.
+- **Invoicing & Payments**: Transaction processing with atomic database RPCs and running balance calculation.
+- **Audit Reports**: Secure platform audit reporting and CSV data export.
+- **PWA Ready**: Offline-first capability with service worker caching.
 
-## React Compiler
+## Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Frontend**: React 19, Vite, Tailwind CSS, Framer Motion, Lucide Icons
+- **Backend & Auth**: Supabase Auth, PostgreSQL with Row Level Security (RLS)
+- **Functions**: Supabase Edge Functions (Deno / TypeScript)
+- **Email**: Transactional email integration via Resend
 
-## Expanding the Oxlint configuration
+## Getting Started
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+1. Clone the repository and install dependencies:
+   ```bash
+   npm install
+   ```
+
+2. Copy the sample environment file and add your credentials:
+   ```bash
+   cp .env.example .env
+   ```
+
+3. Start the development server:
+   ```bash
+   npm run dev
+   ```
+
+4. Build for production:
+   ```bash
+   npm run build
+   ```

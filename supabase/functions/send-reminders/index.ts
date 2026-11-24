@@ -124,7 +124,7 @@ serve(async (req) => {
       })
 
     const results = await Promise.allSettled(emailsToSend)
-    const successful = results.filter((r) => r.status === 'fulfilled').length
+    const successful = results.filter((r) => r.status === 'fulfilled' && (r.value as Response).ok).length
 
     return new Response(JSON.stringify({
       message: `Successfully sent ${successful} out of ${emailsToSend.length} reminders.`,

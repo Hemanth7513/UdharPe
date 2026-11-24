@@ -8,7 +8,6 @@ import Modal from '../components/Modal';
 import SkeletonLoader from '../components/SkeletonLoader';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
-import * as XLSX from 'xlsx';
 
 export default function CustomerLedger() {
   const { id } = useParams();
@@ -244,26 +243,27 @@ export default function CustomerLedger() {
       toast.error("No data to export.");
       return;
     }
-    const exportData = transactions.map(t => ({
-      'Date': new Date(t.created_at).toLocaleString(),
-      'Type': t.type === 'bill' ? 'Udhar Given' : 'Payment Received',
-      'Note': t.note || '-',
-      'Amount (₹)': t.amount
-    }));
-    
-    // Add summary row
-    exportData.push({
-      'Date': 'Total Outstanding',
-      'Type': '',
-      'Note': '',
-      'Amount (₹)': Number(customer.total_outstanding)
-    });
-
-    const worksheet = XLSX.utils.json_to_sheet(exportData);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Ledger");
-    XLSX.writeFile(workbook, `${customer.name.replace(/\s+/g, '_')}_Ledger.xlsx`);
-    toast.success("Excel downloaded!");
+    const headers = ['Date', 'Type', 'Note', 'Amount (INR)'];
+    const rows = transactions.map(t => [
+      new Date(t.created_at).toLocaleString(),
+      t.type === 'bill' ? 'Udhar Given' : 'Payment Received',
+      t.note || '-',
+      t.amount
+    ]);
+    rows.push(['Total Outstanding', '', '', Number(customer.total_outstanding)]);
+    const csvContent = '\uFEFF' + [headers, ...rows]
+      .map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+      .join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `${customer.name.replace(/\s+/g, '_')}_Ledger.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    toast.success("Ledger exported (.csv)!");
   };
 
   const sendEmailToBackend = async ({ subject, message, template, attachments = [] }) => {

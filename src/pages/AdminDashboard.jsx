@@ -7,7 +7,6 @@ import { ShieldAlert, Users, TrendingUp, Building, Receipt, ChevronLeft, Eye, Do
 import Modal from '../components/Modal';
 import SkeletonLoader from '../components/SkeletonLoader';
 import toast from 'react-hot-toast';
-import * as XLSX from 'xlsx';
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -32,62 +31,22 @@ export default function AdminDashboard() {
       }
 
       if (!isSuperAdminUser(user)) {
-        setError("Unauthorized. You are not the platform administrator.");
+        setError("Unauthorized. You do not have platform administrator privileges.");
         setLoading(false);
         return;
       }
 
       setIsAdmin(true);
 
-      // 1. Attempt edge function invoke first
-      let edgeSuccess = false;
-      try {
-        const { data, error: invokeError } = await supabase.functions.invoke('admin-stats');
-        if (!invokeError && data && !data.error) {
-          setStats(data);
-          edgeSuccess = true;
-        }
-      } catch {
-        console.warn('Edge function unavailable, falling back to direct database query');
+      const { data, error: invokeError } = await supabase.functions.invoke('admin-stats');
+      if (invokeError || !data || data.error) {
+        throw new Error(data?.error || invokeError?.message || 'Unable to load platform statistics');
       }
 
-      // 2. Direct database query fallback if edge function is unconfigured or failed
-      if (!edgeSuccess) {
-        const [profilesRes, customersRes, billsRes, settlementsRes] = await Promise.all([
-          supabase.from('profiles').select('id, firm_name, owner_name, created_at'),
-          supabase.from('customers').select('id, total_outstanding, business_id'),
-          supabase.from('bills').select('id, amount, remaining_amount, business_id'),
-          supabase.from('settlements').select('id, amount_paid, business_id')
-        ]);
-
-        const businessesList = profilesRes.data || [];
-        const customersList = customersRes.data || [];
-        const billsList = billsRes.data || [];
-        const settlementsList = settlementsRes.data || [];
-
-        const totalVolume = billsList.reduce((sum, b) => sum + Number(b.amount || 0), 0);
-        const totalSettled = settlementsList.reduce((sum, s) => sum + Number(s.amount_paid || 0), 0);
-        const totalOutstanding = billsList.reduce((sum, b) => sum + Number(b.remaining_amount || 0), 0);
-
-        setStats({
-          totalBusinesses: businessesList.length || 1,
-          totalCustomers: customersList.length,
-          totalTransactions: billsList.length + settlementsList.length,
-          totalVolume,
-          totalSettled,
-          totalOutstanding,
-          businesses: businessesList.map(b => ({
-            id: b.id,
-            firm_name: b.firm_name || 'Business',
-            owner_name: b.owner_name || 'Merchant',
-            email: b.owner_name ? `${b.owner_name.toLowerCase().replace(/\s+/g, '')}@udharpe.app` : 'merchant@udharpe.app',
-            created_at: b.created_at || new Date().toISOString()
-          }))
-        });
-      }
+      setStats(data);
     } catch (err) {
       console.error(err);
-      setError("Failed to fetch platform statistics.");
+      setError("Unable to load platform statistics. Please ensure the admin-stats Edge Function is deployed and you have verified superadmin permissions.");
     } finally {
       setLoading(false);
     }
@@ -103,38 +62,17 @@ export default function AdminDashboard() {
     setLoadingDeepDive(true);
 
     try {
-      // Try edge function first
-      try {
-        const { data, error: invokeError } = await supabase.functions.invoke('admin-stats', {
-          body: { action: 'get_business_details', businessId: business.id }
-        });
-        if (!invokeError && data && !data.error) {
-          setDeepDiveData({
-            customerCount: data.customerCount || 0,
-            billCount: data.billCount || 0,
-            totalOutstanding: data.totalOutstanding || 0,
-            firmName: business.firm_name || '',
-            ownerName: business.owner_name || ''
-          });
-          setLoadingDeepDive(false);
-          return;
-        }
-      } catch {}
-
-      // Direct fallback
-      const [custRes, billRes] = await Promise.all([
-        supabase.from('customers').select('id, total_outstanding').eq('business_id', business.id),
-        supabase.from('bills').select('id, remaining_amount').eq('business_id', business.id)
-      ]);
-
-      const custs = custRes.data || [];
-      const bills = billRes.data || [];
-      const totalOut = bills.reduce((sum, b) => sum + Number(b.remaining_amount || 0), 0);
+      const { data, error: invokeError } = await supabase.functions.invoke('admin-stats', {
+        body: { action: 'get_business_details', businessId: business.id }
+      });
+      if (invokeError || !data || data.error) {
+        throw new Error(data?.error || invokeError?.message || 'Failed to fetch business details');
+      }
 
       setDeepDiveData({
-        customerCount: custs.length,
-        billCount: bills.length,
-        totalOutstanding: totalOut,
+        customerCount: data.customerCount || 0,
+        billCount: data.billCount || 0,
+        totalOutstanding: data.totalOutstanding || 0,
         firmName: business.firm_name || '',
         ownerName: business.owner_name || ''
       });
@@ -147,20 +85,28 @@ export default function AdminDashboard() {
   };
 
   const handleExportAuditReport = () => {
-    if (!stats) return;
-    const exportData = (stats.businesses || []).map(b => ({
-      'Business ID': b.id,
-      'Firm Name': b.firm_name || '-',
-      'Owner Name': b.owner_name || '-',
-      'Email': b.email || '-',
-      'Registration Date': new Date(b.created_at).toLocaleDateString()
-    }));
-
-    const worksheet = XLSX.utils.json_to_sheet(exportData);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Platform Businesses");
-    XLSX.writeFile(workbook, `UdharPe_Platform_Audit_${new Date().toISOString().split('T')[0]}.xlsx`);
-    toast.success("Platform audit report exported!");
+    if (!stats?.businesses) return;
+    const headers = ['Business ID', 'Firm Name', 'Owner Name', 'Email', 'Registration Date'];
+    const rows = stats.businesses.map(b => [
+      b.id || '',
+      b.firm_name || '-',
+      b.owner_name || '-',
+      b.email || '-',
+      b.created_at ? new Date(b.created_at).toLocaleDateString() : '-'
+    ]);
+    const csvContent = '\uFEFF' + [headers, ...rows]
+      .map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+      .join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `UdharPe_Platform_Audit_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    toast.success("Platform audit report exported (.csv)!");
   };
 
   const filteredBusinesses = useMemo(() => {
@@ -189,17 +135,28 @@ export default function AdminDashboard() {
     );
   }
 
-  if (error && !isAdmin) {
+  if (error) {
     return (
-      <div className="max-w-2xl mx-auto p-8 text-center animate-fade-in">
-        <div className="w-24 h-24 mx-auto mb-6 bg-neu-bg shadow-neu rounded-full flex items-center justify-center text-neu-danger">
-          <ShieldAlert size={40} />
+      <div className="max-w-2xl mx-auto p-8 text-center animate-fade-in py-16">
+        <div className="w-20 h-20 mx-auto mb-6 bg-rose-50 border border-rose-200 rounded-3xl flex items-center justify-center text-rose-600 shadow-sm">
+          <ShieldAlert size={36} />
         </div>
-        <h1 className="text-3xl font-black text-neu-heading mb-4">Access Denied</h1>
-        <p className="text-neu-text font-medium mb-8">{error}</p>
-        <button onClick={() => navigate('/dashboard')} className="btn-solid mx-auto">
-          Return to My Business
-        </button>
+        <h1 className="text-2xl sm:text-3xl font-black text-slate-900 mb-3">{!isAdmin ? 'Access Denied' : 'Admin Telemetry Unavailable'}</h1>
+        <p className="text-slate-600 font-medium mb-8 max-w-md mx-auto leading-relaxed">{error}</p>
+        <div className="flex items-center justify-center gap-4">
+          {isAdmin ? (
+            <button 
+              onClick={() => { setError(null); setLoading(true); checkAdminAndFetchStats(); }} 
+              className="px-6 py-3 rounded-xl bg-indigo-600 text-white font-bold hover:bg-indigo-700 shadow-sm transition"
+            >
+              Retry Connection
+            </button>
+          ) : (
+            <button onClick={() => navigate('/dashboard')} className="btn-solid mx-auto">
+              Return to My Business
+            </button>
+          )}
+        </div>
       </div>
     );
   }
@@ -232,7 +189,7 @@ export default function AdminDashboard() {
               className="neu-card px-4 py-2 flex items-center gap-2 text-xs font-bold text-neu-heading hover:text-neu-primary transition-colors"
               title="Download full platform businesses breakdown"
             >
-              <Download size={15} /> Export Audit (.xlsx)
+              <Download size={15} /> Export Audit (.csv)
             </button>
           )}
           {stats && (

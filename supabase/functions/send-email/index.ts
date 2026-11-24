@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.110.8"
 import { getCorsHeaders } from "../_shared/cors.ts"
-import { checkRateLimit, escapeHtml, sanitizeStrings } from "../_shared/security.ts"
+import { checkRateLimit, escapeHtml } from "../_shared/security.ts"
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
 const FROM_EMAIL = Deno.env.get('RESEND_FROM_EMAIL') || 'UdharPe Support <onboarding@resend.dev>'
@@ -49,7 +49,7 @@ serve(async (req) => {
       throw new Error('Payload too large')
     }
 
-    const raw = sanitizeStrings(JSON.parse(bodyText))
+    const raw = JSON.parse(bodyText)
     const { customer_id, subject, message, attachments, template } = raw
 
     if (!customer_id || !subject) {
