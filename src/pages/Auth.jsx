@@ -50,34 +50,68 @@ export default function Auth({ isRecovering }) {
         navigate('/dashboard');
       } 
       else if (authMode === 'signup') {
-        const { error } = await supabase.functions.invoke('send-auth-email', {
-          body: { 
-            email, 
-            password, 
-            type: 'signup',
-            options: { data: { firm_name: firmName, owner_name: ownerName } }
-          }
-        });
-        if (error) throw error;
+        // First try custom branded edge function; fallback to standard Supabase Auth
+        try {
+          const { error: fnError } = await supabase.functions.invoke('send-auth-email', {
+            body: { 
+              email, 
+              password, 
+              type: 'signup',
+              options: { data: { firm_name: firmName, owner_name: ownerName } }
+            }
+          });
+          if (fnError) throw fnError;
+        } catch {
+          const { error: signUpError } = await supabase.auth.signUp({
+            email,
+            password,
+            options: {
+              data: { firm_name: firmName, owner_name: ownerName },
+              emailRedirectTo: `${window.location.origin}/dashboard`
+            }
+          });
+          if (signUpError) throw signUpError;
+        }
         
         setIconState('CheckCircle2');
         setErrorMsg('Registration successful! Check your email or login now.');
         setAuthMode('login');
       }
       else if (authMode === 'forgot_password') {
-        const { error } = await supabase.functions.invoke('send-auth-email', {
-          body: { email, type: 'recovery' }
-        });
-        if (error) throw error;
+        // First try custom branded edge function; fallback to standard Supabase Auth reset
+        try {
+          const { error: fnError } = await supabase.functions.invoke('send-auth-email', {
+            body: { email, type: 'recovery' }
+          });
+          if (fnError) throw fnError;
+        } catch {
+          const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+            redirectTo: `${window.location.origin}/auth`
+          });
+          if (resetError) throw resetError;
+        }
+
         setIconState('CheckCircle2');
         setErrorMsg('Password reset link sent to your email!');
         setAuthMode('login');
       }
       else if (authMode === 'magic_link') {
-        const { error } = await supabase.functions.invoke('send-auth-email', {
-          body: { email, type: 'magiclink' }
-        });
-        if (error) throw error;
+        // First try custom branded edge function; fallback to standard Supabase Auth OTP / magic link
+        try {
+          const { error: fnError } = await supabase.functions.invoke('send-auth-email', {
+            body: { email, type: 'magiclink' }
+          });
+          if (fnError) throw fnError;
+        } catch {
+          const { error: otpError } = await supabase.auth.signInWithOtp({
+            email,
+            options: {
+              emailRedirectTo: `${window.location.origin}/dashboard`
+            }
+          });
+          if (otpError) throw otpError;
+        }
+
         setIconState('CheckCircle2');
         setErrorMsg('Magic link sent! Check your inbox to log in.');
         setAuthMode('login');
@@ -100,14 +134,11 @@ export default function Auth({ isRecovering }) {
       }
     } catch (error) {
       console.error("Auth Error:", error); 
-      let safeMessage = error.message === "Passwords do not match" 
-        ? "Passwords do not match." 
-        : "An error occurred. Please try again.";
+      let safeMessage = error.message || "An error occurred. Please try again.";
       
-      if (authMode === 'login' || authMode === 'magic_link') {
-        safeMessage = "Invalid email or password.";
+      if (authMode === 'login') {
+        safeMessage = error.message || "Invalid email or password.";
       } else if (authMode === 'forgot_password') {
-        // If it's a rate limit error, show it to the user.
         const isRateLimit = error.message && (
           error.message.toLowerCase().includes('rate limit') || 
           error.message.toLowerCase().includes('wait') || 
@@ -119,15 +150,9 @@ export default function Auth({ isRecovering }) {
           setLoading(false);
           return;
         }
-        // Otherwise, pretend it succeeded to prevent email enumeration attacks
-        safeMessage = "If this email is registered, you will receive a reset link shortly.";
-        setIconState('CheckCircle2');
-        setErrorMsg(safeMessage);
-        setAuthMode('login'); // Match the success UX
-        setLoading(false);
-        return;
-      } else if (authMode === 'signup') {
-        safeMessage = "Registration failed. Please check your details and try again.";
+        safeMessage = error.message || "Failed to send reset link. Please check your email or try again later.";
+      } else if (authMode === 'magic_link') {
+        safeMessage = error.message || "Failed to send magic link. Please try again.";
       }
       
       setErrorMsg(safeMessage);
