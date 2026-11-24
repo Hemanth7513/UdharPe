@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { isSuperAdminUser } from '../lib/admin';
-import { ShieldAlert, Users, TrendingUp, Building, Receipt, Activity, ChevronLeft, Eye, Download, Search, CheckCircle2 } from 'lucide-react';
+import { ShieldAlert, Users, TrendingUp, Building, Receipt, ChevronLeft, Eye, Download, Search, CheckCircle2 } from 'lucide-react';
 import Modal from '../components/Modal';
 import SkeletonLoader from '../components/SkeletonLoader';
 import toast from 'react-hot-toast';
@@ -47,8 +47,8 @@ export default function AdminDashboard() {
           setStats(data);
           edgeSuccess = true;
         }
-      } catch (e) {
-        console.warn('Edge function unavailable, falling back to direct database query:', e);
+      } catch {
+        console.warn('Edge function unavailable, falling back to direct database query');
       }
 
       // 2. Direct database query fallback if edge function is unconfigured or failed
@@ -119,7 +119,7 @@ export default function AdminDashboard() {
           setLoadingDeepDive(false);
           return;
         }
-      } catch (e) {}
+      } catch {}
 
       // Direct fallback
       const [custRes, billRes] = await Promise.all([

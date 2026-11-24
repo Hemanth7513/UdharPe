@@ -3,7 +3,7 @@ import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../lib/supabase';
 import { isSuperAdminUser } from '../lib/admin';
-import { LayoutDashboard, Users, PlusCircle, LogOut, Settings, ShieldAlert, Handshake, ChevronDown, User, ShieldCheck } from 'lucide-react';
+import { LayoutDashboard, Users, PlusCircle, LogOut, Settings, ShieldAlert, Handshake, ChevronDown, ShieldCheck } from 'lucide-react';
 
 export default function AuthLayout() {
   const navigate = useNavigate();

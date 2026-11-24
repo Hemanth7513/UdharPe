@@ -71,12 +71,27 @@ function App() {
             {/* Protected Routes inside AuthLayout */}
             {session && (
               <Route element={<AuthLayout />}>
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/customers" element={<Customers />} />
-                <Route path="/customers/:id" element={<CustomerLedger />} />
-                <Route path="/billing" element={<Billing />} />
+                <Route 
+                  path="/dashboard" 
+                  element={isSuperAdminUser(session.user) ? <Navigate to="/admin" replace /> : <Dashboard />} 
+                />
+                <Route 
+                  path="/customers" 
+                  element={isSuperAdminUser(session.user) ? <Navigate to="/admin" replace /> : <Customers />} 
+                />
+                <Route 
+                  path="/customers/:id" 
+                  element={isSuperAdminUser(session.user) ? <Navigate to="/admin" replace /> : <CustomerLedger />} 
+                />
+                <Route 
+                  path="/billing" 
+                  element={isSuperAdminUser(session.user) ? <Navigate to="/admin" replace /> : <Billing />} 
+                />
                 <Route path="/settings" element={<Settings />} />
-                <Route path="/admin" element={<AdminDashboard />} />
+                <Route 
+                  path="/admin" 
+                  element={!isSuperAdminUser(session.user) ? <Navigate to="/dashboard" replace /> : <AdminDashboard />} 
+                />
               </Route>
             )}
 
