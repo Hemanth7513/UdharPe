@@ -13,9 +13,8 @@ export default function Landing() {
       {/* Compact Single-Line Header */}
       <header className="w-full border-b border-zinc-300">
         <div className="max-w-7xl mx-auto px-6 h-16 flex justify-between items-center">
-          <span className="flex items-center gap-2.5 text-[22px] font-display font-bold tracking-tight text-zinc-900">
-            <BrandMark size={30} />
-            <span>UdharPe</span>
+          <span className="flex items-center" aria-label="UdharPe">
+            <BrandMark size={40} />
           </span>
           <button
             onClick={() => navigate('/auth')}

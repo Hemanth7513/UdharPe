@@ -157,10 +157,10 @@ export default function Auth({ isRecovering }) {
           <button
             type="button"
             onClick={() => navigate('/')}
-            className="inline-flex items-center gap-2.5 text-[24px] font-display font-bold tracking-tight text-zinc-900"
+            aria-label="UdharPe Home"
+            className="inline-flex items-center justify-center hover:opacity-85 transition-opacity duration-150"
           >
-            <BrandMark size={32} />
-            <span>UdharPe</span>
+            <BrandMark size={46} />
           </button>
         </div>
 

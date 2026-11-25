@@ -77,14 +77,14 @@ export default function AuthLayout() {
       <nav className="w-full bg-[#f4f4f5]/95 backdrop-blur-md border-b border-zinc-300 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            {/* Brand Wordmark */}
+            {/* Brand Logo */}
             <button
               type="button"
               onClick={() => navigate(isAdmin ? '/admin' : '/dashboard')}
-              className="flex items-center gap-2.5 text-[22px] font-display font-bold text-zinc-900 tracking-tight hover:opacity-80 transition-opacity duration-150"
+              aria-label="UdharPe Home"
+              className="flex items-center hover:opacity-85 transition-opacity duration-150"
             >
-              <BrandMark size={30} />
-              <span>UdharPe</span>
+              <BrandMark size={40} />
             </button>
 
             {/* Desktop Navigation */}
