@@ -79,20 +79,23 @@ serve(async (req) => {
 
     // Aggregates only — no raw customer/bill PII
     if (action === 'get_business_details' && businessId) {
-      const { count: customerCount } = await supabaseAdmin
+      const { count: customerCount, error: custErr } = await supabaseAdmin
         .from('customers')
         .select('*', { count: 'exact', head: true })
         .eq('business_id', businessId)
+      if (custErr) throw custErr
 
-      const { count: billCount } = await supabaseAdmin
+      const { count: billCount, error: billErr } = await supabaseAdmin
         .from('bills')
         .select('*', { count: 'exact', head: true })
         .eq('business_id', businessId)
+      if (billErr) throw billErr
 
-      const { data: outstandingRows } = await supabaseAdmin
+      const { data: outstandingRows, error: outErr } = await supabaseAdmin
         .from('customers')
         .select('total_outstanding')
         .eq('business_id', businessId)
+      if (outErr) throw outErr
 
       const totalOutstanding = (outstandingRows || []).reduce(
         (sum, row) => sum + Number(row.total_outstanding || 0),
@@ -113,13 +116,15 @@ serve(async (req) => {
     if (authErr) throw authErr
     const totalBusinesses = users?.users?.length || 0
 
-    const { count: totalCustomers } = await supabaseAdmin
+    const { count: totalCustomers, error: totalCustErr } = await supabaseAdmin
       .from('customers')
       .select('*', { count: 'exact', head: true })
+    if (totalCustErr) throw totalCustErr
 
-    const { data: bills } = await supabaseAdmin
+    const { data: bills, error: billsErr } = await supabaseAdmin
       .from('bills')
       .select('amount')
+    if (billsErr) throw billsErr
 
     let totalVolume = 0
     const totalTransactions = bills?.length || 0
