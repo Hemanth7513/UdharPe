@@ -2,12 +2,14 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { Settings as SettingsIcon, LogOut, User, Mail, Briefcase, Edit2, Save, X } from 'lucide-react';
+import { isSuperAdminUser } from '../lib/admin';
+import { Settings as SettingsIcon, LogOut, User, Mail, Briefcase, Edit2, Save, X, ShieldCheck } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function Settings() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   
@@ -28,6 +30,8 @@ export default function Settings() {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
+
+      setIsAdmin(isSuperAdminUser(user));
 
       const userProfile = {
         firm_name: user.user_metadata?.firm_name || '',
@@ -109,13 +113,17 @@ export default function Settings() {
           <div className="w-11 h-11 rounded-lg bg-white border border-zinc-300 flex items-center justify-center text-zinc-900">
             <SettingsIcon size={22} />
           </div>
-          <div>
-            <h1 className="text-3xl font-display font-bold text-zinc-900 tracking-tight">Settings</h1>
-            <p className="text-zinc-600 text-[14px] mt-0.5">Manage your firm profile</p>
+        <div>
+            <h1 className="text-3xl font-display font-bold text-zinc-900 tracking-tight">
+              {isAdmin ? 'Admin Settings' : 'Settings'}
+            </h1>
+            <p className="text-zinc-600 text-[14px] mt-0.5">
+              {isAdmin ? 'Platform Superadmin account & session' : 'Manage your firm profile'}
+            </p>
           </div>
         </div>
 
-        {!isEditing && (
+        {!isAdmin && !isEditing && (
           <button
             onClick={() => setIsEditing(true)}
             className="btn-solid p-2.5"
@@ -126,6 +134,47 @@ export default function Settings() {
         )}
       </header>
 
+      {isAdmin ? (
+        <div className="bg-white border border-zinc-300 rounded-lg p-6 sm:p-8 space-y-5">
+          <div className="space-y-1.5">
+            <label className="block text-[13px] font-semibold text-zinc-700">Access Level</label>
+            <div className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-md bg-zinc-50 border border-zinc-200 font-semibold text-zinc-900">
+              <ShieldCheck size={18} className="text-zinc-900" />
+              <span>Platform Superadmin</span>
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="block text-[13px] font-semibold text-zinc-700">Email Address</label>
+            <div className="relative">
+              <Mail size={17} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
+              <input
+                type="email"
+                disabled
+                value={profile.email}
+                className="w-full pl-11 pr-4 py-2.5 rounded-md font-medium text-zinc-600 bg-zinc-50 border border-zinc-200"
+              />
+            </div>
+          </div>
+
+          <div className="pt-4 border-t border-zinc-200 flex flex-col sm:flex-row gap-3">
+            <button
+              type="button"
+              onClick={() => navigate('/admin')}
+              className="btn-primary flex-1 py-2.5"
+            >
+              Open Platform Command Center
+            </button>
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="flex-1 py-2.5 rounded-md border border-red-200 bg-red-50 hover:bg-red-100 flex items-center justify-center gap-2 text-red-700 font-semibold transition-colors duration-150 text-[14px]"
+            >
+              <LogOut size={18} /> Log Out Securely
+            </button>
+          </div>
+        </div>
+      ) : (
       <form onSubmit={handleSaveProfile} className="bg-white border border-zinc-300 rounded-lg p-6 sm:p-8 space-y-5">
 
         <div className="space-y-1.5">
@@ -206,6 +255,7 @@ export default function Settings() {
         )}
 
       </form>
+      )}
     </motion.div>
   );
 }
