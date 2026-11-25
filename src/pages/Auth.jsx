@@ -185,24 +185,34 @@ export default function Auth({ isRecovering }) {
           </button>
         </div>
 
-        <div className="bg-white border border-zinc-300 rounded-lg p-7 sm:p-9">
-          <div className="flex justify-center mb-5">
-            <div className="w-14 h-14 rounded-lg flex items-center justify-center text-zinc-900 bg-zinc-100 border border-zinc-200">
-              {iconState === 'Briefcase' && <Briefcase className="w-6 h-6" />}
-              {iconState === 'Eye' && <Eye className="w-6 h-6" />}
-              {iconState === 'EyeOff' && <EyeOff className="w-6 h-6" />}
-              {iconState === 'Loader2' && <Loader2 className="w-6 h-6 animate-spin" />}
-              {iconState === 'CheckCircle2' && <CheckCircle2 className="w-6 h-6 text-emerald-700" />}
-              {iconState === 'AlertCircle' && <AlertCircle className="w-6 h-6 text-red-600" />}
-            </div>
-          </div>
+        <div className="bg-white border border-zinc-300 rounded-lg p-7 sm:p-9" style={{ perspective: '900px' }}>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={authMode}
+              initial={{ opacity: 0, rotateX: -6, y: 6 }}
+              animate={{ opacity: 1, rotateX: 0, y: 0 }}
+              exit={{ opacity: 0, rotateX: 6, y: -6 }}
+              transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <div className="flex justify-center mb-5">
+                <div className="w-14 h-14 rounded-lg flex items-center justify-center text-zinc-900 bg-zinc-100 border border-zinc-200">
+                  {iconState === 'Briefcase' && <Briefcase className="w-6 h-6" />}
+                  {iconState === 'Eye' && <Eye className="w-6 h-6" />}
+                  {iconState === 'EyeOff' && <EyeOff className="w-6 h-6" />}
+                  {iconState === 'Loader2' && <Loader2 className="w-6 h-6 animate-spin" />}
+                  {iconState === 'CheckCircle2' && <CheckCircle2 className="w-6 h-6 text-emerald-700" />}
+                  {iconState === 'AlertCircle' && <AlertCircle className="w-6 h-6 text-red-600" />}
+                </div>
+              </div>
 
-          <h1 className="text-2xl font-display font-bold text-center text-zinc-900 mb-1.5 tracking-tight">
-            {title}
-          </h1>
-          <p className="text-center text-zinc-600 mb-7 text-[15px]">
-            {subtitle}
-          </p>
+              <h1 className="text-2xl font-display font-bold text-center text-zinc-900 mb-1.5 tracking-tight">
+                {title}
+              </h1>
+              <p className="text-center text-zinc-600 mb-7 text-[15px]">
+                {subtitle}
+              </p>
+            </motion.div>
+          </AnimatePresence>
 
           <AnimatePresence>
             {errorMsg && (

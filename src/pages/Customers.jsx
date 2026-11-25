@@ -6,6 +6,7 @@ import { Search, Plus, UserPlus, ChevronLeft, Phone, Mail, Download } from 'luci
 import toast from 'react-hot-toast';
 import Modal from '../components/Modal';
 import SkeletonLoader from '../components/SkeletonLoader';
+import { Tilt3DCard, FadeInContainer, FadeInItem } from '../components/FramerComponents';
 
 export default function Customers() {
   const navigate = useNavigate();
@@ -242,62 +243,66 @@ export default function Customers() {
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <FadeInContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {filteredCustomers.map(customer => (
-            <div key={customer.id} className="bg-white border border-zinc-300 hover:border-zinc-400 rounded-lg p-5 flex flex-col justify-between transition-colors duration-150">
-              <div>
-                <div className="flex justify-between items-start mb-3">
-                  <div className="w-10 h-10 rounded-md bg-zinc-100 border border-zinc-200 flex items-center justify-center text-zinc-900 font-display font-bold text-[16px]">
-                    {customer.name.charAt(0).toUpperCase()}
+            <FadeInItem key={customer.id} className="h-full">
+              <Tilt3DCard maxTilt={3.5}>
+                <div className="bg-white border border-zinc-300 hover:border-zinc-400 rounded-lg p-5 flex flex-col justify-between h-full transition-colors duration-150">
+                  <div>
+                    <div className="flex justify-between items-start mb-3">
+                      <div className="w-10 h-10 rounded-md bg-zinc-100 border border-zinc-200 flex items-center justify-center text-zinc-900 font-display font-bold text-[16px]">
+                        {customer.name.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="text-right">
+                        <p className="text-[13px] text-zinc-500 font-medium">Outstanding</p>
+                        <p className={`font-display font-bold text-lg tabular-nums ${Number(customer.total_outstanding) > 0 ? 'text-red-600' : 'text-emerald-700'}`}>
+                          ₹{Number(customer.total_outstanding).toLocaleString('en-IN')}
+                        </p>
+                      </div>
+                    </div>
+
+                    <h3 className="font-display font-bold text-lg text-zinc-900 mb-2">{customer.name}</h3>
+
+                    <div className="space-y-1.5 mb-3">
+                      {customer.phone && (
+                        <div className="flex items-center gap-2 text-zinc-600 text-[14px]">
+                          <Phone size={14} className="text-zinc-400" /> {customer.phone}
+                        </div>
+                      )}
+                      {customer.email && (
+                        <div className="flex items-center gap-2 text-zinc-600 text-[14px] truncate">
+                          <Mail size={14} className="text-zinc-400 shrink-0" /> {customer.email}
+                        </div>
+                      )}
+                    </div>
+
+                    <button
+                      onClick={() => openEditModal(customer)}
+                      className="text-[13px] font-semibold text-zinc-600 hover:text-zinc-900 underline underline-offset-4 transition-colors duration-150"
+                    >
+                      Edit Details
+                    </button>
                   </div>
-                  <div className="text-right">
-                    <p className="text-[13px] text-zinc-500 font-medium">Outstanding</p>
-                    <p className={`font-display font-bold text-lg tabular-nums ${Number(customer.total_outstanding) > 0 ? 'text-red-600' : 'text-emerald-700'}`}>
-                      ₹{Number(customer.total_outstanding).toLocaleString('en-IN')}
-                    </p>
+
+                  <div className="mt-5 pt-4 border-t border-zinc-200 flex gap-2.5">
+                    <button
+                      onClick={() => navigate(`/customers/${customer.id}`)}
+                      className="btn-solid flex-1 py-2 text-[14px]"
+                    >
+                      View Ledger
+                    </button>
+                    <button
+                      onClick={() => navigate(`/billing?customer_id=${customer.id}`)}
+                      className="btn-primary flex-1 py-2 text-[14px]"
+                    >
+                      <Plus size={16} /> Udhar
+                    </button>
                   </div>
                 </div>
-
-                <h3 className="font-display font-bold text-lg text-zinc-900 mb-2">{customer.name}</h3>
-
-                <div className="space-y-1.5 mb-3">
-                  {customer.phone && (
-                    <div className="flex items-center gap-2 text-zinc-600 text-[14px]">
-                      <Phone size={14} className="text-zinc-400" /> {customer.phone}
-                    </div>
-                  )}
-                  {customer.email && (
-                    <div className="flex items-center gap-2 text-zinc-600 text-[14px] truncate">
-                      <Mail size={14} className="text-zinc-400 shrink-0" /> {customer.email}
-                    </div>
-                  )}
-                </div>
-
-                <button
-                  onClick={() => openEditModal(customer)}
-                  className="text-[13px] font-semibold text-zinc-600 hover:text-zinc-900 underline underline-offset-4 transition-colors duration-150"
-                >
-                  Edit Details
-                </button>
-              </div>
-
-              <div className="mt-5 pt-4 border-t border-zinc-200 flex gap-2.5">
-                <button
-                  onClick={() => navigate(`/customers/${customer.id}`)}
-                  className="btn-solid flex-1 py-2 text-[14px]"
-                >
-                  View Ledger
-                </button>
-                <button
-                  onClick={() => navigate(`/billing?customer_id=${customer.id}`)}
-                  className="btn-primary flex-1 py-2 text-[14px]"
-                >
-                  <Plus size={16} /> Udhar
-                </button>
-              </div>
-            </div>
+              </Tilt3DCard>
+            </FadeInItem>
           ))}
-        </div>
+        </FadeInContainer>
       )}
 
       {/* Add/Edit Customer Modal */}

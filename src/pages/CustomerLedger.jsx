@@ -460,19 +460,26 @@ export default function CustomerLedger() {
             <button
               key={tab.id}
               onClick={() => setLedgerFilter(tab.id)}
-              className={`px-3 py-1 rounded text-[13px] font-semibold transition-colors duration-150 ${
+              className={`relative px-3 py-1 rounded text-[13px] font-semibold transition-colors duration-150 ${
                 ledgerFilter === tab.id
-                  ? 'bg-white text-zinc-900 shadow-neu'
+                  ? 'text-zinc-900'
                   : 'text-zinc-600 hover:text-zinc-900'
               }`}
             >
-              {tab.label}
+              {ledgerFilter === tab.id && (
+                <motion.span
+                  layoutId="ledgerFilterPill"
+                  transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+                  className="absolute inset-0 bg-white rounded shadow-neu"
+                />
+              )}
+              <span className="relative z-10">{tab.label}</span>
             </button>
           ))}
         </div>
       </div>
 
-      <div className="bg-white border border-zinc-300 rounded-lg divide-y divide-zinc-200">
+      <div className="bg-white border border-zinc-300 rounded-lg divide-y divide-zinc-200" style={{ perspective: '900px' }}>
         {transactions.filter(t => ledgerFilter === 'all' || t.type === ledgerFilter).length === 0 ? (
           <div className="p-10 text-center">
             <p className="text-zinc-600 font-medium text-[15px]">No transactions matching this filter.</p>
@@ -483,9 +490,9 @@ export default function CustomerLedger() {
             .map((t, idx) => (
             <motion.div
               key={t.id}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: Math.min(idx * 0.03, 0.24), duration: 0.2 }}
+              initial={{ opacity: 0, rotateX: -6, y: 6 }}
+              animate={{ opacity: 1, rotateX: 0, y: 0 }}
+              transition={{ delay: Math.min(idx * 0.03, 0.24), duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
               className="p-5 sm:p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:bg-zinc-50/70 transition-colors duration-150"
             >
               <div className="flex items-start gap-4">
