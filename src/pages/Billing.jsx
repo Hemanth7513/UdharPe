@@ -7,6 +7,7 @@ import toast from 'react-hot-toast';
 import Modal from '../components/Modal';
 import SkeletonLoader from '../components/SkeletonLoader';
 import DueDatePicker from '../components/DueDatePicker';
+import { findDuplicateCustomer } from '../lib/customers';
 
 export default function Billing() {
   const navigate = useNavigate();
@@ -38,7 +39,7 @@ export default function Billing() {
 
       const { data, error } = await supabase
         .from('customers')
-        .select('id, name, total_outstanding')
+        .select('id, name, phone, total_outstanding')
         .eq('business_id', user.id)
         .order('name', { ascending: true });
 
@@ -67,6 +68,11 @@ export default function Billing() {
 
   const handleAddCustomer = async (e) => {
     e.preventDefault();
+    const duplicate = findDuplicateCustomer(customers, newCustomer);
+    if (duplicate) {
+      toast.error(`Party already exists: ${duplicate.name}`);
+      return;
+    }
     setIsAddingCustomer(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();

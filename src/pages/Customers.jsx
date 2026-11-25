@@ -7,6 +7,8 @@ import toast from 'react-hot-toast';
 import Modal from '../components/Modal';
 import SkeletonLoader from '../components/SkeletonLoader';
 import { Tilt3DCard, FadeInContainer, FadeInItem } from '../components/FramerComponents';
+import { findDuplicateCustomer } from '../lib/customers';
+import { exportCsv } from '../lib/csv';
 
 export default function Customers() {
   const navigate = useNavigate();
@@ -47,6 +49,11 @@ export default function Customers() {
 
   const handleAddCustomer = async (e) => {
     e.preventDefault();
+    const duplicate = findDuplicateCustomer(customers, newCustomer);
+    if (duplicate) {
+      toast.error(`Customer already exists: ${duplicate.name}`);
+      return;
+    }
     setIsSubmitting(true);
 
     try {
@@ -86,6 +93,11 @@ export default function Customers() {
 
   const handleEditCustomer = async (e) => {
     e.preventDefault();
+    const duplicate = findDuplicateCustomer(customers, newCustomer, editingId);
+    if (duplicate) {
+      toast.error(`Another customer already uses those details: ${duplicate.name}`);
+      return;
+    }
     setIsSubmitting(true);
 
     try {
@@ -153,18 +165,7 @@ export default function Customers() {
       Number(c.total_outstanding || 0),
       new Date(c.created_at).toLocaleDateString()
     ]);
-    const csvContent = '\uFEFF' + [headers, ...rows]
-      .map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
-      .join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', 'UdharPe_Customers.csv');
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    exportCsv('UdharPe_Customers.csv', headers, rows);
     toast.success("Customer list exported (.csv)!");
   };
 

@@ -8,6 +8,7 @@ import Modal from '../components/Modal';
 import SkeletonLoader from '../components/SkeletonLoader';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
+import { exportCsv } from '../lib/csv';
 
 export default function CustomerLedger() {
   const { id } = useParams();
@@ -252,18 +253,7 @@ export default function CustomerLedger() {
       t.amount
     ]);
     rows.push(['Total Outstanding', '', '', Number(customer.total_outstanding)]);
-    const csvContent = '\uFEFF' + [headers, ...rows]
-      .map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
-      .join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', `${customer.name.replace(/\s+/g, '_')}_Ledger.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    exportCsv(`${customer.name.replace(/\s+/g, '_')}_Ledger.csv`, headers, rows);
     toast.success("Ledger exported (.csv)!");
   };
 

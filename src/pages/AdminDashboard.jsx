@@ -7,6 +7,7 @@ import { ShieldAlert, Building, ChevronLeft, Eye, Download, Search } from 'lucid
 import Modal from '../components/Modal';
 import SkeletonLoader from '../components/SkeletonLoader';
 import toast from 'react-hot-toast';
+import { exportCsv } from '../lib/csv';
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -94,18 +95,7 @@ export default function AdminDashboard() {
       b.email || '-',
       b.created_at ? new Date(b.created_at).toLocaleDateString() : '-'
     ]);
-    const csvContent = '\uFEFF' + [headers, ...rows]
-      .map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
-      .join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', `UdharPe_Platform_Audit_${new Date().toISOString().split('T')[0]}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    exportCsv(`UdharPe_Platform_Audit_${new Date().toISOString().split('T')[0]}.csv`, headers, rows);
     toast.success("Platform audit report exported (.csv)!");
   };
 
