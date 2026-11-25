@@ -3,7 +3,8 @@ import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../lib/supabase';
 import { isSuperAdminUser } from '../lib/admin';
-import { LayoutDashboard, Users, PlusCircle, LogOut, Settings, ShieldAlert, Handshake, ChevronDown, ShieldCheck } from 'lucide-react';
+import { LayoutDashboard, Users, PlusCircle, LogOut, Settings, ShieldAlert, Handshake, ChevronDown, ShieldCheck, Search } from 'lucide-react';
+import CommandPalette from './CommandPalette';
 
 export default function AuthLayout() {
   const navigate = useNavigate();
@@ -11,7 +12,20 @@ export default function AuthLayout() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const [isCommandOpen, setIsCommandOpen] = useState(false);
   const menuRef = useRef(null);
+
+  // Global Cmd+K / Ctrl+K shortcut for Quick Command Palette
+  useEffect(() => {
+    const handleGlobalKeyDown = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setIsCommandOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleGlobalKeyDown);
+    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+  }, []);
 
   useEffect(() => {
     const fetchUserAndRole = async () => {
@@ -111,8 +125,26 @@ export default function AuthLayout() {
               })}
             </div>
 
-            {/* User Profile & Account Menu */}
-            <div className="relative flex items-center gap-3" ref={menuRef}>
+            {/* User Profile & Account Menu + Quick Jump */}
+            <div className="relative flex items-center gap-2.5" ref={menuRef}>
+              <button
+                onClick={() => setIsCommandOpen(true)}
+                className="hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg bg-[#f0e9db] hover:bg-[#e7decb] border border-[#d6cbb9] text-stone-600 hover:text-stone-900 transition-colors text-xs font-medium"
+                title="Quick Jump (Ctrl+K)"
+              >
+                <Search size={14} className="text-red-800" />
+                <span>Jump...</span>
+                <kbd className="px-1.5 py-0.5 text-[10px] font-mono bg-[#fffdf9] border border-[#c7bba7] rounded text-stone-500">⌘K</kbd>
+              </button>
+
+              <button
+                onClick={() => setIsCommandOpen(true)}
+                className="sm:hidden p-2 rounded-lg bg-[#f0e9db] border border-[#d6cbb9] text-stone-700"
+                aria-label="Quick Search"
+              >
+                <Search size={18} />
+              </button>
+
               <button
                 onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
                 className="flex items-center gap-2.5 p-1.5 pr-3 rounded-lg bg-[#f0e9db] hover:bg-[#e7decb] border border-[#d6cbb9] transition-all text-left"
@@ -229,10 +261,23 @@ export default function AuthLayout() {
         </div>
       </nav>
 
-      {/* Main Content Area */}
+      {/* Main Content Area with Smooth Framer Page Transition */}
       <main className="flex-1 w-full max-w-7xl mx-auto pb-24 md:pb-8 pt-6">
-        <Outlet />
+        <motion.div
+          key={location.pathname}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <Outlet />
+        </motion.div>
       </main>
+
+      <CommandPalette
+        isOpen={isCommandOpen}
+        onClose={() => setIsCommandOpen(false)}
+        isAdmin={isAdmin}
+      />
     </div>
   );
 }

@@ -476,8 +476,15 @@ export default function CustomerLedger() {
         ) : (
           transactions
             .filter(t => ledgerFilter === 'all' || t.type === ledgerFilter)
-            .map(t => (
-            <div key={t.id} className="neu-card p-5 sm:p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:shadow-neu-hover transition-all">
+            .map((t, idx) => (
+            <motion.div
+              key={t.id}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: Math.min(idx * 0.04, 0.28), duration: 0.22 }}
+              whileHover={{ y: -2 }}
+              className="neu-card p-5 sm:p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
+            >
               <div className="flex items-center gap-4">
                 {t.type === 'bill' ? (
                   <div className="w-12 h-12 rounded-md border border-red-200 bg-red-50/60 flex items-center justify-center text-red-800 shrink-0">
@@ -551,19 +558,21 @@ export default function CustomerLedger() {
                   </button>
                 )}
               </div>
-            </div>
+            </motion.div>
           ))
         )}
       </div>
 
       {/* Floating Action Button for raising a bill pre-filled with this customer */}
-      <button 
+      <motion.button 
+        whileHover={{ scale: 1.08 }}
+        whileTap={{ scale: 0.94 }}
         onClick={() => navigate(`/billing?customer_id=${customer.id}`)}
-        className="fixed bottom-24 md:bottom-8 right-6 w-14 h-14 bg-neu-primary text-white rounded-full shadow-[0_10px_20px_rgba(79,70,229,0.4)] flex items-center justify-center hover:scale-105 hover:bg-neu-primary-hover transition-all z-40"
+        className="fixed bottom-24 md:bottom-8 right-6 w-14 h-14 bg-red-800 text-white rounded-full shadow-lg shadow-red-900/30 border-2 border-red-950/20 flex items-center justify-center hover:bg-red-900 transition-colors z-40"
         title="Raise Udhar for this customer"
       >
         <Receipt size={24} />
-      </button>
+      </motion.button>
 
       {/* Record Payment Modal */}
       <Modal isOpen={isPaymentModalOpen} onClose={() => { setIsPaymentModalOpen(false); setSelectedBillForPayment(null); }} title={selectedBillForPayment ? `Record Payment for ${selectedBillForPayment.bill_no || 'Bill'}` : "Record Payment"}>

@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { Wallet, Users, Receipt, Plus, ArrowUpRight, ArrowDownRight, Sparkles } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import AnimatedCurrency from '../components/AnimatedCurrency';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -197,43 +198,55 @@ export default function Dashboard() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {/* Total Outstanding Card - Highlighted */}
-        <div className="neu-card p-8 relative overflow-hidden flex flex-col justify-center border border-white/50 bg-neu-primary/5">
+        <motion.div
+          whileHover={{ y: -3 }}
+          transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+          className="neu-card p-8 relative overflow-hidden flex flex-col justify-center bg-[#fffaf3]"
+        >
           <div className="flex items-center gap-2 text-neu-text mb-3">
-            <div className="w-10 h-10 shadow-neu rounded-full flex items-center justify-center text-neu-primary bg-neu-bg">
+            <div className="w-10 h-10 rounded-md border border-red-200 bg-red-50 flex items-center justify-center text-red-800">
               <Wallet size={18} />
             </div>
             <h3 className="font-bold text-lg">Total Udhar (Baki)</h3>
           </div>
-          <p className="text-4xl sm:text-5xl font-black text-neu-danger tracking-tight mt-2 truncate">
-            ₹{totalOutstanding.toLocaleString('en-IN')}
+          <p className="text-3xl sm:text-4xl font-black text-neu-danger tracking-tight mt-2 truncate">
+            <AnimatedCurrency value={totalOutstanding} />
           </p>
-        </div>
+        </motion.div>
 
         {/* Payments Received This Month */}
-        <div className="neu-card p-8 relative overflow-hidden flex flex-col justify-center border border-white/50">
+        <motion.div
+          whileHover={{ y: -3 }}
+          transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+          className="neu-card p-8 relative overflow-hidden flex flex-col justify-center"
+        >
           <div className="flex items-center gap-2 text-neu-text mb-3">
-            <div className="w-10 h-10 shadow-neu rounded-full flex items-center justify-center text-neu-success bg-neu-bg">
+            <div className="w-10 h-10 rounded-md border border-emerald-200 bg-emerald-50 flex items-center justify-center text-emerald-700">
               <Receipt size={18} />
             </div>
             <h3 className="font-bold text-lg">Jama / Received (This Month)</h3>
           </div>
-          <p className="text-4xl sm:text-5xl font-black text-neu-success tracking-tight mt-2 truncate">
-            ₹{paymentsReceived.toLocaleString('en-IN')}
+          <p className="text-3xl sm:text-4xl font-black text-neu-success tracking-tight mt-2 truncate">
+            <AnimatedCurrency value={paymentsReceived} />
           </p>
-        </div>
+        </motion.div>
 
         {/* New Udhar This Month */}
-        <div className="neu-card p-8 relative overflow-hidden flex flex-col justify-center border border-white/50">
+        <motion.div
+          whileHover={{ y: -3 }}
+          transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+          className="neu-card p-8 relative overflow-hidden flex flex-col justify-center"
+        >
           <div className="flex items-center gap-2 text-neu-text mb-3">
-            <div className="w-10 h-10 shadow-neu rounded-full flex items-center justify-center text-neu-danger bg-neu-bg">
+            <div className="w-10 h-10 rounded-md border border-red-200 bg-red-50 flex items-center justify-center text-red-800">
               <Wallet size={18} />
             </div>
             <h3 className="font-bold text-lg">Udhar Given (This Month)</h3>
           </div>
-          <p className="text-4xl sm:text-5xl font-black text-neu-danger tracking-tight mt-2 truncate">
-            ₹{newUdhar.toLocaleString('en-IN')}
+          <p className="text-3xl sm:text-4xl font-black text-neu-danger tracking-tight mt-2 truncate">
+            <AnimatedCurrency value={newUdhar} />
           </p>
-        </div>
+        </motion.div>
       </div>
 
       {/* Chart Section */}
