@@ -114,9 +114,13 @@ serve(async (req) => {
 
     const { data: customerRows, error: totalCustErr } = await supabaseAdmin
       .from('customers')
-      .select('id')
+      .select('id, total_outstanding')
     if (totalCustErr) throw totalCustErr
     const totalCustomers = (customerRows || []).length
+    const totalOutstanding = (customerRows || []).reduce(
+      (sum, c) => sum + Number(c.total_outstanding || 0),
+      0
+    )
 
     const { data: bills, error: billsErr } = await supabaseAdmin
       .from('bills')
@@ -131,11 +135,15 @@ serve(async (req) => {
       })
     }
 
+    const totalSettled = Math.max(0, totalVolume - totalOutstanding)
+
     const payload = {
       totalBusinesses,
-      totalCustomers: totalCustomers || 0,
+      totalCustomers,
       totalTransactions,
       totalVolume,
+      totalOutstanding,
+      totalSettled,
       adminEmail: user.email,
       businesses: (users?.users || []).map((u) => ({
         id: u.id,
