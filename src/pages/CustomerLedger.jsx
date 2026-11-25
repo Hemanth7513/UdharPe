@@ -226,7 +226,7 @@ export default function CustomerLedger() {
       startY: 50,
       theme: 'grid',
       styles: { fontSize: 10, cellPadding: 3 },
-      headStyles: { fillColor: [79, 70, 229] } // neu-primary color
+      headStyles: { fillColor: [24, 24, 27] }
     });
 
     if (returnBase64) {
@@ -307,6 +307,26 @@ export default function CustomerLedger() {
       setEmailMessage('');
     } catch (error) {
       toast.error(error.message);
+    } finally {
+      setIsSendingEmail(false);
+    }
+  };
+
+  const handleEmailReminder = async () => {
+    if (!customer.email) {
+      toast.error('Customer does not have an email address saved.');
+      return;
+    }
+
+    setIsSendingEmail(true);
+    try {
+      await sendEmailToBackend({
+        subject: `Payment Reminder: ₹${Number(customer.total_outstanding).toLocaleString('en-IN')} Outstanding`,
+        template: 'reminder',
+      });
+      toast.success(`Payment reminder emailed to ${customer.email}!`);
+    } catch (error) {
+      toast.error('Failed to send reminder: ' + error.message);
     } finally {
       setIsSendingEmail(false);
     }
@@ -408,6 +428,14 @@ export default function CustomerLedger() {
                 className="btn-primary flex-1 md:flex-none py-2 px-4 text-[14px]"
               >
                 Record Payment
+              </button>
+              <button
+                onClick={handleEmailReminder}
+                disabled={isSendingEmail}
+                className="btn-solid py-2 px-3.5 text-[14px] shrink-0 disabled:opacity-50"
+                title={customer.email ? `Send payment reminder to ${customer.email}` : 'Add customer email to send reminder'}
+              >
+                <Mail size={16} /> {isSendingEmail ? 'Sending...' : 'Email Reminder'}
               </button>
               <button
                 onClick={handleWhatsAppRemind}

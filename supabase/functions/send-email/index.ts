@@ -62,7 +62,7 @@ serve(async (req) => {
 
     const { data: customer, error: custError } = await supabaseUser
       .from('customers')
-      .select('id, name, email, business_id')
+      .select('id, name, email, business_id, total_outstanding')
       .eq('id', customer_id)
       .eq('business_id', user.id)
       .single()
@@ -87,6 +87,39 @@ serve(async (req) => {
         <p>Hello ${safeName},</p>
         <p>Please find attached your latest statement from UdharPe.</p>
         <p>Thank you!</p>
+      `
+    } else if (template === 'reminder') {
+      const { data: profile } = await supabaseUser
+        .from('profiles')
+        .select('firm_name')
+        .eq('id', user.id)
+        .maybeSingle()
+
+      const safeFirm = escapeHtml(profile?.firm_name || user.user_metadata?.firm_name || 'UdharPe Merchant')
+      const outstanding = Number(customer.total_outstanding || 0).toLocaleString('en-IN')
+
+      html = `
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 560px; margin: 0 auto; padding: 24px; background-color: #f4f4f5; color: #18181b;">
+          <div style="background-color: #ffffff; padding: 28px; border-radius: 8px; border: 1px solid #d4d4d8;">
+            <p style="margin: 0 0 16px 0; font-size: 18px; font-weight: 700; color: #18181b;">Payment Reminder</p>
+            <p style="margin: 0 0 12px 0; font-size: 15px; line-height: 1.6; color: #3f3f46;">
+              Hello ${safeName},
+            </p>
+            <p style="margin: 0 0 20px 0; font-size: 15px; line-height: 1.6; color: #3f3f46;">
+              This is a friendly reminder from <strong>${safeFirm}</strong> regarding your current outstanding balance.
+            </p>
+            <div style="background-color: #fafafa; border: 1px solid #e4e4e7; border-radius: 6px; padding: 16px; margin-bottom: 20px;">
+              <p style="margin: 0; font-size: 13px; color: #52525b;">Total Outstanding</p>
+              <p style="margin: 4px 0 0 0; font-size: 28px; font-weight: 700; color: #dc2626;">₹${outstanding}</p>
+            </div>
+            <p style="margin: 0; font-size: 14px; line-height: 1.6; color: #52525b;">
+              Kindly arrange for payment at your earliest convenience. If you have already settled this amount, please disregard this message.
+            </p>
+            <p style="margin: 20px 0 0 0; font-size: 14px; color: #18181b;">
+              Thank you,<br/><strong>${safeFirm}</strong>
+            </p>
+          </div>
+        </div>
       `
     } else {
       if (!message || typeof message !== 'string') {
