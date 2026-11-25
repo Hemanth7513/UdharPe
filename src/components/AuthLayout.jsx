@@ -3,7 +3,7 @@ import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../lib/supabase';
 import { isSuperAdminUser } from '../lib/admin';
-import { LayoutDashboard, Users, PlusCircle, LogOut, Settings, ShieldAlert, Handshake, ChevronDown, ShieldCheck, Search } from 'lucide-react';
+import { LayoutDashboard, Users, PlusCircle, LogOut, Settings, ShieldAlert, ChevronDown, ShieldCheck, Search } from 'lucide-react';
 import CommandPalette from './CommandPalette';
 
 export default function AuthLayout() {
@@ -15,7 +15,6 @@ export default function AuthLayout() {
   const [isCommandOpen, setIsCommandOpen] = useState(false);
   const menuRef = useRef(null);
 
-  // Global Cmd+K / Ctrl+K shortcut for Quick Command Palette
   useEffect(() => {
     const handleGlobalKeyDown = (e) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
@@ -38,7 +37,6 @@ export default function AuthLayout() {
     fetchUserAndRole();
   }, []);
 
-  // Close profile menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
@@ -66,122 +64,104 @@ export default function AuthLayout() {
         { name: 'Settings', path: '/settings', icon: Settings },
       ];
 
-  const firmName = isAdmin 
-    ? 'Platform Superadmin' 
+  const firmName = isAdmin
+    ? 'Platform Superadmin'
     : (currentUser?.user_metadata?.firm_name || 'My Business');
   const ownerName = currentUser?.user_metadata?.owner_name || '';
   const userInitials = isAdmin ? 'SA' : (firmName || currentUser?.email || 'U').slice(0, 2).toUpperCase();
 
   return (
-    <div className="min-h-screen flex flex-col selection:bg-red-800 selection:text-white">
+    <div className="min-h-screen flex flex-col bg-[#f4f4f5] text-zinc-900">
       {/* Top Navbar */}
-      <nav className="w-full bg-[#fffdf9]/95 backdrop-blur-md border-b-2 border-stone-800 sticky top-0 z-50">
+      <nav className="w-full bg-[#f4f4f5]/95 backdrop-blur-md border-b border-zinc-300 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-20">
-            {/* Logo */}
-            <motion.div 
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="flex items-center gap-3 cursor-pointer" 
+          <div className="flex justify-between items-center h-16">
+            {/* Brand Wordmark */}
+            <button
+              type="button"
               onClick={() => navigate(isAdmin ? '/admin' : '/dashboard')}
+              className="text-[22px] font-display font-bold text-zinc-900 tracking-tight hover:opacity-80 transition-opacity duration-150"
             >
-              <div className="w-11 h-11 rounded-lg bg-red-800 shadow-sm border border-red-900 flex items-center justify-center text-[#fffdf9]">
-                <Handshake size={24} />
-              </div>
-              <span className="text-2xl font-serif font-bold text-stone-900 tracking-tight hidden sm:block">UdharPe</span>
-            </motion.div>
+              UdharPe
+            </button>
 
             {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center gap-1.5 p-1 bg-[#f0e9db] rounded-lg border border-[#d6cbb9]">
+            <div className="hidden md:flex items-center gap-7">
               {navItems.map((item) => {
-                const Icon = item.icon;
                 const isActive = location.pathname === item.path;
                 return (
                   <button
                     key={item.name}
                     onClick={() => navigate(item.path)}
-                    className={`relative px-4 py-2 rounded-md flex items-center gap-2 font-bold text-sm transition-colors ${
-                      isActive 
-                        ? 'text-red-800' 
-                        : 'text-stone-600 hover:text-stone-900'
+                    className={`relative py-5 text-[15px] font-medium transition-colors duration-150 ${
+                      isActive
+                        ? 'text-zinc-900 font-bold'
+                        : 'text-zinc-600 hover:text-zinc-900'
                     }`}
                   >
+                    {item.name}
                     {isActive && (
                       <motion.div
-                        layoutId="activeNavTab"
-                        transition={{ type: 'spring', bounce: 0.2, duration: 0.4 }}
-                        className="absolute inset-0 bg-[#fffdf9] rounded-md shadow-sm border border-[#c7bba7] -z-0"
+                        layoutId="activeNavUnderline"
+                        transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                        className="absolute bottom-0 left-0 right-0 h-[2px] bg-zinc-900"
                       />
                     )}
-                    <span className="relative z-10 flex items-center gap-2">
-                      <Icon size={17} />
-                      {item.name}
-                    </span>
                   </button>
                 );
               })}
             </div>
 
-            {/* User Profile & Account Menu + Quick Jump */}
+            {/* Search + User Menu */}
             <div className="relative flex items-center gap-2.5" ref={menuRef}>
               <button
                 onClick={() => setIsCommandOpen(true)}
-                className="hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg bg-[#f0e9db] hover:bg-[#e7decb] border border-[#d6cbb9] text-stone-600 hover:text-stone-900 transition-colors text-xs font-medium"
+                className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-md bg-white hover:bg-zinc-50 border border-zinc-300 text-zinc-600 hover:text-zinc-900 transition-colors duration-150 text-[13px] font-medium"
                 title="Search (Ctrl+K)"
               >
-                <Search size={14} className="text-red-800" />
+                <Search size={14} className="text-zinc-500" />
                 <span>Search...</span>
-                <kbd className="px-1.5 py-0.5 text-[10px] font-mono bg-[#fffdf9] border border-[#c7bba7] rounded text-stone-500">⌘K</kbd>
+                <kbd className="px-1.5 py-0.5 text-[13px] leading-none bg-zinc-100 border border-zinc-300 rounded text-zinc-600">⌘K</kbd>
               </button>
 
               <button
                 onClick={() => setIsCommandOpen(true)}
-                className="sm:hidden p-2 rounded-lg bg-[#f0e9db] border border-[#d6cbb9] text-stone-700"
-                aria-label="Quick Search"
+                className="sm:hidden p-2 rounded-md bg-white border border-zinc-300 text-zinc-700"
+                aria-label="Search"
               >
                 <Search size={18} />
               </button>
 
               <button
                 onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
-                className="flex items-center gap-2.5 p-1.5 pr-3 rounded-lg bg-[#f0e9db] hover:bg-[#e7decb] border border-[#d6cbb9] transition-all text-left"
+                className="flex items-center gap-2.5 p-1 pr-2.5 rounded-md bg-white hover:bg-zinc-50 border border-zinc-300 transition-colors duration-150 text-left"
               >
-                <div className="w-9 h-9 rounded-md bg-stone-900 text-[#fffdf9] font-mono font-bold text-xs flex items-center justify-center shadow-sm relative">
+                <div className="w-8 h-8 rounded bg-zinc-900 text-white font-display font-bold text-[13px] flex items-center justify-center">
                   {userInitials}
-                  <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-600 border-2 border-[#fffdf9] rounded-full" />
                 </div>
                 <div className="hidden sm:block">
-                  <div className="text-xs font-bold text-stone-900 truncate max-w-[120px]">{firmName}</div>
-                  <div className="text-[10px] font-mono font-semibold text-stone-500 uppercase tracking-wider flex items-center gap-1">
-                    {isAdmin ? (
-                      <span className="text-red-800 font-bold flex items-center gap-0.5">
-                        <ShieldCheck size={11} /> Admin
-                      </span>
-                    ) : (
-                      'Merchant'
-                    )}
-                  </div>
+                  <div className="text-[13px] font-bold text-zinc-900 truncate max-w-[130px] leading-tight">{firmName}</div>
                 </div>
-                <ChevronDown size={14} className={`text-stone-500 transition-transform ${isProfileMenuOpen ? 'rotate-180' : ''}`} />
+                <ChevronDown size={14} className={`text-zinc-500 transition-transform duration-150 ${isProfileMenuOpen ? 'rotate-180' : ''}`} />
               </button>
 
               {/* Profile Dropdown */}
               <AnimatePresence>
                 {isProfileMenuOpen && (
                   <motion.div
-                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    initial={{ opacity: 0, y: 6, scale: 0.98 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                    transition={{ duration: 0.15 }}
-                    className="absolute right-0 top-14 w-64 bg-[#fffdf9] rounded-lg shadow-xl border border-[#c7bba7] p-2 z-50 overflow-hidden"
+                    exit={{ opacity: 0, y: 6, scale: 0.98 }}
+                    transition={{ duration: 0.15, ease: [0.22, 1, 0.36, 1] }}
+                    className="absolute right-0 top-12 w-64 bg-white rounded-lg shadow-elevated border border-zinc-300 p-2 z-50"
                   >
-                    <div className="p-3 bg-[#f6f0e4] rounded-md mb-1.5 border border-[#d6cbb9]">
-                      <p className="text-xs font-serif font-bold text-stone-900 truncate">{firmName}</p>
-                      {ownerName && <p className="text-[11px] text-stone-600 truncate">{ownerName}</p>}
-                      <p className="text-[10px] text-stone-500 font-mono truncate mt-0.5">{currentUser?.email}</p>
+                    <div className="p-3 bg-zinc-50 rounded-md mb-1.5 border border-zinc-200">
+                      <p className="text-[14px] font-display font-bold text-zinc-900 truncate">{firmName}</p>
+                      {ownerName && <p className="text-[13px] text-zinc-600 truncate">{ownerName}</p>}
+                      <p className="text-[13px] text-zinc-500 truncate mt-0.5">{currentUser?.email}</p>
                       {isAdmin && (
-                        <div className="mt-2 inline-flex items-center gap-1 text-[10px] font-mono font-bold text-red-800 bg-red-50 border border-red-300 px-2 py-0.5 rounded-sm">
-                          <ShieldCheck size={11} /> Platform Superadmin
+                        <div className="mt-2 inline-flex items-center gap-1 text-[13px] font-semibold text-zinc-900">
+                          <ShieldCheck size={14} /> Platform Superadmin
                         </div>
                       )}
                     </div>
@@ -192,9 +172,9 @@ export default function AuthLayout() {
                           setIsProfileMenuOpen(false);
                           navigate('/settings');
                         }}
-                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-md text-xs font-bold text-stone-700 hover:bg-[#f0e9db] transition-colors text-left"
+                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-md text-[14px] font-medium text-zinc-700 hover:bg-zinc-100 hover:text-zinc-900 transition-colors duration-150 text-left"
                       >
-                        <Settings size={15} className="text-stone-500" /> Business Profile &amp; Settings
+                        <Settings size={15} className="text-zinc-500" /> Business Profile &amp; Settings
                       </button>
 
                       {isAdmin ? (
@@ -203,20 +183,20 @@ export default function AuthLayout() {
                             setIsProfileMenuOpen(false);
                             navigate('/admin');
                           }}
-                          className="w-full flex items-center gap-2.5 px-3 py-2 rounded-md text-xs font-bold text-red-800 hover:bg-red-50 transition-colors text-left"
+                          className="w-full flex items-center gap-2.5 px-3 py-2 rounded-md text-[14px] font-medium text-zinc-900 hover:bg-zinc-100 transition-colors duration-150 text-left"
                         >
                           <ShieldAlert size={15} /> Platform Command Center
                         </button>
                       ) : null}
 
-                      <div className="my-1 border-t border-[#d6cbb9]" />
+                      <div className="my-1 border-t border-zinc-200" />
 
                       <button
                         onClick={() => {
                           setIsProfileMenuOpen(false);
                           handleLogout();
                         }}
-                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-md text-xs font-bold text-red-700 hover:bg-red-50 transition-colors text-left"
+                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-md text-[14px] font-medium text-red-600 hover:bg-red-50 transition-colors duration-150 text-left"
                       >
                         <LogOut size={15} /> Sign Out of UdharPe
                       </button>
@@ -228,9 +208,9 @@ export default function AuthLayout() {
           </div>
         </div>
 
-        {/* Mobile Floating Bottom Bar */}
-        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-[#fffdf9]/95 backdrop-blur-lg border-t-2 border-stone-800 z-50 px-3 py-2 pb-safe min-h-[4.5rem]">
-          <div className="flex justify-around items-center h-full">
+        {/* Mobile Bottom Bar */}
+        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-zinc-300 z-50 px-2 py-1.5">
+          <div className="flex justify-around items-center">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = location.pathname === item.path;
@@ -238,19 +218,12 @@ export default function AuthLayout() {
                 <button
                   key={item.name}
                   onClick={() => navigate(item.path)}
-                  className={`relative p-2 flex-1 mx-1 rounded-md flex flex-col items-center justify-center gap-1 transition-colors ${
-                    isActive ? 'text-red-800' : 'text-stone-500 hover:text-stone-900'
+                  className={`py-1.5 px-2 flex-1 rounded-md flex flex-col items-center justify-center gap-1 transition-colors duration-150 ${
+                    isActive ? 'text-zinc-900 font-bold bg-zinc-100' : 'text-zinc-500 hover:text-zinc-900'
                   }`}
                 >
-                  {isActive && (
-                    <motion.div
-                      layoutId="mobileActiveTab"
-                      transition={{ type: 'spring', bounce: 0.25, duration: 0.35 }}
-                      className="absolute inset-0 bg-[#f0e9db] border border-[#c7bba7] rounded-md -z-0"
-                    />
-                  )}
-                  <Icon size={20} className="relative z-10 shrink-0" />
-                  <span className="relative z-10 text-[11px] text-center font-bold">{item.name}</span>
+                  <Icon size={18} className="shrink-0" />
+                  <span className="text-[12px] text-center">{item.name}</span>
                 </button>
               );
             })}
@@ -258,13 +231,13 @@ export default function AuthLayout() {
         </div>
       </nav>
 
-      {/* Main Content Area with Smooth Framer Page Transition */}
-      <main className="flex-1 w-full max-w-7xl mx-auto pb-24 md:pb-8 pt-6">
+      {/* Main Content */}
+      <main className="flex-1 w-full max-w-7xl mx-auto pb-24 md:pb-12 pt-6">
         <motion.div
           key={location.pathname}
-          initial={{ opacity: 0, y: 8 }}
+          initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
         >
           <Outlet />
         </motion.div>

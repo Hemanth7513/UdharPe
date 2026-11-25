@@ -10,8 +10,8 @@ export default function AnimatedCurrency({ value = 0, prefix = '₹', className 
 
   useEffect(() => {
     const controls = animate(displayValue, numericTarget, {
-      duration: 0.65,
-      ease: [0.16, 1, 0.3, 1],
+      duration: 0.55,
+      ease: [0.22, 1, 0.36, 1],
       onUpdate: (latest) => setDisplayValue(Math.round(latest)),
     });
     return () => controls.stop();
@@ -19,7 +19,7 @@ export default function AnimatedCurrency({ value = 0, prefix = '₹', className 
   }, [numericTarget]);
 
   return (
-    <span className={`tabular-nums font-mono ${className}`}>
+    <span className={`tabular-nums ${className}`}>
       {prefix}{displayValue.toLocaleString('en-IN')}
     </span>
   );

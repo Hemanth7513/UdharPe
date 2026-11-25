@@ -98,25 +98,27 @@ export default function Settings() {
   }
 
   return (
-    <motion.div 
-      className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 animate-fade-in pb-12"
-      initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+    <motion.div
+      className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 pb-12"
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.2 }}
     >
-      <header className="mb-8 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 shadow-neu rounded-2xl flex items-center justify-center text-neu-primary bg-neu-bg">
-            <SettingsIcon size={24} />
+      <header className="mb-7 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3.5">
+          <div className="w-11 h-11 rounded-lg bg-white border border-zinc-300 flex items-center justify-center text-zinc-900">
+            <SettingsIcon size={22} />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-neu-heading tracking-tight">Settings</h1>
-            <p className="text-neu-text font-medium text-sm mt-1">Manage your firm profile</p>
+            <h1 className="text-3xl font-display font-bold text-zinc-900 tracking-tight">Settings</h1>
+            <p className="text-zinc-600 text-[14px] mt-0.5">Manage your firm profile</p>
           </div>
         </div>
-        
+
         {!isEditing && (
-          <button 
+          <button
             onClick={() => setIsEditing(true)}
-            className="neu-card p-3 text-neu-primary hover:text-white hover:bg-neu-primary transition-all"
+            className="btn-solid p-2.5"
             title="Edit Profile"
           >
             <Edit2 size={18} />
@@ -124,81 +126,81 @@ export default function Settings() {
         )}
       </header>
 
-      <form onSubmit={handleSaveProfile} className="neu-card p-6 sm:p-8 space-y-6">
-        
-        <div className="space-y-1">
-          <label htmlFor="firmName" className="text-xs font-bold text-neu-text uppercase tracking-wider pl-1">Firm Name</label>
+      <form onSubmit={handleSaveProfile} className="bg-white border border-zinc-300 rounded-lg p-6 sm:p-8 space-y-5">
+
+        <div className="space-y-1.5">
+          <label htmlFor="firmName" className="block text-[13px] font-semibold text-zinc-700">Firm Name</label>
           <div className="relative">
-            <Briefcase size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-neu-primary" />
-            <input 
+            <Briefcase size={17} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500" />
+            <input
               id="firmName"
-              type="text" 
+              type="text"
               required
               disabled={!isEditing}
               value={profile.firm_name}
-              onChange={(e) => setProfile({...profile, firm_name: e.target.value})}
-              className={`w-full pl-12 pr-4 py-4 rounded-xl font-bold text-neu-heading outline-none transition-all ${isEditing ? 'bg-neu-bg shadow-neu-inner focus:ring-2 focus:ring-neu-primary/30 border border-gray-300' : 'bg-transparent shadow-none'}`}
+              onChange={(e) => setProfile({ ...profile, firm_name: e.target.value })}
+              className={`w-full pl-11 pr-4 py-2.5 rounded-md font-semibold text-zinc-900 outline-none transition-colors duration-150 ${isEditing ? 'bg-white border border-zinc-300 focus:border-zinc-900 focus:ring-2 focus:ring-zinc-900/10' : 'bg-zinc-50 border border-zinc-200'}`}
             />
           </div>
         </div>
 
-        <div className="space-y-1">
-          <label htmlFor="ownerName" className="text-xs font-bold text-neu-text uppercase tracking-wider pl-1">Owner Name</label>
+        <div className="space-y-1.5">
+          <label htmlFor="ownerName" className="block text-[13px] font-semibold text-zinc-700">Owner Name</label>
           <div className="relative">
-            <User size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-neu-primary" />
-            <input 
+            <User size={17} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500" />
+            <input
               id="ownerName"
-              type="text" 
+              type="text"
               required
               disabled={!isEditing}
               value={profile.owner_name}
-              onChange={(e) => setProfile({...profile, owner_name: e.target.value})}
-              className={`w-full pl-12 pr-4 py-4 rounded-xl font-bold text-neu-heading outline-none transition-all ${isEditing ? 'bg-neu-bg shadow-neu-inner focus:ring-2 focus:ring-neu-primary/30 border border-gray-300' : 'bg-transparent shadow-none'}`}
+              onChange={(e) => setProfile({ ...profile, owner_name: e.target.value })}
+              className={`w-full pl-11 pr-4 py-2.5 rounded-md font-semibold text-zinc-900 outline-none transition-colors duration-150 ${isEditing ? 'bg-white border border-zinc-300 focus:border-zinc-900 focus:ring-2 focus:ring-zinc-900/10' : 'bg-zinc-50 border border-zinc-200'}`}
             />
           </div>
         </div>
 
-        <div className="space-y-1">
-          <label className="text-xs font-bold text-neu-text uppercase tracking-wider pl-1">Email Address</label>
+        <div className="space-y-1.5">
+          <label className="block text-[13px] font-semibold text-zinc-700">Email Address</label>
           <div className="relative">
-            <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-neu-primary opacity-50" />
-            <input 
-              type="email" 
+            <Mail size={17} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
+            <input
+              type="email"
               disabled
               value={profile.email}
-              className="w-full pl-12 pr-4 py-4 rounded-xl font-medium text-neu-heading bg-transparent shadow-none opacity-70"
+              className="w-full pl-11 pr-4 py-2.5 rounded-md font-medium text-zinc-600 bg-zinc-50 border border-zinc-200"
             />
           </div>
-          {isEditing && <p className="text-xs text-neu-text pl-1 mt-1 italic">Email cannot be changed here.</p>}
+          {isEditing && <p className="text-[13px] text-zinc-500 mt-1">Email cannot be changed here.</p>}
         </div>
 
         {isEditing && (
-          <div className="flex gap-4 pt-4">
-            <button 
+          <div className="flex gap-3 pt-3">
+            <button
               type="button"
               onClick={handleCancel}
-              className="flex-1 py-4 rounded-xl shadow-neu text-neu-heading font-bold hover:shadow-neu-hover transition-all flex items-center justify-center gap-2"
+              className="btn-solid flex-1 py-2.5"
             >
-              <X size={18} /> Cancel
+              <X size={17} /> Cancel
             </button>
-            <button 
+            <button
               type="submit"
               disabled={saving}
-              className="flex-1 btn-solid py-4"
+              className="btn-primary flex-1 py-2.5"
             >
-              <Save size={18} /> {saving ? 'Saving...' : 'Save Changes'}
+              <Save size={17} /> {saving ? 'Saving...' : 'Save Changes'}
             </button>
           </div>
         )}
 
         {!isEditing && (
-          <div className="pt-6 mt-6 border-t border-white/20">
-            <button 
+          <div className="pt-5 mt-5 border-t border-zinc-200">
+            <button
               type="button"
               onClick={handleLogout}
-              className="w-full py-4 rounded-xl shadow-neu flex items-center justify-center gap-2 text-neu-danger font-bold hover:shadow-neu-hover transition-all bg-neu-bg"
+              className="w-full py-2.5 rounded-md border border-red-200 bg-red-50 hover:bg-red-100 flex items-center justify-center gap-2 text-red-700 font-semibold transition-colors duration-150 text-[14px]"
             >
-              <LogOut size={20} /> Log Out Securely
+              <LogOut size={18} /> Log Out Securely
             </button>
           </div>
         )}

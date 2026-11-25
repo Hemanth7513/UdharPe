@@ -7,10 +7,10 @@ import { ArrowRight, Briefcase, Eye, EyeOff, Loader2, CheckCircle2, AlertCircle,
 
 export default function Auth({ isRecovering }) {
   const navigate = useNavigate();
-  const [authMode, setAuthMode] = useState(isRecovering ? 'update_password' : 'login'); // 'login', 'signup', 'forgot_password', 'magic_link', 'update_password'
+  const [authMode, setAuthMode] = useState(isRecovering ? 'update_password' : 'login');
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
-  
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -25,7 +25,6 @@ export default function Auth({ isRecovering }) {
   }, [isRecovering]);
 
   useEffect(() => {
-    // Check if the user is coming from a password recovery email
     const { data: authListener } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'PASSWORD_RECOVERY') {
         setAuthMode('update_password');
@@ -50,14 +49,12 @@ export default function Auth({ isRecovering }) {
         setIconState('CheckCircle2');
         const isAdmin = isSuperAdminUser(data.user);
         navigate(isAdmin ? '/admin' : '/dashboard');
-      } 
-      else if (authMode === 'signup') {
-        // First try custom branded edge function; fallback to standard Supabase Auth
+      } else if (authMode === 'signup') {
         try {
           const { error: fnError } = await supabase.functions.invoke('send-auth-email', {
-            body: { 
-              email, 
-              password, 
+            body: {
+              email,
+              password,
               type: 'signup',
               options: { data: { firm_name: firmName, owner_name: ownerName } }
             }
@@ -74,13 +71,11 @@ export default function Auth({ isRecovering }) {
           });
           if (signUpError) throw signUpError;
         }
-        
+
         setIconState('CheckCircle2');
         setErrorMsg('Registration successful! Check your email or login now.');
         setAuthMode('login');
-      }
-      else if (authMode === 'forgot_password') {
-        // First try custom branded edge function; fallback to standard Supabase Auth reset
+      } else if (authMode === 'forgot_password') {
         try {
           const { error: fnError } = await supabase.functions.invoke('send-auth-email', {
             body: { email, type: 'recovery' }
@@ -96,9 +91,7 @@ export default function Auth({ isRecovering }) {
         setIconState('CheckCircle2');
         setErrorMsg('Password reset link sent to your email!');
         setAuthMode('login');
-      }
-      else if (authMode === 'magic_link') {
-        // First try custom branded edge function; fallback to standard Supabase Auth OTP / magic link
+      } else if (authMode === 'magic_link') {
         try {
           const { error: fnError } = await supabase.functions.invoke('send-auth-email', {
             body: { email, type: 'magiclink' }
@@ -117,17 +110,15 @@ export default function Auth({ isRecovering }) {
         setIconState('CheckCircle2');
         setErrorMsg('Magic link sent! Check your inbox to log in.');
         setAuthMode('login');
-      }
-      else if (authMode === 'update_password') {
+      } else if (authMode === 'update_password') {
         if (password !== confirmPassword) {
-          throw new Error("Passwords do not match");
+          throw new Error('Passwords do not match');
         }
         const { error } = await supabase.auth.updateUser({ password });
         if (error) throw error;
-        
-        // Force manual login after reset
+
         await supabase.auth.signOut();
-        
+
         setIconState('CheckCircle2');
         setErrorMsg('Password updated successfully! Please log in with your new password.');
         setAuthMode('login');
@@ -135,15 +126,15 @@ export default function Auth({ isRecovering }) {
         setConfirmPassword('');
       }
     } catch (error) {
-      console.error("Auth Error:", error); 
-      let safeMessage = error.message || "An error occurred. Please try again.";
-      
+      console.error('Auth Error:', error);
+      let safeMessage = error.message || 'An error occurred. Please try again.';
+
       if (authMode === 'login') {
-        safeMessage = error.message || "Invalid email or password.";
+        safeMessage = error.message || 'Invalid email or password.';
       } else if (authMode === 'forgot_password') {
         const isRateLimit = error.message && (
-          error.message.toLowerCase().includes('rate limit') || 
-          error.message.toLowerCase().includes('wait') || 
+          error.message.toLowerCase().includes('rate limit') ||
+          error.message.toLowerCase().includes('wait') ||
           error.status === 429
         );
         if (isRateLimit) {
@@ -152,11 +143,11 @@ export default function Auth({ isRecovering }) {
           setLoading(false);
           return;
         }
-        safeMessage = error.message || "Failed to send reset link. Please check your email or try again later.";
+        safeMessage = error.message || 'Failed to send reset link. Please check your email or try again later.';
       } else if (authMode === 'magic_link') {
-        safeMessage = error.message || "Failed to send magic link. Please try again.";
+        safeMessage = error.message || 'Failed to send magic link. Please try again.';
       }
-      
+
       setErrorMsg(safeMessage);
       setIconState('AlertCircle');
     } finally {
@@ -177,47 +168,52 @@ export default function Auth({ isRecovering }) {
   const { title, subtitle } = renderHeader();
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <motion.div 
-        className="w-full max-w-md animate-slide-up"
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.4 }}
+    <div className="min-h-screen flex flex-col justify-center items-center p-4 bg-[#f4f4f5]">
+      <motion.div
+        className="w-full max-w-md"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
       >
-        <div className="neu-card p-8 sm:p-10">
-          
-          <div className="flex justify-center mb-6">
-            <motion.div 
-              key={iconState}
-              initial={{ scale: 0.5, rotate: -20, opacity: 0 }}
-              animate={{ scale: 1, rotate: 0, opacity: 1 }}
-              transition={{ type: "spring", stiffness: 300, damping: 15 }}
-              className="w-20 h-20 shadow-sm rounded-full flex items-center justify-center text-neu-primary bg-slate-50 border border-slate-200"
-            >
-              {iconState === 'Briefcase' && <Briefcase className="w-8 h-8" />}
-              {iconState === 'Eye' && <Eye className="w-8 h-8" />}
-              {iconState === 'EyeOff' && <EyeOff className="w-8 h-8" />}
-              {iconState === 'Loader2' && <Loader2 className="w-8 h-8 animate-spin" />}
-              {iconState === 'CheckCircle2' && <CheckCircle2 className="w-8 h-8 text-neu-success" />}
-              {iconState === 'AlertCircle' && <AlertCircle className="w-8 h-8 text-neu-danger" />}
-            </motion.div>
+        <div className="text-center mb-6">
+          <button
+            type="button"
+            onClick={() => navigate('/')}
+            className="text-[24px] font-display font-bold tracking-tight text-zinc-900"
+          >
+            UdharPe
+          </button>
+        </div>
+
+        <div className="bg-white border border-zinc-300 rounded-lg p-7 sm:p-9">
+          <div className="flex justify-center mb-5">
+            <div className="w-14 h-14 rounded-lg flex items-center justify-center text-zinc-900 bg-zinc-100 border border-zinc-200">
+              {iconState === 'Briefcase' && <Briefcase className="w-6 h-6" />}
+              {iconState === 'Eye' && <Eye className="w-6 h-6" />}
+              {iconState === 'EyeOff' && <EyeOff className="w-6 h-6" />}
+              {iconState === 'Loader2' && <Loader2 className="w-6 h-6 animate-spin" />}
+              {iconState === 'CheckCircle2' && <CheckCircle2 className="w-6 h-6 text-emerald-700" />}
+              {iconState === 'AlertCircle' && <AlertCircle className="w-6 h-6 text-red-600" />}
+            </div>
           </div>
 
-          <h1 className="text-3xl font-bold text-center text-neu-heading mb-2 tracking-tight">
+          <h1 className="text-2xl font-display font-bold text-center text-zinc-900 mb-1.5 tracking-tight">
             {title}
           </h1>
-          <p className="text-center text-neu-text mb-8 text-sm">
+          <p className="text-center text-zinc-600 mb-7 text-[15px]">
             {subtitle}
           </p>
-          
+
           <AnimatePresence>
             {errorMsg && (
-              <motion.div 
-                initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
-                className={`p-4 rounded-xl mb-6 text-sm font-medium border ${
-                  errorMsg.includes('successful') || errorMsg.includes('sent') || errorMsg.includes('updated') 
-                    ? 'bg-indigo-50/50 border-indigo-100 text-indigo-700' 
-                    : 'bg-red-50/50 border-red-100 text-red-700'
+              <motion.div
+                initial={{ opacity: 0, y: -6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -6 }}
+                className={`p-3.5 rounded-md mb-6 text-[14px] font-medium border ${
+                  errorMsg.includes('successful') || errorMsg.includes('sent') || errorMsg.includes('updated')
+                    ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                    : 'bg-red-50 border-red-200 text-red-700'
                 }`}
               >
                 {errorMsg}
@@ -225,132 +221,126 @@ export default function Auth({ isRecovering }) {
             )}
           </AnimatePresence>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            
+          <form onSubmit={handleSubmit} className="space-y-5">
             {authMode === 'signup' && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}
-                className="space-y-6 overflow-hidden"
-              >
+              <div className="space-y-5">
                 <div>
-                  <label htmlFor="firmName" className="block text-sm font-semibold text-neu-heading mb-2 pl-1">Firm Name</label>
-                  <input 
+                  <label htmlFor="firmName" className="block text-[13px] font-semibold text-zinc-800 mb-1.5">Firm Name</label>
+                  <input
                     id="firmName"
                     type="text" required value={firmName} onChange={e => setFirmName(e.target.value)}
                     placeholder="e.g. Sharma Electronics" className="input-field"
                   />
                 </div>
                 <div>
-                  <label htmlFor="ownerName" className="block text-sm font-semibold text-neu-heading mb-2 pl-1">Owner Name</label>
-                  <input 
+                  <label htmlFor="ownerName" className="block text-[13px] font-semibold text-zinc-800 mb-1.5">Owner Name</label>
+                  <input
                     id="ownerName"
                     type="text" required value={ownerName} onChange={e => setOwnerName(e.target.value)}
                     placeholder="e.g. Rajesh Sharma" className="input-field"
                   />
                 </div>
-              </motion.div>
+              </div>
             )}
 
             {authMode !== 'update_password' && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                <label htmlFor="email" className="block text-sm font-semibold text-neu-heading mb-2 pl-1">Email Address</label>
-                <input 
+              <div>
+                <label htmlFor="email" className="block text-[13px] font-semibold text-zinc-800 mb-1.5">Email Address</label>
+                <input
                   id="email"
                   type="email" required value={email} onChange={e => setEmail(e.target.value)}
                   onFocus={() => setIconState('Eye')} onBlur={() => setIconState('Briefcase')}
                   placeholder="you@example.com" className="input-field"
                 />
-              </motion.div>
+              </div>
             )}
 
             {(authMode === 'login' || authMode === 'signup' || authMode === 'update_password') && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+              <div className="space-y-5">
                 <div>
-                  <label htmlFor="password" className="block text-sm font-semibold text-neu-heading mb-2 pl-1">
+                  <label htmlFor="password" className="block text-[13px] font-semibold text-zinc-800 mb-1.5">
                     {authMode === 'update_password' ? 'New Password' : 'Password'}
                   </label>
-                  <input 
+                  <input
                     id="password"
                     type="password" required value={password} onChange={e => setPassword(e.target.value)}
                     onFocus={() => setIconState('EyeOff')} onBlur={() => setIconState('Briefcase')}
                     placeholder="••••••••" className="input-field"
                   />
                 </div>
-                
+
                 {authMode === 'update_password' && (
-                  <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}>
-                    <label htmlFor="confirmPassword" className="block text-sm font-semibold text-neu-heading mb-2 pl-1">
+                  <div>
+                    <label htmlFor="confirmPassword" className="block text-[13px] font-semibold text-zinc-800 mb-1.5">
                       Confirm New Password
                     </label>
-                    <input 
+                    <input
                       id="confirmPassword"
                       type="password" required value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)}
                       onFocus={() => setIconState('EyeOff')} onBlur={() => setIconState('Briefcase')}
                       placeholder="••••••••" className="input-field"
                     />
-                  </motion.div>
+                  </div>
                 )}
-              </motion.div>
+              </div>
             )}
 
-            <button type="submit" disabled={loading} className="btn-solid w-full mt-4">
+            <button type="submit" disabled={loading} className="btn-primary w-full">
               {loading ? 'Processing...' : (
-                authMode === 'login' ? 'Log In' : 
-                authMode === 'signup' ? 'Create Profile' : 
+                authMode === 'login' ? 'Log In' :
+                authMode === 'signup' ? 'Create Profile' :
                 authMode === 'forgot_password' ? 'Send Reset Link' :
                 authMode === 'magic_link' ? 'Send Magic Link' :
                 'Update Password'
               )}
-              {!loading && <ArrowRight className="w-5 h-5 ml-1" />}
+              {!loading && <ArrowRight className="w-4 h-4" />}
             </button>
           </form>
 
           {authMode === 'login' && (
             <div className="flex flex-col sm:flex-row justify-between gap-3 mt-6">
-              <button 
+              <button
                 type="button"
                 onClick={() => { setAuthMode('magic_link'); setErrorMsg(''); }}
-                className="flex items-center justify-center gap-2 text-sm text-neu-primary font-bold hover:scale-105 transition-transform"
+                className="flex items-center justify-center gap-2 text-[13px] text-zinc-900 font-semibold hover:underline"
               >
-                <Mail size={16} /> OTP / Magic Link
+                <Mail size={15} /> OTP / Magic Link
               </button>
-              <button 
+              <button
                 type="button"
                 onClick={() => { setAuthMode('forgot_password'); setErrorMsg(''); }}
-                className="flex items-center justify-center gap-2 text-sm text-neu-text font-bold hover:scale-105 transition-transform"
+                className="flex items-center justify-center gap-2 text-[13px] text-zinc-600 font-semibold hover:text-zinc-900"
               >
-                <Key size={16} /> Forgot Password?
+                <Key size={15} /> Forgot Password?
               </button>
             </div>
           )}
 
           {authMode !== 'login' && authMode !== 'update_password' && (
-            <button 
+            <button
               type="button"
               onClick={() => { setAuthMode('login'); setErrorMsg(''); }}
-              className="block text-center w-full mt-6 text-sm text-neu-text font-bold hover:text-neu-primary transition-colors"
+              className="block text-center w-full mt-6 text-[13px] text-zinc-700 font-semibold hover:text-zinc-900 transition-colors duration-150"
             >
               Back to Login
             </button>
           )}
 
-          <div className="mt-8 pt-6 border-t border-slate-100">
-            <p className="text-center text-sm font-medium text-neu-text mb-4">
-              {authMode === 'signup' ? "Already registered? " : "Don't have an account? "}
-              <button 
+          <div className="mt-7 pt-5 border-t border-zinc-200">
+            <p className="text-center text-[14px] text-zinc-600 mb-3">
+              {authMode === 'signup' ? 'Already registered? ' : "Don't have an account? "}
+              <button
                 onClick={() => { setAuthMode(authMode === 'signup' ? 'login' : 'signup'); setErrorMsg(''); }}
-                className="text-neu-primary font-bold hover:text-neu-primary-hover transition-colors px-2 py-1 ml-1 hover:underline"
+                className="text-zinc-900 font-bold hover:underline ml-1"
               >
                 {authMode === 'signup' ? 'Log In Here' : 'Register Firm'}
               </button>
             </p>
-            <div className="flex justify-center gap-4 text-xs font-medium text-neu-text/80">
-              <button onClick={() => navigate('/privacy-policy')} className="hover:text-neu-primary transition-colors">Privacy Policy</button>
-              <span>•</span>
-              <button onClick={() => navigate('/terms-of-service')} className="hover:text-neu-primary transition-colors">Terms of Service</button>
+            <div className="flex justify-center gap-5 text-[13px] text-zinc-500">
+              <button onClick={() => navigate('/privacy-policy')} className="hover:text-zinc-900 transition-colors duration-150">Privacy Policy</button>
+              <button onClick={() => navigate('/terms-of-service')} className="hover:text-zinc-900 transition-colors duration-150">Terms of Service</button>
             </div>
           </div>
-
         </div>
       </motion.div>
     </div>

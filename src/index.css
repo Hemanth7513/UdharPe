@@ -4,75 +4,65 @@
 
 @layer base {
   body {
-    background-color: #f6f0e4;
-    background-image: linear-gradient(to bottom, rgba(168, 148, 120, 0.14) 1px, transparent 1px);
-    background-size: 100% 32px;
-    @apply text-stone-900 antialiased min-h-screen overflow-x-hidden selection:bg-red-800 selection:text-white font-sans;
+    background-color: #f4f4f5;
+    @apply text-zinc-900 antialiased min-h-screen overflow-x-hidden selection:bg-zinc-900 selection:text-white font-sans text-[15px];
   }
   h1, h2, h3, h4, h5, h6 {
-    @apply text-stone-900 font-serif tracking-tight font-bold;
+    @apply text-zinc-900 font-display tracking-tight font-bold;
   }
 }
 
 @layer components {
-  /* Paper-Craft Ledger Card: Warm Ivory Paper with Tactile Accounting Border */
+  /* Architectural Stone Card */
   .neu-card {
-    background-color: #fffdf9;
-    border: 1px solid #d6cbb9;
-    box-shadow: 0 4px 14px rgba(90, 70, 45, 0.07);
-    @apply rounded-lg transition-all duration-200
-           hover:shadow-[0_8px_20px_rgba(90,70,45,0.1)] hover:border-[#bcae98];
+    background-color: #ffffff;
+    border: 1px solid #d4d4d8;
+    @apply rounded-lg transition-colors duration-150 hover:border-zinc-400;
   }
-  
-  /* Primary Bahi-Khata Crimson Button */
+
+  /* Primary Charcoal Action Button (never red/warning) */
   .btn-primary {
-    @apply relative overflow-hidden bg-red-800 text-white font-semibold px-5 py-2.5 rounded-md 
-           shadow-sm border border-red-900/80 transition-all duration-150 ease-out 
-           hover:bg-red-900 hover:shadow-md
-           active:translate-y-[1px]
-           flex items-center justify-center gap-2;
+    @apply bg-zinc-900 text-white font-semibold px-5 py-2.5 rounded-md
+           border border-zinc-900 transition-colors duration-150 ease-out
+           hover:bg-zinc-800 active:translate-y-[1px]
+           flex items-center justify-center gap-2 text-[14px];
   }
-  
-  /* Secondary Charcoal Ink Button */
+
+  /* Secondary Outlined Stone Button */
   .btn-solid {
-    @apply relative overflow-hidden bg-stone-900 text-[#fffdf9] font-semibold px-5 py-2.5 rounded-md 
-           shadow-sm border border-stone-950 transition-all duration-150 ease-out hover:bg-stone-800
-           active:translate-y-[1px] flex items-center justify-center gap-2;
+    @apply bg-white text-zinc-900 font-semibold px-5 py-2.5 rounded-md
+           border border-zinc-300 transition-colors duration-150 ease-out
+           hover:bg-zinc-100 hover:border-zinc-400 active:translate-y-[1px]
+           flex items-center justify-center gap-2 text-[14px];
   }
 
-  /* Warm Archival Input Field */
+  /* Crisp Architectural Input */
   .input-field {
-    background-color: #fffdf9;
-    border: 1px solid #c7bba7;
-    @apply w-full text-stone-900 placeholder-stone-400
-           rounded-md px-4 py-2.5 outline-none transition-all duration-150
-           shadow-inner
-           focus:border-red-800 focus:ring-4 focus:ring-red-800/10
-           hover:border-stone-500 text-sm font-medium;
+    @apply w-full bg-white border border-zinc-300 text-zinc-900 placeholder-zinc-400
+           rounded-md px-3.5 py-2.5 outline-none transition-colors duration-150
+           focus:border-zinc-900 focus:ring-2 focus:ring-zinc-900/10
+           hover:border-zinc-400 text-[15px] font-medium;
   }
+}
 
-  /* Physical Rubber-Stamp Status Badges */
-  .stamp-due {
-    @apply inline-block px-2 py-0.5 border-2 border-red-700 text-red-700 bg-red-50/40
-           font-mono font-black text-[10px] uppercase tracking-widest -rotate-2 rounded-sm select-none;
-  }
-
-  .stamp-paid {
-    @apply inline-block px-2 py-0.5 border-2 border-emerald-700 text-emerald-700 bg-emerald-50/40
-           font-mono font-black text-[10px] uppercase tracking-widest rotate-1 rounded-sm select-none;
-  }
-
-  .stamp-partial {
-    @apply inline-block px-2 py-0.5 border-2 border-amber-700 text-amber-800 bg-amber-50/40
-           font-mono font-black text-[10px] uppercase tracking-widest -rotate-1 rounded-sm select-none;
-  }
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
 }
 
 /* Chrome/Safari Autofill fix */
 input:-webkit-autofill,
-input:-webkit-autofill:hover, 
-input:-webkit-autofill:focus, 
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
 input:-webkit-autofill:active {
-  -webkit-box-shadow: 0 0 0 30px #fffdf9 inset !important;
-  -webkit-text-fill-color: #1c1917 !important;
+  -webkit-box-shadow: 0 0 0 30px #ffffff inset !important;
+  -webkit-text-fill-color: #18181b !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

@@ -157,58 +157,61 @@ export default function Billing() {
   }
 
   return (
-    <motion.div 
-      className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 animate-fade-in pb-12"
-      initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+    <motion.div
+      className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pb-12"
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.2 }}
     >
-      <header className="mb-8 flex items-center gap-3">
-        <div className="w-12 h-12 shadow-neu rounded-2xl flex items-center justify-center text-neu-primary bg-neu-bg">
-          <Receipt size={24} />
+      <header className="mb-7 flex items-center gap-3.5">
+        <div className="w-11 h-11 rounded-lg bg-white border border-zinc-300 flex items-center justify-center text-zinc-900">
+          <Receipt size={22} />
         </div>
         <div>
-          <h1 className="text-3xl font-bold text-neu-heading tracking-tight">Record Udhar</h1>
-          <p className="text-neu-text font-medium text-sm mt-1">Add a new entry to a party's ledger</p>
+          <h1 className="text-3xl font-display font-bold text-zinc-900 tracking-tight">Record Udhar</h1>
+          <p className="text-zinc-600 text-[14px] mt-0.5">Add a new entry to a party's ledger</p>
         </div>
       </header>
 
-      <div className="neu-card p-6 sm:p-10 border border-white/40 relative z-10">
-        
+      <div className="bg-white border border-zinc-300 rounded-lg p-6 sm:p-9 relative z-10">
+
         {success ? (
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.96 }}
+            animate={{ opacity: 1, scale: 1 }}
             className="py-12 text-center"
           >
-            <div className="w-20 h-20 mx-auto bg-neu-bg shadow-neu rounded-full flex items-center justify-center text-neu-primary mb-6">
-              <CheckCircle size={40} />
+            <div className="w-16 h-16 mx-auto bg-emerald-50 border border-emerald-200 rounded-full flex items-center justify-center text-emerald-700 mb-5">
+              <CheckCircle size={32} />
             </div>
-            <h2 className="text-2xl font-black text-neu-heading mb-2">Entry Recorded!</h2>
-            <p className="text-neu-text font-medium">The ledger has been updated successfully.</p>
-            <p className="text-xs text-neu-text/60 mt-8 uppercase tracking-widest font-bold">Redirecting to Dashboard...</p>
+            <h2 className="text-2xl font-display font-bold text-zinc-900 mb-2">Entry Recorded!</h2>
+            <p className="text-zinc-600 text-[15px]">The ledger has been updated successfully.</p>
+            <p className="text-[13px] text-zinc-500 mt-6 font-medium">Redirecting to Dashboard...</p>
           </motion.div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-6">
-            
+
             {/* Customer / Party Selection */}
             <div className="relative">
-              <div className="flex justify-between items-end mb-2">
-                <label htmlFor="customerSearch" className="block text-sm font-bold text-neu-heading pl-1 uppercase tracking-wide">
+              <div className="flex justify-between items-end mb-1.5">
+                <label htmlFor="customerSearch" className="block text-[13px] font-semibold text-zinc-800">
                   Customer / Party *
                 </label>
                 {customers.length > 0 && (
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     onClick={() => setIsAddCustomerModalOpen(true)}
-                    className="text-neu-primary font-bold flex items-center gap-1 hover:underline text-sm"
+                    className="text-zinc-900 font-semibold flex items-center gap-1 hover:underline text-[13px]"
                   >
-                    <UserPlus size={16} /> New Party
+                    <UserPlus size={15} /> New Party
                   </button>
                 )}
               </div>
-              
+
               {customers.length === 0 ? (
-                <div className="p-4 rounded-2xl shadow-neu-inner bg-neu-bg text-neu-danger font-medium text-sm flex justify-between items-center">
+                <div className="p-4 rounded-md border border-red-200 bg-red-50 text-red-700 font-medium text-[14px] flex justify-between items-center">
                   <span>No parties found. Please add a customer first.</span>
-                  <button type="button" onClick={() => setIsAddCustomerModalOpen(true)} className="btn-primary text-xs py-1.5 px-3">
+                  <button type="button" onClick={() => setIsAddCustomerModalOpen(true)} className="btn-primary text-[13px] py-1.5 px-3">
                     Add Customer
                   </button>
                 </div>
@@ -226,28 +229,31 @@ export default function Billing() {
                     onFocus={() => setIsDropdownOpen(true)}
                     onBlur={() => setTimeout(() => setIsDropdownOpen(false), 200)}
                     placeholder="Search party by name..."
-                    className="w-full bg-neu-bg text-neu-heading rounded-2xl px-4 py-4 outline-none focus:ring-2 focus:ring-neu-primary/30 shadow-neu-inner font-bold"
+                    className="input-field py-3 font-semibold"
                   />
-                  
+
                   <AnimatePresence>
                     {isDropdownOpen && (
-                      <motion.div 
-                        initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }}
-                        className="absolute z-50 w-full mt-2 bg-neu-bg border border-white/50 shadow-neu rounded-2xl max-h-60 overflow-y-auto"
+                      <motion.div
+                        initial={{ opacity: 0, y: -4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -4 }}
+                        transition={{ duration: 0.14 }}
+                        className="absolute z-50 w-full mt-1.5 bg-white border border-zinc-300 shadow-elevated rounded-lg max-h-60 overflow-y-auto divide-y divide-zinc-200"
                       >
                         {customers.filter(c => c.name.toLowerCase().includes(customerSearch.toLowerCase())).length > 0 ? (
                           customers.filter(c => c.name.toLowerCase().includes(customerSearch.toLowerCase())).map(c => (
-                            <div 
+                            <div
                               key={c.id}
                               onClick={() => {
                                 setSelectedCustomerId(c.id);
                                 setCustomerSearch(c.name);
                                 setIsDropdownOpen(false);
                               }}
-                              className="px-4 py-3 hover:bg-neu-primary/10 cursor-pointer border-b border-white/20 last:border-0 font-bold text-neu-heading flex justify-between"
+                              className="px-4 py-3 hover:bg-zinc-50 cursor-pointer font-semibold text-zinc-900 flex justify-between text-[14px]"
                             >
                               <span>{c.name}</span>
-                              <span className="text-neu-danger font-medium text-sm">₹{Number(c.total_outstanding).toLocaleString()}</span>
+                              <span className="text-red-600 font-medium tabular-nums">₹{Number(c.total_outstanding).toLocaleString('en-IN')}</span>
                             </div>
                           ))
                         ) : (
@@ -262,62 +268,62 @@ export default function Billing() {
 
             {/* Amount */}
             <div>
-              <label htmlFor="amount" className="block text-sm font-bold text-neu-heading mb-2 pl-1 uppercase tracking-wide">
+              <label htmlFor="amount" className="block text-[13px] font-semibold text-zinc-800 mb-1.5">
                 Amount (₹) *
               </label>
               <div className="relative">
-                <span className="absolute left-5 top-1/2 -translate-y-1/2 text-neu-heading font-black text-xl">₹</span>
-                <input 
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-900 font-display font-bold text-lg">₹</span>
+                <input
                   id="amount"
-                  type="number" 
-                  required 
+                  type="number"
+                  required
                   min="1"
                   step="0.01"
-                  value={amount} 
+                  value={amount}
                   onChange={e => setAmount(e.target.value)}
-                  placeholder="0.00" 
-                  className="w-full bg-neu-bg text-neu-heading rounded-2xl pl-12 pr-4 py-4 outline-none focus:ring-2 focus:ring-neu-primary/30 shadow-neu-inner font-black text-xl"
+                  placeholder="0.00"
+                  className="input-field pl-10 py-3 font-display font-bold text-lg tabular-nums"
                 />
               </div>
             </div>
 
             {/* Due Date */}
             <div>
-              <label htmlFor="dueDate" className="block text-sm font-bold text-neu-heading mb-2 pl-1 uppercase tracking-wide">
+              <label htmlFor="dueDate" className="block text-[13px] font-semibold text-zinc-800 mb-1.5">
                 Due Date (Time Period) *
               </label>
-              <input 
+              <input
                 id="dueDate"
-                type="date" 
-                required 
-                value={dueDate} 
+                type="date"
+                required
+                value={dueDate}
                 onChange={e => setDueDate(e.target.value)}
-                className="input-field font-medium uppercase"
+                className="input-field"
               />
             </div>
 
             {/* Description / Note */}
             <div>
-              <label htmlFor="description" className="block text-sm font-bold text-neu-heading mb-2 pl-1 uppercase tracking-wide">
+              <label htmlFor="description" className="block text-[13px] font-semibold text-zinc-800 mb-1.5">
                 Description / Note (Optional)
               </label>
-              <input 
+              <input
                 id="description"
-                type="text" 
-                value={description} 
+                type="text"
+                value={description}
                 onChange={e => setDescription(e.target.value)}
-                placeholder="e.g. Invoice #1042, Materials, etc." 
+                placeholder="e.g. Invoice #1042, Materials, etc."
                 className="input-field"
               />
             </div>
 
-            <button 
-              type="submit" 
-              disabled={isSubmitting || customers.length === 0} 
-              className="btn-solid w-full py-5 text-lg mt-4 flex items-center justify-center gap-2"
+            <button
+              type="submit"
+              disabled={isSubmitting || customers.length === 0}
+              className="btn-primary w-full py-3.5 text-[15px] mt-2"
             >
               {isSubmitting ? 'Recording...' : 'Record Udhar Entry'}
-              {!isSubmitting && <ArrowRight size={20} />}
+              {!isSubmitting && <ArrowRight size={18} />}
             </button>
           </form>
         )}

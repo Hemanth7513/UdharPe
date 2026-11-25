@@ -1,140 +1,79 @@
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, CheckCircle, Shield, TrendingUp, Handshake } from 'lucide-react';
-
-// Animation Variants for staggered, buttery smooth animations
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.15,
-      delayChildren: 0.1
-    }
-  }
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 30 },
-  visible: { 
-    opacity: 1, 
-    y: 0, 
-    transition: { type: "spring", stiffness: 70, damping: 15 } 
-  }
-};
+import { ArrowRight } from 'lucide-react';
 
 export default function Landing() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen overflow-hidden flex flex-col relative bg-neu-bg">
-      
-      {/* Ambient background decoration */}
-      <motion.div 
-        animate={{ y: [0, -20, 0], scale: [1, 1.05, 1] }} 
-        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute top-1/4 left-1/4 w-[300px] h-[300px] rounded-full shadow-neu opacity-40 bg-neu-bg -z-10"
-      />
-      <motion.div 
-        animate={{ y: [0, 30, 0], scale: [1, 0.95, 1] }} 
-        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-        className="absolute bottom-1/4 right-1/4 w-[450px] h-[450px] rounded-full shadow-neu opacity-40 bg-neu-bg -z-10"
-      />
-
-      {/* Minimal Navbar */}
-      <motion.nav 
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
-        className="w-full px-6 py-5 flex justify-between items-center max-w-7xl mx-auto z-10"
-      >
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-xl shadow-neu flex items-center justify-center bg-neu-bg text-neu-primary">
-            <Handshake size={28} />
-          </div>
-          <span className="text-3xl font-black tracking-tight text-neu-heading">UdharPe</span>
-        </div>
-        <button onClick={() => navigate('/auth')} className="btn-solid text-sm px-6 py-2.5">
-          Sign In
-        </button>
-      </motion.nav>
-
-      {/* Ultra Minimal Hero */}
-      <main className="flex-grow flex items-center justify-center max-w-7xl mx-auto px-6 py-12 w-full z-10">
-        
-          <motion.div 
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-            className="flex flex-col items-center text-center max-w-3xl"
+    <div className="min-h-screen flex flex-col bg-[#f4f4f5] text-zinc-900">
+      {/* Compact Single-Line Header */}
+      <header className="w-full border-b border-zinc-300">
+        <div className="max-w-7xl mx-auto px-6 h-16 flex justify-between items-center">
+          <span className="text-[22px] font-display font-bold tracking-tight text-zinc-900">
+            UdharPe
+          </span>
+          <button
+            onClick={() => navigate('/auth')}
+            className="btn-solid px-5 py-2 text-[14px]"
           >
-            <motion.h1 variants={itemVariants} className="text-5xl md:text-6xl lg:text-7xl font-extrabold font-display text-slate-900 leading-[1.1] mb-6 tracking-tight">
-              Business Credit.<br />
-              <span className="text-indigo-600">Tracked Accurately. Cleared on Time.</span>
-            </motion.h1>
-            
-            <motion.p variants={itemVariants} className="text-lg md:text-xl text-slate-600 mb-10 max-w-2xl font-normal leading-relaxed">
-              Replace messy paper notebooks with a secure, cloud-synced ledger. Record daily credit, track settlements, and maintain zero-dispute accounts with your parties.
-            </motion.p>
-            
-            <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-              <button onClick={() => navigate('/auth')} className="btn-primary text-base px-8 py-3.5 w-full sm:w-auto shadow-lg shadow-indigo-600/25">
-                Open Your Free Ledger <ArrowRight size={20} className="ml-1.5" />
-              </button>
-            </motion.div>
-          </motion.div>
+            Sign In
+          </button>
+        </div>
+      </header>
 
+      {/* Monumental Centered Stage */}
+      <main className="flex-grow flex items-center justify-center max-w-5xl mx-auto px-6 py-16 w-full">
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+          className="flex flex-col items-center text-center"
+        >
+          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-display font-bold text-zinc-900 leading-[0.98] tracking-[-0.04em] mb-6">
+            Business credit, tracked accurately and cleared on time.
+          </h1>
+
+          <p className="text-[17px] text-zinc-600 mb-10 max-w-xl leading-relaxed">
+            Replace messy paper notebooks with a cloud-synced ledger. Record daily credit, track settlements, and keep clear accounts with your customers.
+          </p>
+
+          <button
+            onClick={() => navigate('/auth')}
+            className="btn-primary text-[15px] px-7 py-3.5"
+          >
+            Open Your Free Ledger <ArrowRight size={18} />
+          </button>
+        </motion.div>
       </main>
 
-      {/* Bottom Features Bar */}
-      <motion.div 
-        initial={{ opacity: 0, y: 50 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.8, duration: 0.6 }}
-        className="w-full max-w-7xl mx-auto px-6 pb-12 pt-8 mt-auto z-10"
-      >
-        <div className="grid md:grid-cols-3 gap-6">
-          <div className="flex items-center gap-4 p-5 rounded-2xl shadow-neu-inner bg-neu-bg">
-            <div className="w-12 h-12 shadow-neu rounded-full flex shrink-0 items-center justify-center text-neu-primary">
-              <CheckCircle size={20} />
-            </div>
-            <div>
-              <h4 className="font-bold text-neu-heading">Dead Simple</h4>
-              <p className="text-sm text-neu-text font-medium">Log entries in under 30s.</p>
-            </div>
+      {/* Architectural 3-Column Feature Strip */}
+      <section className="w-full max-w-7xl mx-auto px-6 pb-12">
+        <div className="grid md:grid-cols-3 bg-white border border-zinc-300 rounded-lg divide-y md:divide-y-0 md:divide-x divide-zinc-200">
+          <div className="p-6">
+            <h2 className="text-[17px] font-display font-bold text-zinc-900 mb-1.5">Fast daily entries</h2>
+            <p className="text-[15px] text-zinc-600">Record bills and customer payments in seconds from phone or desktop.</p>
           </div>
-          <div className="flex items-center gap-4 p-5 rounded-2xl shadow-neu-inner bg-neu-bg">
-            <div className="w-12 h-12 shadow-neu rounded-full flex shrink-0 items-center justify-center text-neu-primary">
-              <Shield size={20} />
-            </div>
-            <div>
-              <h4 className="font-bold text-neu-heading">100% Private</h4>
-              <p className="text-sm text-neu-text font-medium">Bank-grade data isolation.</p>
-            </div>
+          <div className="p-6">
+            <h2 className="text-[17px] font-display font-bold text-zinc-900 mb-1.5">Isolated business data</h2>
+            <p className="text-[15px] text-zinc-600">Every merchant account runs on strict row-level security and append-only ledgers.</p>
           </div>
-          <div className="flex items-center gap-4 p-5 rounded-2xl shadow-neu-inner bg-neu-bg">
-            <div className="w-12 h-12 shadow-neu rounded-full flex shrink-0 items-center justify-center text-neu-primary">
-              <TrendingUp size={20} />
-            </div>
-            <div>
-              <h4 className="font-bold text-neu-heading">Get Paid Faster</h4>
-              <p className="text-sm text-neu-text font-medium">Track overdue bills instantly.</p>
-            </div>
+          <div className="p-6">
+            <h2 className="text-[17px] font-display font-bold text-zinc-900 mb-1.5">Faster collections</h2>
+            <p className="text-[15px] text-zinc-600">Spot overdue balances immediately and send WhatsApp or email reminders.</p>
           </div>
         </div>
-      </motion.div>
-      
-      {/* Footer Links */}
-      <motion.footer 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1, duration: 0.6 }}
-        className="w-full text-center pb-6 z-10 flex justify-center gap-4 text-xs font-medium text-neu-text/80"
-      >
-        <button onClick={() => navigate('/privacy-policy')} className="hover:text-neu-primary transition-colors">Privacy Policy</button>
-        <span>•</span>
-        <button onClick={() => navigate('/terms-of-service')} className="hover:text-neu-primary transition-colors">Terms of Service</button>
-      </motion.footer>
+      </section>
+
+      {/* Footer */}
+      <footer className="w-full border-t border-zinc-300 py-5 px-6 flex justify-center gap-6 text-[13px] font-medium text-zinc-600">
+        <button onClick={() => navigate('/privacy-policy')} className="hover:text-zinc-900 transition-colors duration-150">
+          Privacy Policy
+        </button>
+        <button onClick={() => navigate('/terms-of-service')} className="hover:text-zinc-900 transition-colors duration-150">
+          Terms of Service
+        </button>
+      </footer>
     </div>
   );
 }

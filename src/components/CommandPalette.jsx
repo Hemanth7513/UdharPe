@@ -10,7 +10,6 @@ export default function CommandPalette({ isOpen, onClose, isAdmin }) {
   const [customers, setCustomers] = useState([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
 
-  // Load customers for quick jump when opened by a merchant
   useEffect(() => {
     if (!isOpen) {
       setQuery('');
@@ -73,7 +72,6 @@ export default function CommandPalette({ isOpen, onClose, isAdmin }) {
     setSelectedIndex(0);
   }, [query]);
 
-  // Keyboard navigation inside modal
   useEffect(() => {
     if (!isOpen) return;
     const handleKeyDown = (e) => {
@@ -103,37 +101,40 @@ export default function CommandPalette({ isOpen, onClose, isAdmin }) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={{ duration: 0.16 }}
             onClick={onClose}
-            className="fixed inset-0 bg-stone-900/45 backdrop-blur-sm"
+            className="fixed inset-0 bg-zinc-950/45 backdrop-blur-sm"
           />
 
           <motion.div
-            initial={{ opacity: 0, scale: 0.96, y: -12 }}
+            initial={{ opacity: 0, scale: 0.97, y: -8 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.96, y: -12 }}
-            transition={{ type: 'spring', damping: 25, stiffness: 360 }}
-            className="relative w-full max-w-lg bg-[#fffdf9] rounded-lg shadow-2xl border-2 border-stone-800 overflow-hidden z-10"
+            exit={{ opacity: 0, scale: 0.97, y: -8 }}
+            transition={{ duration: 0.16, ease: [0.22, 1, 0.36, 1] }}
+            className="relative w-full max-w-lg bg-white rounded-lg shadow-elevated border border-zinc-300 overflow-hidden z-10"
           >
-            {/* Search Input */}
-            <div className="flex items-center gap-3 px-4 py-3.5 border-b border-[#d6cbb9] bg-[#f6f0e4]">
-              <Search size={18} className="text-red-800 shrink-0" />
+            <div className="flex items-center gap-3 px-4 py-3.5 border-b border-zinc-200 bg-zinc-50">
+              <Search size={18} className="text-zinc-500 shrink-0" />
               <input
                 autoFocus
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder={isAdmin ? 'Search admin section...' : 'Search customer name, phone, or action...'}
-                className="w-full bg-transparent text-stone-900 placeholder-stone-500 text-sm font-medium outline-none"
+                className="w-full bg-transparent text-zinc-900 placeholder-zinc-400 text-[15px] font-medium outline-none"
               />
-              <button onClick={onClose} className="p-1 text-stone-500 hover:text-stone-900 rounded">
+              <button
+                onClick={onClose}
+                aria-label="Close search"
+                className="p-1 text-zinc-500 hover:text-zinc-900 rounded transition-colors duration-150"
+              >
                 <X size={16} />
               </button>
             </div>
 
-            {/* Results List */}
             <div className="max-h-80 overflow-y-auto p-2 space-y-1">
               {results.length === 0 ? (
-                <div className="py-8 text-center text-xs font-mono text-stone-500">
+                <div className="py-8 text-center text-[13px] text-zinc-500">
                   No matching pages or customers found.
                 </div>
               ) : (
@@ -148,36 +149,33 @@ export default function CommandPalette({ isOpen, onClose, isAdmin }) {
                         navigate(item.path);
                         onClose();
                       }}
-                      className={`w-full flex items-center justify-between px-3 py-2.5 rounded-md text-left transition-colors ${
-                        active
-                          ? 'bg-red-800 text-white'
-                          : 'text-stone-800 hover:bg-[#f0e9db]'
+                      className={`w-full flex items-center justify-between px-3 py-2.5 rounded-md text-left transition-colors duration-150 ${
+                        active ? 'bg-zinc-900 text-white' : 'text-zinc-800 hover:bg-zinc-100'
                       }`}
                     >
                       <div className="flex items-center gap-3 min-w-0">
-                        <div className={`w-8 h-8 rounded flex items-center justify-center shrink-0 ${
-                          active ? 'bg-red-900 text-white' : 'bg-[#f0e9db] text-stone-700'
+                        <div className={`w-8 h-8 rounded-md flex items-center justify-center shrink-0 ${
+                          active ? 'bg-zinc-800 text-white' : 'bg-zinc-100 text-zinc-700'
                         }`}>
                           <Icon size={16} />
                         </div>
                         <div className="min-w-0">
-                          <div className="text-sm font-bold truncate">{item.label}</div>
-                          <div className={`text-[11px] font-mono truncate ${active ? 'text-red-100' : 'text-stone-500'}`}>
+                          <div className="text-[14px] font-semibold truncate">{item.label}</div>
+                          <div className={`text-[13px] tabular-nums truncate ${active ? 'text-zinc-300' : 'text-zinc-500'}`}>
                             {item.sub}
                           </div>
                         </div>
                       </div>
-                      <ArrowRight size={14} className={`shrink-0 ${active ? 'text-white' : 'text-stone-400'}`} />
+                      <ArrowRight size={14} className={`shrink-0 ${active ? 'text-white' : 'text-zinc-400'}`} />
                     </button>
                   );
                 })
               )}
             </div>
 
-            {/* Footer Hints */}
-            <div className="px-4 py-2 bg-[#f6f0e4] border-t border-[#d6cbb9] flex items-center justify-between text-[10px] font-mono text-stone-500">
+            <div className="px-4 py-2.5 bg-zinc-50 border-t border-zinc-200 flex items-center justify-between text-[13px] text-zinc-500">
               <span>↑↓ Navigate · ↵ Open</span>
-              <span>ESC to close</span>
+              <span>Esc to close</span>
             </div>
           </motion.div>
         </div>

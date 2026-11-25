@@ -365,78 +365,82 @@ export default function CustomerLedger() {
   }
 
   return (
-    <motion.div 
-      className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 animate-fade-in pb-24"
-      initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+    <motion.div
+      className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-24"
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.2 }}
     >
-      <button 
+      <button
         onClick={() => navigate('/customers')}
-        className="mb-6 flex items-center gap-2 text-neu-text hover:text-neu-primary transition-colors font-bold text-sm"
+        className="mb-5 flex items-center gap-2 text-zinc-600 hover:text-zinc-900 transition-colors duration-150 font-semibold text-[14px]"
       >
         <ArrowLeft size={16} /> Back to Parties
       </button>
 
       {/* Customer Header Card */}
-      <div className="neu-card p-6 sm:p-8 mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+      <div className="bg-white border border-zinc-300 rounded-lg p-6 sm:p-7 mb-7 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div className="flex items-center gap-4">
-          <div className="w-16 h-16 shadow-neu-inner rounded-full flex items-center justify-center text-neu-primary bg-neu-bg shrink-0">
-             <User size={30} />
+          <div className="w-14 h-14 rounded-lg bg-zinc-100 border border-zinc-200 flex items-center justify-center text-zinc-900 shrink-0">
+            <User size={26} />
           </div>
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-neu-heading tracking-tight">{customer.name}</h1>
-            {customer.phone && <p className="text-neu-text font-medium mt-1 text-sm">{customer.phone}</p>}
+            <h1 className="text-2xl sm:text-3xl font-display font-bold text-zinc-900 tracking-tight">{customer.name}</h1>
+            {customer.phone && <p className="text-zinc-600 mt-0.5 text-[14px] tabular-nums">{customer.phone}</p>}
           </div>
         </div>
-        
+
         <div className="text-left md:text-right w-full md:w-auto flex flex-col md:items-end gap-3">
-          <div className="p-4 md:p-0 rounded-2xl md:rounded-none shadow-neu-inner md:shadow-none bg-neu-bg md:bg-transparent w-full md:w-auto">
-            <p className="text-sm text-neu-text font-bold uppercase tracking-wider mb-1">Total Outstanding</p>
-            <p className="text-4xl font-black text-neu-danger">₹{Number(customer.total_outstanding).toLocaleString()}</p>
+          <div>
+            <p className="text-[13px] text-zinc-500 font-medium mb-0.5">Total Outstanding</p>
+            <p className={`text-3xl sm:text-4xl font-display font-bold tabular-nums ${Number(customer.total_outstanding) > 0 ? 'text-red-600' : 'text-emerald-700'}`}>
+              ₹{Number(customer.total_outstanding).toLocaleString('en-IN')}
+            </p>
           </div>
-          
+
           {Number(customer.total_outstanding) > 0 && (
             <div className="flex flex-wrap gap-2 w-full md:w-auto">
-              <button 
+              <button
                 onClick={() => {
                   setSelectedBillForPayment(null);
                   setIsPaymentModalOpen(true);
                 }}
-                className="btn-solid flex-1 md:flex-none py-2 px-4 text-sm"
+                className="btn-primary flex-1 md:flex-none py-2 px-4 text-[14px]"
               >
                 Record Payment
               </button>
-              <button 
+              <button
                 onClick={handleWhatsAppRemind}
-                className="neu-card flex items-center justify-center w-10 h-10 text-[#25D366] hover:scale-105 transition-transform shrink-0"
+                className="btn-solid w-10 h-10 p-0 text-emerald-700 shrink-0"
                 title="Send WhatsApp Reminder"
               >
-                <MessageCircle size={20} />
+                <MessageCircle size={18} />
               </button>
-              <button 
+              <button
                 onClick={handleEmailStatement}
                 disabled={isSendingEmail}
-                className="neu-card flex items-center justify-center w-10 h-10 text-neu-primary hover:scale-105 transition-transform shrink-0 disabled:opacity-50"
+                className="btn-solid w-10 h-10 p-0 shrink-0 disabled:opacity-50"
                 title="Email PDF Statement"
               >
-                <Mail size={20} />
+                <Mail size={18} />
               </button>
-              <button 
+              <button
                 onClick={generatePDF}
-                className="neu-card flex items-center justify-center w-10 h-10 text-neu-primary hover:scale-105 transition-transform shrink-0"
+                className="btn-solid w-10 h-10 p-0 shrink-0"
                 title="Download PDF Statement"
               >
-                <Download size={20} />
+                <Download size={18} />
               </button>
-              <button 
+              <button
                 onClick={handleExportExcel}
-                className="neu-card flex items-center justify-center w-10 h-10 text-green-600 hover:scale-105 transition-transform shrink-0 font-bold"
-                title="Download Excel"
+                className="btn-solid w-10 h-10 p-0 text-emerald-700 shrink-0 font-bold text-[13px]"
+                title="Download CSV"
               >
-                XL
+                CSV
               </button>
-              <button 
+              <button
                 onClick={() => setIsEmailModalOpen(true)}
-                className="neu-card flex items-center justify-center py-2 px-4 text-neu-primary hover:text-white hover:bg-neu-primary transition-all font-bold text-sm shrink-0"
+                className="btn-solid py-2 px-3.5 text-[14px] shrink-0"
               >
                 Support Email
               </button>
@@ -445,9 +449,9 @@ export default function CustomerLedger() {
         </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 pl-1">
-        <h2 className="text-xl font-bold text-neu-heading">Transaction History</h2>
-        <div className="flex items-center gap-1.5 p-1 bg-[#f0e9db] rounded-lg border border-[#d6cbb9] self-start sm:self-auto">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+        <h2 className="text-xl font-display font-bold text-zinc-900">Transaction History</h2>
+        <div className="flex items-center gap-1 p-1 bg-zinc-200/70 rounded-md border border-zinc-300 self-start sm:self-auto">
           {[
             { id: 'all', label: 'All' },
             { id: 'bill', label: 'Bills' },
@@ -456,10 +460,10 @@ export default function CustomerLedger() {
             <button
               key={tab.id}
               onClick={() => setLedgerFilter(tab.id)}
-              className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${
+              className={`px-3 py-1 rounded text-[13px] font-semibold transition-colors duration-150 ${
                 ledgerFilter === tab.id
-                  ? 'bg-[#fffdf9] text-red-800 shadow-sm border border-[#c7bba7]'
-                  : 'text-stone-600 hover:text-stone-900'
+                  ? 'bg-white text-zinc-900 shadow-neu'
+                  : 'text-zinc-600 hover:text-zinc-900'
               }`}
             >
               {tab.label}
@@ -468,88 +472,89 @@ export default function CustomerLedger() {
         </div>
       </div>
 
-      <div className="space-y-4">
+      <div className="bg-white border border-zinc-300 rounded-lg divide-y divide-zinc-200">
         {transactions.filter(t => ledgerFilter === 'all' || t.type === ledgerFilter).length === 0 ? (
-           <div className="neu-card p-10 text-center">
-             <p className="text-neu-text font-medium">No transactions matching this filter.</p>
-           </div>
+          <div className="p-10 text-center">
+            <p className="text-zinc-600 font-medium text-[15px]">No transactions matching this filter.</p>
+          </div>
         ) : (
           transactions
             .filter(t => ledgerFilter === 'all' || t.type === ledgerFilter)
             .map((t, idx) => (
             <motion.div
               key={t.id}
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: Math.min(idx * 0.04, 0.28), duration: 0.22 }}
-              whileHover={{ y: -2 }}
-              className="neu-card p-5 sm:p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
+              transition={{ delay: Math.min(idx * 0.03, 0.24), duration: 0.2 }}
+              className="p-5 sm:p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:bg-zinc-50/70 transition-colors duration-150"
             >
-              <div className="flex items-center gap-4">
+              <div className="flex items-start gap-4">
                 {t.type === 'bill' ? (
-                  <div className="w-12 h-12 rounded-md border border-red-200 bg-red-50/60 flex items-center justify-center text-red-800 shrink-0">
-                    <ArrowUpRight size={22} />
+                  <div className="w-10 h-10 rounded-md border border-red-200 bg-red-50 flex items-center justify-center text-red-600 shrink-0 mt-0.5">
+                    <ArrowUpRight size={20} />
                   </div>
                 ) : (
-                  <div className="w-12 h-12 rounded-md border border-emerald-200 bg-emerald-50/60 flex items-center justify-center text-emerald-700 shrink-0">
-                    <ArrowDownRight size={22} />
+                  <div className="w-10 h-10 rounded-md border border-emerald-200 bg-emerald-50 flex items-center justify-center text-emerald-700 shrink-0 mt-0.5">
+                    <ArrowDownRight size={20} />
                   </div>
                 )}
                 <div>
-                  <h4 className="font-bold text-neu-heading text-lg flex items-center gap-2.5 flex-wrap">
-                    {t.type === 'bill' ? (t.bill_no || 'Udhar Given') : 'Payment Received'}
+                  <h4 className="font-display font-bold text-zinc-900 text-[16px] flex items-center gap-2.5 flex-wrap">
+                    <span>{t.type === 'bill' ? (t.bill_no || 'Udhar Given') : 'Payment Received'}</span>
                     {t.type === 'bill' && t.status === 'paid' && (
-                      <span className="stamp-paid">Paid</span>
+                      <span className="text-[13px] font-semibold text-emerald-700">· Paid</span>
                     )}
                     {t.type === 'bill' && t.status === 'partial' && (
-                      <span className="stamp-partial">Partial</span>
+                      <span className="text-[13px] font-semibold text-amber-700">· Partial</span>
                     )}
                     {t.type === 'bill' && t.status === 'pending' && (
-                      <span className="stamp-due">Pending</span>
+                      <span className="text-[13px] font-semibold text-red-600">· Pending</span>
                     )}
                   </h4>
-                  <p className="text-sm text-neu-text font-medium mt-0.5">
+                  <p className="text-[13px] text-zinc-500 mt-0.5">
                     {new Date(t.created_at).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}
                   </p>
                   {t.note && (
-                    <p className="text-sm text-neu-text/80 mt-2 bg-neu-bg/50 inline-block px-3 py-1 rounded-lg italic border border-white/20">
+                    <p className="text-[14px] text-zinc-700 mt-1.5 italic">
                       "{t.note}"
                     </p>
                   )}
                   {t.type === 'bill' && t.remaining_amount > 0 && (
-                    <p className="text-sm text-neu-danger font-bold mt-2">
-                      Remaining: ₹{Number(t.remaining_amount).toLocaleString()}
+                    <p className="text-[13px] text-red-600 font-semibold mt-1.5 tabular-nums">
+                      Remaining: ₹{Number(t.remaining_amount).toLocaleString('en-IN')}
                     </p>
                   )}
-                  
-                  <button 
+
+                  <button
                     onClick={() => {
                       setEditingTransaction(t);
                       setEditNote(t.note || '');
                       setIsEditModalOpen(true);
                     }}
-                    className="mt-3 text-xs font-bold text-neu-text/60 hover:text-neu-primary transition-colors block"
+                    className="mt-2 text-[13px] font-semibold text-zinc-500 hover:text-zinc-900 transition-colors duration-150 block"
                   >
                     Edit Note
                   </button>
                 </div>
               </div>
-              <div className="text-right w-full sm:w-auto mt-2 sm:mt-0 pt-4 sm:pt-0 border-t border-white/20 sm:border-t-0 flex flex-col items-end">
-                <p className={`font-black text-2xl ${t.type === 'bill' ? 'text-neu-danger' : 'text-neu-success'}`}>
-                  {t.type === 'bill' ? '+' : '-'}₹{t.amount.toLocaleString('en-IN')}
-                </p>
-                {t.runningBalance !== undefined && (
-                  <p className="text-xs font-mono font-semibold text-slate-500 mt-1">
-                    Balance: ₹{t.runningBalance.toLocaleString('en-IN')}
+              <div className="text-left sm:text-right w-full sm:w-auto flex flex-row sm:flex-col justify-between sm:items-end items-center">
+                <div>
+                  <p className={`font-display font-bold text-xl tabular-nums ${t.type === 'bill' ? 'text-red-600' : 'text-emerald-700'}`}>
+                    {t.type === 'bill' ? '+' : '-'}₹{t.amount.toLocaleString('en-IN')}
                   </p>
-                )}
+                  {t.runningBalance !== undefined && (
+                    <p className="text-[13px] font-medium text-zinc-500 mt-0.5 tabular-nums">
+                      Balance: ₹{t.runningBalance.toLocaleString('en-IN')}
+                    </p>
+                  )}
+                </div>
                 {t.type === 'bill' && t.remaining_amount > 0 && (
-                  <button 
+                  <button
                     onClick={() => {
                       setSelectedBillForPayment(t);
                       setIsPaymentModalOpen(true);
                     }}
-                    className="mt-2 text-xs font-bold text-neu-primary hover:text-neu-primary-hover border border-neu-primary px-3 py-1 rounded-lg transition-colors"
+                    className="mt-0 sm:mt-2 btn-solid py-1.5 px-3 text-[13px]"
                   >
                     Apply Payment
                   </button>
@@ -560,15 +565,15 @@ export default function CustomerLedger() {
         )}
       </div>
 
-      {/* Floating Action Button for raising a bill pre-filled with this customer */}
-      <motion.button 
-        whileHover={{ scale: 1.08 }}
-        whileTap={{ scale: 0.94 }}
+      {/* Floating Action Button (Charcoal, not Red) */}
+      <motion.button
+        whileHover={{ scale: 1.06 }}
+        whileTap={{ scale: 0.95 }}
         onClick={() => navigate(`/billing?customer_id=${customer.id}`)}
-        className="fixed bottom-24 md:bottom-8 right-6 w-14 h-14 bg-red-800 text-white rounded-full shadow-lg shadow-red-900/30 border-2 border-red-950/20 flex items-center justify-center hover:bg-red-900 transition-colors z-40"
+        className="fixed bottom-24 md:bottom-8 right-6 w-14 h-14 bg-zinc-900 text-white rounded-full shadow-elevated flex items-center justify-center hover:bg-zinc-800 transition-colors duration-150 z-40"
         title="Raise Udhar for this customer"
       >
-        <Receipt size={24} />
+        <Receipt size={22} />
       </motion.button>
 
       {/* Record Payment Modal */}
@@ -590,7 +595,7 @@ export default function CustomerLedger() {
                 type="number" required min="1" step="0.01"
                 value={paymentAmount} onChange={e => setPaymentAmount(e.target.value)}
                 placeholder="0.00" 
-                className="w-full bg-neu-bg text-neu-heading rounded-2xl pl-12 pr-4 py-4 outline-none focus:ring-2 focus:ring-neu-primary/30 shadow-neu-inner font-black text-xl"
+                className="input-field pl-10 py-3 font-display font-bold text-lg tabular-nums"
               />
             </div>
             {/* Quick Amount Suggestion Chips */}

@@ -185,54 +185,54 @@ export default function Customers() {
   }
 
   return (
-    <motion.div 
-      className="max-w-6xl mx-auto p-4 sm:p-6 lg:p-8 animate-fade-in"
-      initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+    <motion.div
+      className="max-w-6xl mx-auto p-4 sm:p-6 lg:p-8"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.2 }}
     >
-      <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-        <div className="flex items-center gap-4">
-          <button 
+      <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <div className="flex items-center gap-3.5">
+          <button
             onClick={() => navigate('/dashboard')}
-            className="w-10 h-10 neu-card flex items-center justify-center text-neu-text hover:text-neu-primary transition-colors"
+            aria-label="Back to Dashboard"
+            className="w-10 h-10 bg-white border border-zinc-300 rounded-md flex items-center justify-center text-zinc-600 hover:text-zinc-900 hover:border-zinc-400 transition-colors duration-150"
           >
             <ChevronLeft size={20} />
           </button>
           <div>
-            <h1 className="text-3xl font-bold text-neu-heading tracking-tight">My Customers</h1>
-            <p className="text-neu-text mt-1 font-medium">{customers.length} total clients</p>
+            <h1 className="text-3xl font-display font-bold text-zinc-900 tracking-tight">My Customers</h1>
+            <p className="text-zinc-600 mt-0.5 text-[14px] tabular-nums">{customers.length} total clients</p>
           </div>
         </div>
-        
-        <div className="flex w-full sm:w-auto gap-3">
-          <button onClick={handleExportExcel} className="neu-card px-4 py-2 flex items-center justify-center gap-2 text-neu-primary hover:bg-neu-primary hover:text-white transition-all font-bold">
-            <Download size={18} /> <span className="hidden sm:inline">Export</span>
+
+        <div className="flex w-full sm:w-auto gap-2.5">
+          <button onClick={handleExportExcel} className="btn-solid px-4 py-2 text-[14px]">
+            <Download size={16} /> <span className="hidden sm:inline">Export</span>
           </button>
-          <button onClick={openAddModal} className="btn-solid flex-1 sm:flex-none">
-            <UserPlus size={20} /> Add Customer
+          <button onClick={openAddModal} className="btn-primary flex-1 sm:flex-none">
+            <UserPlus size={18} /> Add Customer
           </button>
         </div>
       </header>
-      
+
       {/* Search Bar */}
-      <div className="relative mb-8 group">
-        <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-neu-text group-focus-within:text-neu-primary transition-colors" size={20} />
-        <input 
-          type="text" 
+      <div className="relative mb-6">
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
+        <input
+          type="text"
           placeholder="Search by name or phone..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full bg-neu-bg text-neu-heading placeholder-neu-text/60 rounded-2xl pl-14 pr-4 py-4 outline-none focus:ring-2 focus:ring-neu-primary/30 shadow-neu-inner transition-all font-medium"
+          className="w-full bg-white border border-zinc-300 text-zinc-900 placeholder-zinc-400 rounded-lg pl-11 pr-4 py-3 outline-none focus:border-zinc-900 focus:ring-2 focus:ring-zinc-900/10 transition-colors duration-150 text-[15px]"
         />
       </div>
 
       {/* Customer List */}
       {filteredCustomers.length === 0 ? (
-        <div className="neu-card p-12 text-center shadow-neu-inner">
-          <div className="w-20 h-20 mx-auto mb-6 shadow-neu rounded-full flex items-center justify-center text-neu-primary">
-            <UserPlus size={32} />
-          </div>
-          <h3 className="text-xl font-bold text-neu-heading mb-2">No customers found</h3>
-          <p className="text-neu-text font-medium max-w-md mx-auto">
+        <div className="bg-white border border-zinc-300 rounded-lg p-12 text-center">
+          <h3 className="text-xl font-display font-bold text-zinc-900 mb-2">No customers found</h3>
+          <p className="text-zinc-600 text-[15px] max-w-md mx-auto">
             {searchQuery ? "We couldn't find anyone matching your search." : "You haven't added any customers yet. Add your first customer to start tracking Udhar."}
           </p>
           {!searchQuery && (
@@ -242,55 +242,57 @@ export default function Customers() {
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {filteredCustomers.map(customer => (
-            <div key={customer.id} className="neu-card p-6 flex flex-col justify-between hover:shadow-neu-hover transition-all group">
+            <div key={customer.id} className="bg-white border border-zinc-300 hover:border-zinc-400 rounded-lg p-5 flex flex-col justify-between transition-colors duration-150">
               <div>
-                <div className="flex justify-between items-start mb-4">
-                  <div className="w-12 h-12 shadow-neu rounded-full flex items-center justify-center text-neu-primary font-bold text-lg bg-neu-bg">
+                <div className="flex justify-between items-start mb-3">
+                  <div className="w-10 h-10 rounded-md bg-zinc-100 border border-zinc-200 flex items-center justify-center text-zinc-900 font-display font-bold text-[16px]">
                     {customer.name.charAt(0).toUpperCase()}
                   </div>
                   <div className="text-right">
-                    <p className="text-xs text-neu-text font-medium uppercase tracking-wider mb-1">Outstanding</p>
-                    <p className="font-black text-neu-danger text-lg">₹{Number(customer.total_outstanding).toLocaleString()}</p>
+                    <p className="text-[13px] text-zinc-500 font-medium">Outstanding</p>
+                    <p className={`font-display font-bold text-lg tabular-nums ${Number(customer.total_outstanding) > 0 ? 'text-red-600' : 'text-emerald-700'}`}>
+                      ₹{Number(customer.total_outstanding).toLocaleString('en-IN')}
+                    </p>
                   </div>
                 </div>
-                
-                <h3 className="font-bold text-xl text-neu-heading mb-3">{customer.name}</h3>
-                
-                <div className="space-y-2">
+
+                <h3 className="font-display font-bold text-lg text-zinc-900 mb-2">{customer.name}</h3>
+
+                <div className="space-y-1.5 mb-3">
                   {customer.phone && (
-                    <div className="flex items-center gap-3 text-neu-text font-medium text-sm">
-                      <Phone size={14} className="text-neu-primary" /> {customer.phone}
+                    <div className="flex items-center gap-2 text-zinc-600 text-[14px]">
+                      <Phone size={14} className="text-zinc-400" /> {customer.phone}
                     </div>
                   )}
                   {customer.email && (
-                    <div className="flex items-center gap-3 text-neu-text font-medium text-sm">
-                      <Mail size={14} className="text-neu-primary" /> {customer.email}
+                    <div className="flex items-center gap-2 text-zinc-600 text-[14px] truncate">
+                      <Mail size={14} className="text-zinc-400 shrink-0" /> {customer.email}
                     </div>
                   )}
                 </div>
-                
-                <button 
+
+                <button
                   onClick={() => openEditModal(customer)}
-                  className="mt-4 text-xs font-bold text-neu-primary hover:text-neu-primary-hover border border-neu-primary px-3 py-1 rounded-lg transition-colors inline-block"
+                  className="text-[13px] font-semibold text-zinc-600 hover:text-zinc-900 underline underline-offset-4 transition-colors duration-150"
                 >
                   Edit Details
                 </button>
               </div>
-              
-              <div className="mt-6 flex flex-col sm:flex-row gap-3">
-                <button 
+
+              <div className="mt-5 pt-4 border-t border-zinc-200 flex gap-2.5">
+                <button
                   onClick={() => navigate(`/customers/${customer.id}`)}
-                  className="flex-1 py-2.5 rounded-lg shadow-neu text-neu-heading font-bold hover:text-neu-primary transition-colors flex items-center justify-center gap-2"
+                  className="btn-solid flex-1 py-2 text-[14px]"
                 >
                   View Ledger
                 </button>
-                <button 
-                  onClick={() => navigate('/billing')}
-                  className="flex-1 py-2.5 rounded-lg shadow-neu-inner text-neu-primary font-bold hover:bg-neu-primary hover:text-white transition-colors flex items-center justify-center gap-2"
+                <button
+                  onClick={() => navigate(`/billing?customer_id=${customer.id}`)}
+                  className="btn-primary flex-1 py-2 text-[14px]"
                 >
-                  <Plus size={18} /> Udhar
+                  <Plus size={16} /> Udhar
                 </button>
               </div>
             </div>
