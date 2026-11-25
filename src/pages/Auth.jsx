@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { isSuperAdminUser } from '../lib/admin';
 import { ArrowRight, Briefcase, Eye, EyeOff, Loader2, CheckCircle2, AlertCircle, Mail, Key } from 'lucide-react';
+import BrandMark from '../components/BrandMark';
 
 export default function Auth({ isRecovering }) {
   const navigate = useNavigate();
@@ -156,9 +157,10 @@ export default function Auth({ isRecovering }) {
           <button
             type="button"
             onClick={() => navigate('/')}
-            className="text-[24px] font-display font-bold tracking-tight text-zinc-900"
+            className="inline-flex items-center gap-2.5 text-[24px] font-display font-bold tracking-tight text-zinc-900"
           >
-            UdharPe
+            <BrandMark size={32} />
+            <span>UdharPe</span>
           </button>
         </div>
 

@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabase';
 import { isSuperAdminUser } from '../lib/admin';
 import { LayoutDashboard, Users, PlusCircle, LogOut, Settings, ShieldAlert, ChevronDown, ShieldCheck, Search } from 'lucide-react';
 import CommandPalette from './CommandPalette';
+import BrandMark from './BrandMark';
 
 export default function AuthLayout() {
   const navigate = useNavigate();
@@ -80,9 +81,10 @@ export default function AuthLayout() {
             <button
               type="button"
               onClick={() => navigate(isAdmin ? '/admin' : '/dashboard')}
-              className="text-[22px] font-display font-bold text-zinc-900 tracking-tight hover:opacity-80 transition-opacity duration-150"
+              className="flex items-center gap-2.5 text-[22px] font-display font-bold text-zinc-900 tracking-tight hover:opacity-80 transition-opacity duration-150"
             >
-              UdharPe
+              <BrandMark size={30} />
+              <span>UdharPe</span>
             </button>
 
             {/* Desktop Navigation */}
