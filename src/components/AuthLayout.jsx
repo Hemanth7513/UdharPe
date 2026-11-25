@@ -59,9 +59,9 @@ export default function AuthLayout() {
   const userInitials = isAdmin ? 'SA' : (firmName || currentUser?.email || 'U').slice(0, 2).toUpperCase();
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col selection:bg-indigo-600 selection:text-white">
-      {/* Top Navbar */}
-      <nav className="w-full bg-white/95 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-50">
+    <div className="min-h-screen flex flex-col selection:bg-red-800 selection:text-white">
+      {/* Top Navbar — Digital Bahi-Khata Header */}
+      <nav className="w-full bg-[#fffdf9]/95 backdrop-blur-md border-b-2 border-stone-800 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
             {/* Logo */}
@@ -71,14 +71,17 @@ export default function AuthLayout() {
               className="flex items-center gap-3 cursor-pointer" 
               onClick={() => navigate(isAdmin ? '/admin' : '/dashboard')}
             >
-              <div className="w-11 h-11 rounded-2xl bg-indigo-600 shadow-lg shadow-indigo-600/25 flex items-center justify-center text-white">
+              <div className="w-11 h-11 rounded-lg bg-red-800 shadow-sm border border-red-900 flex items-center justify-center text-[#fffdf9]">
                 <Handshake size={24} />
               </div>
-              <span className="text-2xl font-black text-slate-900 tracking-tight hidden sm:block">UdharPe</span>
+              <div className="hidden sm:block">
+                <span className="text-2xl font-serif font-bold text-stone-900 tracking-tight block leading-none">UdharPe</span>
+                <span className="text-[9px] font-mono uppercase tracking-widest text-stone-500">Digital Bahi-Khata</span>
+              </div>
             </motion.div>
 
-            {/* Desktop Navigation with Animated Framer Pill */}
-            <div className="hidden md:flex items-center gap-1.5 p-1.5 bg-slate-100 rounded-2xl border border-slate-200/60">
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center gap-1.5 p-1 bg-[#f0e9db] rounded-lg border border-[#d6cbb9]">
               {navItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = location.pathname === item.path;
@@ -86,17 +89,17 @@ export default function AuthLayout() {
                   <button
                     key={item.name}
                     onClick={() => navigate(item.path)}
-                    className={`relative px-4 py-2 rounded-xl flex items-center gap-2 font-bold text-sm transition-colors ${
+                    className={`relative px-4 py-2 rounded-md flex items-center gap-2 font-bold text-sm transition-colors ${
                       isActive 
-                        ? 'text-indigo-600' 
-                        : 'text-slate-600 hover:text-slate-900'
+                        ? 'text-red-800' 
+                        : 'text-stone-600 hover:text-stone-900'
                     }`}
                   >
                     {isActive && (
                       <motion.div
                         layoutId="activeNavTab"
                         transition={{ type: 'spring', bounce: 0.2, duration: 0.4 }}
-                        className="absolute inset-0 bg-white rounded-xl shadow-sm border border-slate-200/50 -z-0"
+                        className="absolute inset-0 bg-[#fffdf9] rounded-md shadow-sm border border-[#c7bba7] -z-0"
                       />
                     )}
                     <span className="relative z-10 flex items-center gap-2">
@@ -112,17 +115,17 @@ export default function AuthLayout() {
             <div className="relative flex items-center gap-3" ref={menuRef}>
               <button
                 onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
-                className="flex items-center gap-2.5 p-1.5 pr-3 rounded-2xl bg-slate-100 hover:bg-slate-200/70 border border-slate-200/80 transition-all text-left"
+                className="flex items-center gap-2.5 p-1.5 pr-3 rounded-lg bg-[#f0e9db] hover:bg-[#e7decb] border border-[#d6cbb9] transition-all text-left"
               >
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-600 to-indigo-800 text-white font-black text-xs flex items-center justify-center shadow-sm relative">
+                <div className="w-9 h-9 rounded-md bg-stone-900 text-[#fffdf9] font-mono font-bold text-xs flex items-center justify-center shadow-sm relative">
                   {userInitials}
-                  <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 border-2 border-white rounded-full" />
+                  <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-600 border-2 border-[#fffdf9] rounded-full" />
                 </div>
                 <div className="hidden sm:block">
-                  <div className="text-xs font-bold text-slate-900 truncate max-w-[120px]">{firmName}</div>
-                  <div className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1">
+                  <div className="text-xs font-bold text-stone-900 truncate max-w-[120px]">{firmName}</div>
+                  <div className="text-[10px] font-mono font-semibold text-stone-500 uppercase tracking-wider flex items-center gap-1">
                     {isAdmin ? (
-                      <span className="text-indigo-600 font-bold flex items-center gap-0.5">
+                      <span className="text-red-800 font-bold flex items-center gap-0.5">
                         <ShieldCheck size={11} /> Admin
                       </span>
                     ) : (
@@ -130,7 +133,7 @@ export default function AuthLayout() {
                     )}
                   </div>
                 </div>
-                <ChevronDown size={14} className={`text-slate-400 transition-transform ${isProfileMenuOpen ? 'rotate-180' : ''}`} />
+                <ChevronDown size={14} className={`text-stone-500 transition-transform ${isProfileMenuOpen ? 'rotate-180' : ''}`} />
               </button>
 
               {/* Profile Dropdown */}
@@ -141,14 +144,14 @@ export default function AuthLayout() {
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 10, scale: 0.95 }}
                     transition={{ duration: 0.15 }}
-                    className="absolute right-0 top-14 w-64 bg-white rounded-2xl shadow-xl border border-slate-200/80 p-2 z-50 overflow-hidden"
+                    className="absolute right-0 top-14 w-64 bg-[#fffdf9] rounded-lg shadow-xl border border-[#c7bba7] p-2 z-50 overflow-hidden"
                   >
-                    <div className="p-3 bg-slate-50 rounded-xl mb-1.5 border border-slate-100">
-                      <p className="text-xs font-bold text-slate-900 truncate">{firmName}</p>
-                      {ownerName && <p className="text-[11px] text-slate-500 truncate">{ownerName}</p>}
-                      <p className="text-[10px] text-slate-400 font-mono truncate mt-0.5">{currentUser?.email}</p>
+                    <div className="p-3 bg-[#f6f0e4] rounded-md mb-1.5 border border-[#d6cbb9]">
+                      <p className="text-xs font-serif font-bold text-stone-900 truncate">{firmName}</p>
+                      {ownerName && <p className="text-[11px] text-stone-600 truncate">{ownerName}</p>}
+                      <p className="text-[10px] text-stone-500 font-mono truncate mt-0.5">{currentUser?.email}</p>
                       {isAdmin && (
-                        <div className="mt-2 inline-flex items-center gap-1 text-[10px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded-full">
+                        <div className="mt-2 inline-flex items-center gap-1 text-[10px] font-mono font-bold text-red-800 bg-red-50 border border-red-300 px-2 py-0.5 rounded-sm">
                           <ShieldCheck size={11} /> Platform Superadmin
                         </div>
                       )}
@@ -160,42 +163,31 @@ export default function AuthLayout() {
                           setIsProfileMenuOpen(false);
                           navigate('/settings');
                         }}
-                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100 transition-colors text-left"
+                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-md text-xs font-bold text-stone-700 hover:bg-[#f0e9db] transition-colors text-left"
                       >
-                        <Settings size={15} className="text-slate-500" /> Business Profile &amp; Settings
+                        <Settings size={15} className="text-stone-500" /> Business Profile &amp; Settings
                       </button>
 
                       {isAdmin ? (
-                        <>
-                          <button
-                            onClick={() => {
-                              setIsProfileMenuOpen(false);
-                              navigate('/admin');
-                            }}
-                            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-indigo-600 hover:bg-indigo-50 transition-colors text-left"
-                          >
-                            <ShieldAlert size={15} /> Platform Command Center
-                          </button>
-                          <button
-                            onClick={() => {
-                              setIsProfileMenuOpen(false);
-                              navigate('/dashboard');
-                            }}
-                            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-600 hover:bg-slate-100 transition-colors text-left"
-                          >
-                            <LayoutDashboard size={15} className="text-slate-400" /> Preview Merchant View
-                          </button>
-                        </>
+                        <button
+                          onClick={() => {
+                            setIsProfileMenuOpen(false);
+                            navigate('/admin');
+                          }}
+                          className="w-full flex items-center gap-2.5 px-3 py-2 rounded-md text-xs font-bold text-red-800 hover:bg-red-50 transition-colors text-left"
+                        >
+                          <ShieldAlert size={15} /> Platform Command Center
+                        </button>
                       ) : null}
 
-                      <div className="my-1 border-t border-slate-100" />
+                      <div className="my-1 border-t border-[#d6cbb9]" />
 
                       <button
                         onClick={() => {
                           setIsProfileMenuOpen(false);
                           handleLogout();
                         }}
-                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-rose-600 hover:bg-rose-50 transition-colors text-left"
+                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-md text-xs font-bold text-red-700 hover:bg-red-50 transition-colors text-left"
                       >
                         <LogOut size={15} /> Sign Out of UdharPe
                       </button>
@@ -207,8 +199,8 @@ export default function AuthLayout() {
           </div>
         </div>
 
-        {/* Mobile Floating Bottom Bar with Layout Animation */}
-        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-lg border-t border-slate-200 z-50 px-3 py-2 pb-safe min-h-[4.5rem]">
+        {/* Mobile Floating Bottom Bar */}
+        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-[#fffdf9]/95 backdrop-blur-lg border-t-2 border-stone-800 z-50 px-3 py-2 pb-safe min-h-[4.5rem]">
           <div className="flex justify-around items-center h-full">
             {navItems.map((item) => {
               const Icon = item.icon;
@@ -217,15 +209,15 @@ export default function AuthLayout() {
                 <button
                   key={item.name}
                   onClick={() => navigate(item.path)}
-                  className={`relative p-2 flex-1 mx-1 rounded-2xl flex flex-col items-center justify-center gap-1 transition-colors ${
-                    isActive ? 'text-indigo-600' : 'text-slate-500 hover:text-slate-900'
+                  className={`relative p-2 flex-1 mx-1 rounded-md flex flex-col items-center justify-center gap-1 transition-colors ${
+                    isActive ? 'text-red-800' : 'text-stone-500 hover:text-stone-900'
                   }`}
                 >
                   {isActive && (
                     <motion.div
                       layoutId="mobileActiveTab"
                       transition={{ type: 'spring', bounce: 0.25, duration: 0.35 }}
-                      className="absolute inset-0 bg-indigo-50 rounded-2xl -z-0"
+                      className="absolute inset-0 bg-[#f0e9db] border border-[#c7bba7] rounded-md -z-0"
                     />
                   )}
                   <Icon size={20} className="relative z-10 shrink-0" />

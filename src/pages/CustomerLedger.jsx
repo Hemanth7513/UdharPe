@@ -16,6 +16,7 @@ export default function CustomerLedger() {
   const [customer, setCustomer] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [ledgerFilter, setLedgerFilter] = useState('all');
 
   // Payment Modal State
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
@@ -444,36 +445,63 @@ export default function CustomerLedger() {
         </div>
       </div>
 
-      <div className="flex justify-between items-center mb-6 pl-2">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 pl-1">
         <h2 className="text-xl font-bold text-neu-heading">Transaction History</h2>
+        <div className="flex items-center gap-1.5 p-1 bg-[#f0e9db] rounded-lg border border-[#d6cbb9] self-start sm:self-auto">
+          {[
+            { id: 'all', label: 'All Entries' },
+            { id: 'bill', label: 'Udhar Bills' },
+            { id: 'settlement', label: 'Payments' },
+          ].map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setLedgerFilter(tab.id)}
+              className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${
+                ledgerFilter === tab.id
+                  ? 'bg-[#fffdf9] text-red-800 shadow-sm border border-[#c7bba7]'
+                  : 'text-stone-600 hover:text-stone-900'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="space-y-4">
-        {transactions.length === 0 ? (
-           <div className="neu-card p-10 text-center shadow-neu-inner border border-white/30">
-             <p className="text-neu-text font-medium">No transactions recorded yet.</p>
+        {transactions.filter(t => ledgerFilter === 'all' || t.type === ledgerFilter).length === 0 ? (
+           <div className="neu-card p-10 text-center">
+             <p className="text-neu-text font-medium">No transactions matching this filter.</p>
            </div>
         ) : (
-          transactions.map(t => (
+          transactions
+            .filter(t => ledgerFilter === 'all' || t.type === ledgerFilter)
+            .map(t => (
             <div key={t.id} className="neu-card p-5 sm:p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:shadow-neu-hover transition-all">
               <div className="flex items-center gap-4">
                 {t.type === 'bill' ? (
-                  <div className="w-12 h-12 rounded-full shadow-neu-inner flex items-center justify-center text-neu-danger bg-neu-bg shrink-0">
+                  <div className="w-12 h-12 rounded-md border border-red-200 bg-red-50/60 flex items-center justify-center text-red-800 shrink-0">
                     <ArrowUpRight size={22} />
                   </div>
                 ) : (
-                  <div className="w-12 h-12 rounded-full shadow-neu-inner flex items-center justify-center text-neu-success bg-neu-bg shrink-0">
+                  <div className="w-12 h-12 rounded-md border border-emerald-200 bg-emerald-50/60 flex items-center justify-center text-emerald-700 shrink-0">
                     <ArrowDownRight size={22} />
                   </div>
                 )}
                 <div>
-                  <h4 className="font-bold text-neu-heading text-lg flex items-center gap-2">
+                  <h4 className="font-bold text-neu-heading text-lg flex items-center gap-2.5 flex-wrap">
                     {t.type === 'bill' ? (t.bill_no || 'Udhar Given') : 'Payment Received'}
                     {t.type === 'bill' && t.status === 'paid' && (
-                      <span className="text-xs bg-neu-success/20 text-neu-success px-2 py-0.5 rounded uppercase tracking-wider font-bold">Paid</span>
+                      <span className="stamp-paid">PAID</span>
                     )}
                     {t.type === 'bill' && t.status === 'partial' && (
-                      <span className="text-xs bg-amber-500/20 text-amber-700 px-2 py-0.5 rounded uppercase tracking-wider font-bold">Partial</span>
+                      <span className="stamp-partial">PARTIAL</span>
+                    )}
+                    {t.type === 'bill' && t.status === 'pending' && (
+                      <span className="stamp-due">DUE</span>
+                    )}
+                    {t.type === 'settlement' && (
+                      <span className="stamp-paid">SETTLED</span>
                     )}
                   </h4>
                   <p className="text-sm text-neu-text font-medium mt-0.5">

@@ -7,17 +7,18 @@ export default {
   theme: {
     extend: {
       colors: {
-        'neu-bg': '#f8fafc',
-        'neu-text': '#475569',
-        'neu-heading': '#0f172a',
-        'neu-primary': '#4f46e5',
-        'neu-primary-hover': '#4338ca',
-        'neu-danger': '#f43f5e',
-        'neu-success': '#10b981',
+        'neu-bg': '#f6f0e4',
+        'neu-text': '#57534e',
+        'neu-heading': '#1c1917',
+        'neu-primary': '#991b1b',
+        'neu-primary-hover': '#7f1d1d',
+        'neu-danger': '#b91c1c',
+        'neu-success': '#15803d',
       },
       fontFamily: {
         sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
-        display: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif'],
+        serif: ['Newsreader', 'Georgia', 'serif'],
+        display: ['Newsreader', 'Georgia', 'serif'],
         mono: ['"JetBrains Mono"', 'monospace'],
       },
       boxShadow: {

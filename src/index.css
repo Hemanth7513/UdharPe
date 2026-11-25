@@ -4,43 +4,67 @@
 
 @layer base {
   body {
-    @apply bg-slate-50 text-slate-800 antialiased min-h-screen overflow-x-hidden selection:bg-indigo-600 selection:text-white font-sans;
+    background-color: #f6f0e4;
+    background-image: linear-gradient(to bottom, rgba(168, 148, 120, 0.14) 1px, transparent 1px);
+    background-size: 100% 32px;
+    @apply text-stone-900 antialiased min-h-screen overflow-x-hidden selection:bg-red-800 selection:text-white font-sans;
   }
   h1, h2, h3, h4, h5, h6 {
-    @apply text-slate-900 font-display tracking-tight font-bold;
+    @apply text-stone-900 font-serif tracking-tight font-bold;
   }
 }
 
 @layer components {
-  /* Tier-1 Minimalist Card: Elevated Pure White with Hairline Border */
+  /* Paper-Craft Ledger Card: Warm Ivory Paper with Tactile Accounting Border */
   .neu-card {
-    @apply bg-white rounded-2xl shadow-sm border border-slate-200/80 transition-all duration-200
-           hover:shadow-md hover:border-slate-300;
+    background-color: #fffdf9;
+    border: 1px solid #d6cbb9;
+    box-shadow: 0 4px 14px rgba(90, 70, 45, 0.07);
+    @apply rounded-lg transition-all duration-200
+           hover:shadow-[0_8px_20px_rgba(90,70,45,0.1)] hover:border-[#bcae98];
   }
   
-  /* Tier-1 Primary Button (Linear / Stripe style) */
+  /* Primary Bahi-Khata Crimson Button */
   .btn-primary {
-    @apply relative overflow-hidden bg-indigo-600 text-white font-semibold px-5 py-2.5 rounded-xl 
-           shadow-sm transition-all duration-200 ease-out 
-           hover:bg-indigo-700 hover:shadow-indigo-500/20 hover:shadow-md
-           active:scale-[0.98]
+    @apply relative overflow-hidden bg-red-800 text-white font-semibold px-5 py-2.5 rounded-md 
+           shadow-sm border border-red-900/80 transition-all duration-150 ease-out 
+           hover:bg-red-900 hover:shadow-md
+           active:translate-y-[1px]
            flex items-center justify-center gap-2;
   }
   
-  /* Tier-1 Secondary Action Button */
+  /* Secondary Charcoal Ink Button */
   .btn-solid {
-    @apply relative overflow-hidden bg-slate-900 text-white font-semibold px-5 py-2.5 rounded-xl 
-           shadow-sm transition-all duration-200 ease-out hover:bg-slate-800
-           active:scale-[0.98] flex items-center justify-center gap-2;
+    @apply relative overflow-hidden bg-stone-900 text-[#fffdf9] font-semibold px-5 py-2.5 rounded-md 
+           shadow-sm border border-stone-950 transition-all duration-150 ease-out hover:bg-stone-800
+           active:translate-y-[1px] flex items-center justify-center gap-2;
   }
 
-  /* Tier-1 Accessible High-Contrast Input */
+  /* Warm Archival Input Field */
   .input-field {
-    @apply w-full bg-white text-slate-900 placeholder-slate-400
-           rounded-xl px-4 py-2.5 outline-none transition-all duration-150
-           border border-slate-300 shadow-sm
-           focus:border-indigo-600 focus:ring-4 focus:ring-indigo-600/10
-           hover:border-slate-400 text-sm font-medium;
+    background-color: #fffdf9;
+    border: 1px solid #c7bba7;
+    @apply w-full text-stone-900 placeholder-stone-400
+           rounded-md px-4 py-2.5 outline-none transition-all duration-150
+           shadow-inner
+           focus:border-red-800 focus:ring-4 focus:ring-red-800/10
+           hover:border-stone-500 text-sm font-medium;
+  }
+
+  /* Physical Rubber-Stamp Status Badges */
+  .stamp-due {
+    @apply inline-block px-2 py-0.5 border-2 border-red-700 text-red-700 bg-red-50/40
+           font-mono font-black text-[10px] uppercase tracking-widest -rotate-2 rounded-sm select-none;
+  }
+
+  .stamp-paid {
+    @apply inline-block px-2 py-0.5 border-2 border-emerald-700 text-emerald-700 bg-emerald-50/40
+           font-mono font-black text-[10px] uppercase tracking-widest rotate-1 rounded-sm select-none;
+  }
+
+  .stamp-partial {
+    @apply inline-block px-2 py-0.5 border-2 border-amber-700 text-amber-800 bg-amber-50/40
+           font-mono font-black text-[10px] uppercase tracking-widest -rotate-1 rounded-sm select-none;
   }
 }
 
@@ -49,7 +73,6 @@ input:-webkit-autofill,
 input:-webkit-autofill:hover, 
 input:-webkit-autofill:focus, 
 input:-webkit-autofill:active {
-  -webkit-box-shadow: 0 0 0 30px white inset !important;
-  -webkit-text-fill-color: #0f172a !important;
+  -webkit-box-shadow: 0 0 0 30px #fffdf9 inset !important;
+  -webkit-text-fill-color: #1c1917 !important;
 }
-
