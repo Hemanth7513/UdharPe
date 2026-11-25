@@ -207,29 +207,29 @@ export default function AuthLayout() {
             </div>
           </div>
         </div>
-
-        {/* Mobile Bottom Bar */}
-        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-zinc-300 z-50 px-2 py-1.5">
-          <div className="flex justify-around items-center">
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = location.pathname === item.path;
-              return (
-                <button
-                  key={item.name}
-                  onClick={() => navigate(item.path)}
-                  className={`py-1.5 px-2 flex-1 rounded-md flex flex-col items-center justify-center gap-1 transition-colors duration-150 ${
-                    isActive ? 'text-zinc-900 font-bold bg-zinc-100' : 'text-zinc-500 hover:text-zinc-900'
-                  }`}
-                >
-                  <Icon size={18} className="shrink-0" />
-                  <span className="text-[12px] text-center">{item.name}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
       </nav>
+
+      {/* Mobile Bottom Bar (outside sticky/backdrop-blur nav so fixed bottom-0 anchors to viewport) */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-zinc-300 z-50 px-2 py-1.5">
+        <div className="flex justify-around items-center">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = location.pathname === item.path;
+            return (
+              <button
+                key={item.name}
+                onClick={() => navigate(item.path)}
+                className={`py-1.5 px-2 flex-1 rounded-md flex flex-col items-center justify-center gap-1 transition-colors duration-150 ${
+                  isActive ? 'text-zinc-900 font-bold bg-zinc-100' : 'text-zinc-500 hover:text-zinc-900'
+                }`}
+              >
+                <Icon size={18} className="shrink-0" />
+                <span className="text-[12px] text-center">{item.name}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
 
       {/* Main Content */}
       <main className="flex-1 w-full max-w-7xl mx-auto pb-24 md:pb-12 pt-6">
