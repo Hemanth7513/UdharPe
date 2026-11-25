@@ -6,6 +6,7 @@ import { Receipt, CheckCircle, ArrowRight, UserPlus } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Modal from '../components/Modal';
 import SkeletonLoader from '../components/SkeletonLoader';
+import DueDatePicker from '../components/DueDatePicker';
 
 export default function Billing() {
   const navigate = useNavigate();
@@ -268,9 +269,16 @@ export default function Billing() {
 
             {/* Amount */}
             <div>
-              <label htmlFor="amount" className="block text-[13px] font-semibold text-zinc-800 mb-1.5">
-                Amount (₹) *
-              </label>
+              <div className="flex justify-between items-baseline mb-1.5">
+                <label htmlFor="amount" className="block text-[13px] font-semibold text-zinc-800">
+                  Amount (₹) *
+                </label>
+                {Number(amount) > 0 && (
+                  <span className="text-[13px] font-semibold text-zinc-600 tabular-nums">
+                    ₹{Number(amount).toLocaleString('en-IN')}
+                  </span>
+                )}
+              </div>
               <div className="relative">
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-900 font-display font-bold text-lg">₹</span>
                 <input
@@ -285,21 +293,26 @@ export default function Billing() {
                   className="input-field pl-10 py-3 font-display font-bold text-lg tabular-nums"
                 />
               </div>
+              <div className="grid grid-cols-4 gap-1.5 mt-2">
+                {[500, 1000, 2000, 5000].map((preset) => (
+                  <button
+                    key={preset}
+                    type="button"
+                    onClick={() => setAmount(String((Number(amount) || 0) + preset))}
+                    className="py-1.5 rounded-md border border-zinc-200 bg-zinc-50 hover:bg-zinc-100 hover:border-zinc-300 text-[13px] font-semibold text-zinc-700 tabular-nums transition-colors duration-150"
+                  >
+                    +₹{preset.toLocaleString('en-IN')}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* Due Date */}
             <div>
-              <label htmlFor="dueDate" className="block text-[13px] font-semibold text-zinc-800 mb-1.5">
+              <label className="block text-[13px] font-semibold text-zinc-800 mb-1.5">
                 Due Date (Time Period) *
               </label>
-              <input
-                id="dueDate"
-                type="date"
-                required
-                value={dueDate}
-                onChange={e => setDueDate(e.target.value)}
-                className="input-field"
-              />
+              <DueDatePicker value={dueDate} onChange={setDueDate} />
             </div>
 
             {/* Description / Note */}
