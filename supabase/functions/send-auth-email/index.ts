@@ -136,7 +136,7 @@ serve(async (req) => {
         .content { padding: 40px 32px; color: #333333; }
         .content h2 { margin-top: 0; font-size: 20px; color: #1a1a1a; }
         .content p { font-size: 16px; line-height: 1.5; color: #555555; margin-bottom: 32px; }
-        .btn { display: inline-block; background-color: #4f46e5; color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 6px; font-weight: bold; font-size: 16px; margin-bottom: 32px; }
+        .btn { display: inline-block; background-color: #18181b; color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 6px; font-weight: bold; font-size: 16px; margin-bottom: 32px; }
         .footer { font-size: 13px; color: #888888; line-height: 1.5; margin-top: 20px; padding-top: 20px; border-top: 1px solid #eeeeee; }
       </style>
     </head>
@@ -176,10 +176,7 @@ serve(async (req) => {
 
     if (!res.ok) {
       console.error('Resend API Error:', data)
-      if (type === 'recovery' || type === 'magiclink') {
-        return genericOk()
-      }
-      throw new Error('Failed to send email via Resend.')
+      throw new Error(data?.message || 'Failed to send email via Resend.')
     }
 
     if (type === 'recovery' || type === 'magiclink') {
