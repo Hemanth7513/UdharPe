@@ -40,9 +40,9 @@ export default function CommandPalette({ isOpen, onClose, isAdmin }) {
     }
     return [
       { id: 'nav-dash', label: 'Dashboard', sub: 'Business Overview & KPIs', path: '/dashboard', icon: LayoutDashboard },
-      { id: 'nav-bill', label: 'Raise New Bill', sub: 'Record credit entry (Udhar)', path: '/billing', icon: PlusCircle },
-      { id: 'nav-cust', label: 'All Customers', sub: 'Directory & Balances', path: '/customers', icon: Users },
-      { id: 'nav-set', label: 'Business Settings', sub: 'Firm Profile & Account', path: '/settings', icon: Settings },
+      { id: 'nav-bill', label: 'Raise Bill', sub: 'Record Udhar for a customer', path: '/billing', icon: PlusCircle },
+      { id: 'nav-cust', label: 'Customers', sub: 'Customer directory & balances', path: '/customers', icon: Users },
+      { id: 'nav-set', label: 'Settings', sub: 'Business Profile & Account', path: '/settings', icon: Settings },
     ];
   }, [isAdmin]);
 
@@ -122,7 +122,7 @@ export default function CommandPalette({ isOpen, onClose, isAdmin }) {
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder={isAdmin ? 'Jump to admin section...' : 'Search party name, phone, or action...'}
+                placeholder={isAdmin ? 'Search admin section...' : 'Search customer name, phone, or action...'}
                 className="w-full bg-transparent text-stone-900 placeholder-stone-500 text-sm font-medium outline-none"
               />
               <button onClick={onClose} className="p-1 text-stone-500 hover:text-stone-900 rounded">

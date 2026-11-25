@@ -74,7 +74,7 @@ export default function AuthLayout() {
 
   return (
     <div className="min-h-screen flex flex-col selection:bg-red-800 selection:text-white">
-      {/* Top Navbar — Digital Bahi-Khata Header */}
+      {/* Top Navbar */}
       <nav className="w-full bg-[#fffdf9]/95 backdrop-blur-md border-b-2 border-stone-800 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
@@ -88,10 +88,7 @@ export default function AuthLayout() {
               <div className="w-11 h-11 rounded-lg bg-red-800 shadow-sm border border-red-900 flex items-center justify-center text-[#fffdf9]">
                 <Handshake size={24} />
               </div>
-              <div className="hidden sm:block">
-                <span className="text-2xl font-serif font-bold text-stone-900 tracking-tight block leading-none">UdharPe</span>
-                <span className="text-[9px] font-mono uppercase tracking-widest text-stone-500">Digital Bahi-Khata</span>
-              </div>
+              <span className="text-2xl font-serif font-bold text-stone-900 tracking-tight hidden sm:block">UdharPe</span>
             </motion.div>
 
             {/* Desktop Navigation */}
@@ -130,10 +127,10 @@ export default function AuthLayout() {
               <button
                 onClick={() => setIsCommandOpen(true)}
                 className="hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg bg-[#f0e9db] hover:bg-[#e7decb] border border-[#d6cbb9] text-stone-600 hover:text-stone-900 transition-colors text-xs font-medium"
-                title="Quick Jump (Ctrl+K)"
+                title="Search (Ctrl+K)"
               >
                 <Search size={14} className="text-red-800" />
-                <span>Jump...</span>
+                <span>Search...</span>
                 <kbd className="px-1.5 py-0.5 text-[10px] font-mono bg-[#fffdf9] border border-[#c7bba7] rounded text-stone-500">⌘K</kbd>
               </button>
 

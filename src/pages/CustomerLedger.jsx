@@ -449,8 +449,8 @@ export default function CustomerLedger() {
         <h2 className="text-xl font-bold text-neu-heading">Transaction History</h2>
         <div className="flex items-center gap-1.5 p-1 bg-[#f0e9db] rounded-lg border border-[#d6cbb9] self-start sm:self-auto">
           {[
-            { id: 'all', label: 'All Entries' },
-            { id: 'bill', label: 'Udhar Bills' },
+            { id: 'all', label: 'All' },
+            { id: 'bill', label: 'Bills' },
             { id: 'settlement', label: 'Payments' },
           ].map(tab => (
             <button
@@ -499,16 +499,13 @@ export default function CustomerLedger() {
                   <h4 className="font-bold text-neu-heading text-lg flex items-center gap-2.5 flex-wrap">
                     {t.type === 'bill' ? (t.bill_no || 'Udhar Given') : 'Payment Received'}
                     {t.type === 'bill' && t.status === 'paid' && (
-                      <span className="stamp-paid">PAID</span>
+                      <span className="stamp-paid">Paid</span>
                     )}
                     {t.type === 'bill' && t.status === 'partial' && (
-                      <span className="stamp-partial">PARTIAL</span>
+                      <span className="stamp-partial">Partial</span>
                     )}
                     {t.type === 'bill' && t.status === 'pending' && (
-                      <span className="stamp-due">DUE</span>
-                    )}
-                    {t.type === 'settlement' && (
-                      <span className="stamp-paid">SETTLED</span>
+                      <span className="stamp-due">Pending</span>
                     )}
                   </h4>
                   <p className="text-sm text-neu-text font-medium mt-0.5">
