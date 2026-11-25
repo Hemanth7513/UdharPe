@@ -12,6 +12,7 @@ const Landing = lazy(() => import('./pages/Landing'));
 const Customers = lazy(() => import('./pages/Customers'));
 const CustomerLedger = lazy(() => import('./pages/CustomerLedger'));
 const Billing = lazy(() => import('./pages/Billing'));
+const Settlement = lazy(() => import('./pages/Settlement'));
 const Settings = lazy(() => import('./pages/Settings'));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
@@ -86,6 +87,10 @@ function App() {
                 <Route 
                   path="/billing" 
                   element={isSuperAdminUser(session.user) ? <Navigate to="/admin" replace /> : <Billing />} 
+                />
+                <Route 
+                  path="/settlement" 
+                  element={isSuperAdminUser(session.user) ? <Navigate to="/admin" replace /> : <Settlement />} 
                 />
                 <Route path="/settings" element={<Settings />} />
                 <Route 
