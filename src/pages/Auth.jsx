@@ -50,61 +50,38 @@ export default function Auth({ isRecovering }) {
         const isAdmin = isSuperAdminUser(data.user);
         navigate(isAdmin ? '/admin' : '/dashboard');
       } else if (authMode === 'signup') {
-        try {
-          const { error: fnError } = await supabase.functions.invoke('send-auth-email', {
-            body: {
-              email,
-              password,
-              type: 'signup',
-              options: { data: { firm_name: firmName, owner_name: ownerName } }
-            }
-          });
-          if (fnError) throw fnError;
-        } catch {
-          const { error: signUpError } = await supabase.auth.signUp({
+        const { data, error: fnError } = await supabase.functions.invoke('send-auth-email', {
+          body: {
             email,
             password,
-            options: {
-              data: { firm_name: firmName, owner_name: ownerName },
-              emailRedirectTo: `${window.location.origin}/dashboard`
-            }
-          });
-          if (signUpError) throw signUpError;
+            type: 'signup',
+            options: { data: { firm_name: firmName, owner_name: ownerName } }
+          }
+        });
+        if (fnError || data?.error) {
+          throw new Error(data?.error || fnError?.message || 'Failed to register via Resend');
         }
 
         setIconState('CheckCircle2');
         setErrorMsg('Registration successful! Check your email or login now.');
         setAuthMode('login');
       } else if (authMode === 'forgot_password') {
-        try {
-          const { error: fnError } = await supabase.functions.invoke('send-auth-email', {
-            body: { email, type: 'recovery' }
-          });
-          if (fnError) throw fnError;
-        } catch {
-          const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
-            redirectTo: `${window.location.origin}/auth`
-          });
-          if (resetError) throw resetError;
+        const { data, error: fnError } = await supabase.functions.invoke('send-auth-email', {
+          body: { email, type: 'recovery' }
+        });
+        if (fnError || data?.error) {
+          throw new Error(data?.error || fnError?.message || 'Failed to send reset link via Resend');
         }
 
         setIconState('CheckCircle2');
         setErrorMsg('Password reset link sent to your email!');
         setAuthMode('login');
       } else if (authMode === 'magic_link') {
-        try {
-          const { error: fnError } = await supabase.functions.invoke('send-auth-email', {
-            body: { email, type: 'magiclink' }
-          });
-          if (fnError) throw fnError;
-        } catch {
-          const { error: otpError } = await supabase.auth.signInWithOtp({
-            email,
-            options: {
-              emailRedirectTo: `${window.location.origin}/dashboard`
-            }
-          });
-          if (otpError) throw otpError;
+        const { data, error: fnError } = await supabase.functions.invoke('send-auth-email', {
+          body: { email, type: 'magiclink' }
+        });
+        if (fnError || data?.error) {
+          throw new Error(data?.error || fnError?.message || 'Failed to send magic link via Resend');
         }
 
         setIconState('CheckCircle2');
