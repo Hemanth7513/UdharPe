@@ -79,32 +79,28 @@ serve(async (req) => {
 
     // Aggregates only — no raw customer/bill PII
     if (action === 'get_business_details' && businessId) {
-      const { count: customerCount, error: custErr } = await supabaseAdmin
-        .from('customers')
-        .select('*', { count: 'exact', head: true })
-        .eq('business_id', businessId)
-      if (custErr) throw custErr
-
-      const { count: billCount, error: billErr } = await supabaseAdmin
-        .from('bills')
-        .select('*', { count: 'exact', head: true })
-        .eq('business_id', businessId)
-      if (billErr) throw billErr
-
       const { data: outstandingRows, error: outErr } = await supabaseAdmin
         .from('customers')
         .select('total_outstanding')
         .eq('business_id', businessId)
       if (outErr) throw outErr
 
+      const { data: billRows, error: billErr } = await supabaseAdmin
+        .from('bills')
+        .select('id')
+        .eq('business_id', businessId)
+      if (billErr) throw billErr
+
+      const customerCount = (outstandingRows || []).length
+      const billCount = (billRows || []).length
       const totalOutstanding = (outstandingRows || []).reduce(
         (sum, row) => sum + Number(row.total_outstanding || 0),
         0
       )
 
       return new Response(JSON.stringify({
-        customerCount: customerCount || 0,
-        billCount: billCount || 0,
+        customerCount,
+        billCount,
         totalOutstanding,
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -116,10 +112,11 @@ serve(async (req) => {
     if (authErr) throw authErr
     const totalBusinesses = users?.users?.length || 0
 
-    const { count: totalCustomers, error: totalCustErr } = await supabaseAdmin
+    const { data: customerRows, error: totalCustErr } = await supabaseAdmin
       .from('customers')
-      .select('*', { count: 'exact', head: true })
+      .select('id')
     if (totalCustErr) throw totalCustErr
+    const totalCustomers = (customerRows || []).length
 
     const { data: bills, error: billsErr } = await supabaseAdmin
       .from('bills')
@@ -153,8 +150,13 @@ serve(async (req) => {
       status: 200,
     })
   } catch (error) {
+    const errMsg = error instanceof Error
+      ? (error.message || JSON.stringify(error))
+      : (typeof error === 'object' && error !== null
+          ? ((error as { message?: string; code?: string; details?: string; hint?: string }).message || JSON.stringify(error))
+          : String(error))
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: errMsg }),
       { headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' }, status: 400 }
     )
   }
