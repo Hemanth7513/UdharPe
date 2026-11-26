@@ -4,9 +4,19 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 import { isSuperAdminUser } from '../lib/admin';
-import { Settings as SettingsIcon, LogOut, User, Mail, Briefcase, Edit2, Save, X, ShieldCheck, Globe } from 'lucide-react';
+import { Settings as SettingsIcon, LogOut, User, Mail, Briefcase, Edit2, Save, X, ShieldCheck, Globe, Calendar, MessageCircle, Download } from 'lucide-react';
 import toast from 'react-hot-toast';
 import LanguageSelector from '../components/LanguageSelector';
+import { getMerchantPrefs, saveMerchantPrefs } from '../lib/preferences';
+import { exportCsv } from '../lib/csv';
+
+const DUE_TERM_OPTIONS = [
+  { days: 0, labelKey: 'dueDate.today' },
+  { days: 7, labelKey: 'dueDate.days7' },
+  { days: 15, labelKey: 'dueDate.days15' },
+  { days: 30, labelKey: 'dueDate.days30' },
+  { days: 45, labelKey: 'dueDate.days45' },
+];
 
 export default function Settings() {
   const navigate = useNavigate();
@@ -15,6 +25,8 @@ export default function Settings() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [prefs, setPrefs] = useState(() => getMerchantPrefs());
+  const [exporting, setExporting] = useState(false);
   
   const [profile, setProfile] = useState({
     firm_name: '',
@@ -279,6 +291,169 @@ export default function Settings() {
         </div>
         <LanguageSelector variant="grid" />
       </section>
+
+      {!isAdmin && (
+        <>
+          {/* Ledger & Billing Defaults */}
+          <section className="bg-white border border-zinc-300 rounded-lg p-6 sm:p-8 space-y-4">
+            <div className="flex items-start gap-3">
+              <div className="w-9 h-9 rounded-md bg-zinc-100 border border-zinc-200 flex items-center justify-center shrink-0">
+                <Calendar size={18} className="text-zinc-700" />
+              </div>
+              <div>
+                <h2 className="text-[16px] font-display font-bold text-zinc-900">
+                  {t('settings.billingDefaultsSection')}
+                </h2>
+                <p className="text-[13px] text-zinc-600 mt-0.5">
+                  {t('settings.defaultDueTermDesc')}
+                </p>
+              </div>
+            </div>
+            <div>
+              <p className="text-[13px] font-semibold text-zinc-700 mb-2">
+                {t('settings.defaultDueTerm')}
+              </p>
+              <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
+                {DUE_TERM_OPTIONS.map((opt) => {
+                  const isActive = prefs.defaultDueDays === opt.days;
+                  return (
+                    <button
+                      key={opt.days}
+                      type="button"
+                      onClick={() => {
+                        setPrefs(saveMerchantPrefs({ defaultDueDays: opt.days }));
+                        toast.success(t('settings.prefsUpdated'));
+                      }}
+                      className={`py-2 px-3 rounded-md border text-[13px] font-semibold transition-colors duration-150 ${
+                        isActive
+                          ? 'bg-zinc-900 text-white border-zinc-900'
+                          : 'bg-white text-zinc-700 border-zinc-300 hover:border-zinc-400 hover:bg-zinc-50'
+                      }`}
+                    >
+                      {t(opt.labelKey)}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </section>
+
+          {/* WhatsApp Reminders */}
+          <section className="bg-white border border-zinc-300 rounded-lg p-6 sm:p-8 space-y-4">
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex items-start gap-3">
+                <div className="w-9 h-9 rounded-md bg-zinc-100 border border-zinc-200 flex items-center justify-center shrink-0">
+                  <MessageCircle size={18} className="text-zinc-700" />
+                </div>
+                <div>
+                  <h2 className="text-[16px] font-display font-bold text-zinc-900">
+                    {t('settings.reminderSection')}
+                  </h2>
+                  <p className="text-[13px] font-semibold text-zinc-800 mt-1">
+                    {t('settings.includeFirmName')}
+                  </p>
+                  <p className="text-[13px] text-zinc-600 mt-0.5">
+                    {t('settings.includeFirmNameDesc')}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={prefs.includeFirmNameInReminder}
+                onClick={() => {
+                  const next = saveMerchantPrefs({
+                    includeFirmNameInReminder: !prefs.includeFirmNameInReminder,
+                  });
+                  setPrefs(next);
+                  toast.success(t('settings.prefsUpdated'));
+                }}
+                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-150 ${
+                  prefs.includeFirmNameInReminder ? 'bg-zinc-900' : 'bg-zinc-300'
+                }`}
+              >
+                <span
+                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow transition duration-150 ${
+                    prefs.includeFirmNameInReminder ? 'translate-x-5' : 'translate-x-0'
+                  }`}
+                />
+              </button>
+            </div>
+
+            <div className="rounded-md bg-zinc-50 border border-zinc-200 p-3.5 space-y-1">
+              <p className="text-[12px] font-semibold uppercase tracking-wider text-zinc-500">
+                {t('settings.reminderPreview')}
+              </p>
+              <p className="text-[13px] text-zinc-700 whitespace-pre-line leading-relaxed">
+                {t('ledger.whatsappMessage', {
+                  name: 'Ramesh',
+                  amount: '2,500',
+                  business:
+                    prefs.includeFirmNameInReminder && profile.firm_name.trim()
+                      ? profile.firm_name.trim()
+                      : t('ledger.whatsappBusinessDefault'),
+                })}
+              </p>
+            </div>
+          </section>
+
+          {/* Data & Backup */}
+          <section className="bg-white border border-zinc-300 rounded-lg p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-start gap-3">
+              <div className="w-9 h-9 rounded-md bg-zinc-100 border border-zinc-200 flex items-center justify-center shrink-0">
+                <Download size={18} className="text-zinc-700" />
+              </div>
+              <div>
+                <h2 className="text-[16px] font-display font-bold text-zinc-900">
+                  {t('settings.dataBackupSection')}
+                </h2>
+                <p className="text-[13px] text-zinc-600 mt-0.5">
+                  {t('settings.dataBackupDesc')}
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              disabled={exporting}
+              onClick={async () => {
+                setExporting(true);
+                try {
+                  const { data: { user } } = await supabase.auth.getUser();
+                  if (!user) return;
+                  const { data, error } = await supabase
+                    .from('customers')
+                    .select('name, firm_name, phone, email, address, gst_details, total_outstanding')
+                    .eq('business_id', user.id)
+                    .order('name', { ascending: true });
+                  if (error) throw error;
+                  const rows = (data || []).map((c) => [
+                    c.name || '',
+                    c.firm_name || '',
+                    c.phone || '',
+                    c.email || '',
+                    c.address || '',
+                    c.gst_details || '',
+                    Number(c.total_outstanding || 0),
+                  ]);
+                  exportCsv(
+                    ['Name', 'Firm Name', 'Phone', 'Email', 'Address', 'GST', 'Outstanding (INR)'],
+                    rows,
+                    `udharpe_customers_backup_${new Date().toISOString().slice(0, 10)}.csv`
+                  );
+                  toast.success(t('customers.exportSuccess'));
+                } catch (err) {
+                  toast.error(err.message || 'Export failed');
+                } finally {
+                  setExporting(false);
+                }
+              }}
+              className="btn-solid px-4 py-2.5 text-[13px] shrink-0"
+            >
+              <Download size={15} /> {exporting ? t('common.loading') : t('settings.downloadBackupBtn')}
+            </button>
+          </section>
+        </>
+      )}
     </motion.div>
   );
 }

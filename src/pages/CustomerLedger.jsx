@@ -11,6 +11,7 @@ import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import { exportCsv } from '../lib/csv';
 import { getIntlLocale } from '../i18n';
+import { getMerchantPrefs } from '../lib/preferences';
 
 export default function CustomerLedger() {
   const { id } = useParams();
@@ -19,6 +20,7 @@ export default function CustomerLedger() {
   const intlLocale = getIntlLocale(i18n.language);
   
   const [customer, setCustomer] = useState(null);
+  const [firmName, setFirmName] = useState('');
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [ledgerFilter, setLedgerFilter] = useState('all');
@@ -45,6 +47,7 @@ export default function CustomerLedger() {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
+      setFirmName(user.user_metadata?.firm_name || '');
 
       // 1. Fetch Customer Details
       const { data: custData, error: custError } = await supabase
@@ -188,10 +191,15 @@ export default function CustomerLedger() {
       toast.error(t('ledger.noPhoneError'));
       return;
     }
+    const { includeFirmNameInReminder } = getMerchantPrefs();
+    const businessLabel =
+      includeFirmNameInReminder && firmName.trim()
+        ? firmName.trim()
+        : t('ledger.whatsappBusinessDefault');
     const message = t('ledger.whatsappMessage', {
       name: customer.name,
       amount: Number(customer.total_outstanding).toLocaleString('en-IN'),
-      business: t('ledger.whatsappBusinessDefault'),
+      business: businessLabel,
     });
     const encodedMessage = encodeURIComponent(message);
     // Assumes Indian numbers if no country code, for a real app we'd format better

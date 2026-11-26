@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
 import { getIntlLocale } from '../i18n';
+import { getMerchantPrefs } from '../lib/preferences';
 
 const QUICK_TERMS = [
   { id: '0', labelKey: 'dueDate.today', days: 0 },
@@ -40,10 +41,11 @@ export default function DueDatePicker({ value, onChange }) {
   });
   const containerRef = useRef(null);
 
-  // Default to +15 Days on mount if no value is set
+  // Default to merchant's preferred due term on mount if no value is set
   useEffect(() => {
     if (!value) {
-      onChange(addDaysToToday(15));
+      const { defaultDueDays } = getMerchantPrefs();
+      onChange(addDaysToToday(defaultDueDays));
     }
   }, [value, onChange]);
 
