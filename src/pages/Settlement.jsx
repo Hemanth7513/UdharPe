@@ -92,7 +92,7 @@ export default function Settlement() {
 
   return (
     <motion.div
-      className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pb-12"
+      className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-12"
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.2 }}
@@ -102,12 +102,13 @@ export default function Settlement() {
           <ArrowDownRight size={22} />
         </div>
         <div>
-          <h1 className="text-3xl font-display font-bold text-zinc-900 tracking-tight">Record Payment (Jama)</h1>
-          <p className="text-zinc-600 text-[14px] mt-0.5">Log a payment received from a customer</p>
+          <h1 className="text-3xl font-display font-bold text-zinc-900 tracking-tight">{t('settlement.title')}</h1>
+          <p className="text-zinc-600 text-[14px] mt-0.5">{t('settlement.subtitle')}</p>
         </div>
       </header>
 
-      <div className="bg-white border border-zinc-300 rounded-lg p-6 sm:p-9 relative z-10">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+      <div className="lg:col-span-7 bg-white border border-zinc-300 rounded-lg p-6 sm:p-8 relative z-10">
         {success ? (
           <motion.div
             initial={{ opacity: 0, scale: 0.96 }}
@@ -283,6 +284,80 @@ export default function Settlement() {
             </button>
           </form>
         )}
+      </div>
+
+      {/* Right Column: Actionable Pending Balance Quick-Pick Cards */}
+      <div className="lg:col-span-5 space-y-5">
+        {selectedCustomer && (
+          <div className="bg-white border border-zinc-300 rounded-lg p-6 space-y-3">
+            <div className="flex items-start justify-between gap-2">
+              <div>
+                <p className="text-[12px] font-semibold uppercase tracking-wider text-zinc-500">
+                  {t('billing.selectedCustomer')}
+                </p>
+                <h2 className="text-xl font-display font-bold text-zinc-900 mt-0.5">
+                  {selectedCustomer.name}
+                </h2>
+              </div>
+              <button
+                type="button"
+                onClick={() => navigate(`/customers/${selectedCustomer.id}`)}
+                className="btn-solid px-3 py-1.5 text-[13px]"
+              >
+                {t('customers.viewLedger')}
+              </button>
+            </div>
+            <div className="grid grid-cols-2 gap-3 pt-2 border-t border-zinc-200">
+              <div>
+                <p className="text-[12px] text-zinc-500">{t('billing.currentBalance')}</p>
+                <p className="text-lg font-display font-bold text-red-600 tabular-nums">
+                  ₹{maxPayable.toLocaleString('en-IN')}
+                </p>
+              </div>
+              <div>
+                <p className="text-[12px] text-zinc-500">{t('ledger.balanceDue')}</p>
+                <p className="text-lg font-display font-bold text-emerald-700 tabular-nums">
+                  ₹{Math.max(0, maxPayable - (Number(amount) || 0)).toLocaleString('en-IN')}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {customers.length > 0 && (
+          <div className="bg-white border border-zinc-300 rounded-lg p-6 space-y-3">
+            <h3 className="text-[14px] font-display font-bold text-zinc-900">
+              {t('settlement.selectCustomer')}
+            </h3>
+            <div className="space-y-2">
+              {customers.slice(0, 6).map((c) => {
+                const isPicked = c.id === selectedCustomerId;
+                return (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={() => {
+                      setSelectedCustomerId(c.id);
+                      setCustomerSearch(c.name);
+                      setIsDropdownOpen(false);
+                    }}
+                    className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-lg border text-left transition-colors duration-150 ${
+                      isPicked
+                        ? 'bg-zinc-900 text-white border-zinc-900'
+                        : 'bg-zinc-50 text-zinc-900 border-zinc-200 hover:border-zinc-400'
+                    }`}
+                  >
+                    <span className="text-[14px] font-semibold truncate pr-2">{c.name}</span>
+                    <span className={`text-[13px] font-bold tabular-nums shrink-0 ${isPicked ? 'text-emerald-300' : 'text-red-600'}`}>
+                      ₹{Number(c.total_outstanding).toLocaleString('en-IN')}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </div>
       </div>
     </motion.div>
   );

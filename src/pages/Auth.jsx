@@ -149,9 +149,9 @@ export default function Auth({ isRecovering }) {
   const { title, subtitle } = renderHeader();
 
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center p-4 bg-[#f4f4f5]">
+    <div className="min-h-screen flex flex-col justify-center items-center p-4 sm:p-6 bg-[#f4f4f5]">
       <motion.div
-        className="w-full max-w-md"
+        className="w-full max-w-4xl"
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
@@ -163,12 +163,86 @@ export default function Auth({ isRecovering }) {
             aria-label="UdharPe Home"
             className="inline-flex items-center justify-center hover:opacity-85 transition-opacity duration-150"
           >
-            <BrandMark size={46} />
+            <BrandMark size={44} />
           </button>
           <LanguageSelector variant="compact" />
         </div>
 
-        <div className="bg-white border border-zinc-300 rounded-lg p-7 sm:p-9" style={{ perspective: '900px' }}>
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-stretch">
+          {/* Left Side Card: Mode Switcher & Actionable Quick Access */}
+          <div className="md:col-span-5 flex flex-col justify-between gap-4 bg-white border border-zinc-300 rounded-lg p-6">
+            <div className="space-y-4">
+              <div>
+                <h1 className="text-2xl font-display font-bold text-zinc-900 tracking-tight">
+                  {title}
+                </h1>
+                <p className="text-[14px] text-zinc-600 mt-1">
+                  {t('landing.heroSubtitle')}
+                </p>
+              </div>
+
+              {authMode !== 'update_password' && (
+                <div className="space-y-2 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => { setAuthMode('login'); setErrorMsg(''); }}
+                    className={`w-full flex items-center justify-between px-4 py-3 rounded-lg border text-left text-[14px] font-semibold transition-colors duration-150 ${
+                      authMode === 'login'
+                        ? 'bg-zinc-900 text-white border-zinc-900'
+                        : 'bg-zinc-50 text-zinc-800 border-zinc-200 hover:border-zinc-400'
+                    }`}
+                  >
+                    <span>{t('auth.signInBtn')}</span>
+                    <ArrowRight size={15} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setAuthMode('signup'); setErrorMsg(''); }}
+                    className={`w-full flex items-center justify-between px-4 py-3 rounded-lg border text-left text-[14px] font-semibold transition-colors duration-150 ${
+                      authMode === 'signup'
+                        ? 'bg-zinc-900 text-white border-zinc-900'
+                        : 'bg-zinc-50 text-zinc-800 border-zinc-200 hover:border-zinc-400'
+                    }`}
+                  >
+                    <span>{t('auth.signUpBtn')}</span>
+                    <ArrowRight size={15} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setAuthMode('magic_link'); setErrorMsg(''); }}
+                    className={`w-full flex items-center justify-between px-4 py-3 rounded-lg border text-left text-[14px] font-semibold transition-colors duration-150 ${
+                      authMode === 'magic_link'
+                        ? 'bg-zinc-900 text-white border-zinc-900'
+                        : 'bg-zinc-50 text-zinc-800 border-zinc-200 hover:border-zinc-400'
+                    }`}
+                  >
+                    <span className="flex items-center gap-2"><Mail size={15} /> {t('auth.useMagicLink')}</span>
+                    <ArrowRight size={15} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setAuthMode('forgot_password'); setErrorMsg(''); }}
+                    className={`w-full flex items-center justify-between px-4 py-3 rounded-lg border text-left text-[14px] font-semibold transition-colors duration-150 ${
+                      authMode === 'forgot_password'
+                        ? 'bg-zinc-900 text-white border-zinc-900'
+                        : 'bg-zinc-50 text-zinc-800 border-zinc-200 hover:border-zinc-400'
+                    }`}
+                  >
+                    <span className="flex items-center gap-2"><Key size={15} /> {t('auth.forgotPassword')}</span>
+                    <ArrowRight size={15} />
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <div className="pt-4 border-t border-zinc-200 flex justify-between text-[13px] text-zinc-500">
+              <button onClick={() => navigate('/privacy-policy')} className="hover:text-zinc-900 transition-colors duration-150">{t('landing.privacy')}</button>
+              <button onClick={() => navigate('/terms-of-service')} className="hover:text-zinc-900 transition-colors duration-150">{t('landing.terms')}</button>
+            </div>
+          </div>
+
+          {/* Right Side Card: Form */}
+          <div className="md:col-span-7 bg-white border border-zinc-300 rounded-lg p-7 sm:p-8 flex flex-col justify-center" style={{ perspective: '900px' }}>
           <AnimatePresence mode="wait">
             <motion.div
               key={authMode}
@@ -176,24 +250,22 @@ export default function Auth({ isRecovering }) {
               animate={{ opacity: 1, rotateX: 0, y: 0 }}
               exit={{ opacity: 0, rotateX: 6, y: -6 }}
               transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+              className="flex items-center gap-3 mb-6"
             >
-              <div className="flex justify-center mb-5">
-                <div className="w-14 h-14 rounded-lg flex items-center justify-center text-zinc-900 bg-zinc-100 border border-zinc-200">
-                  {iconState === 'Briefcase' && <Briefcase className="w-6 h-6" />}
-                  {iconState === 'Eye' && <Eye className="w-6 h-6" />}
-                  {iconState === 'EyeOff' && <EyeOff className="w-6 h-6" />}
-                  {iconState === 'Loader2' && <Loader2 className="w-6 h-6 animate-spin" />}
-                  {iconState === 'CheckCircle2' && <CheckCircle2 className="w-6 h-6 text-emerald-700" />}
-                  {iconState === 'AlertCircle' && <AlertCircle className="w-6 h-6 text-red-600" />}
-                </div>
+              <div className="w-11 h-11 rounded-lg flex items-center justify-center text-zinc-900 bg-zinc-100 border border-zinc-200 shrink-0">
+                {iconState === 'Briefcase' && <Briefcase className="w-5 h-5" />}
+                {iconState === 'Eye' && <Eye className="w-5 h-5" />}
+                {iconState === 'EyeOff' && <EyeOff className="w-5 h-5" />}
+                {iconState === 'Loader2' && <Loader2 className="w-5 h-5 animate-spin" />}
+                {iconState === 'CheckCircle2' && <CheckCircle2 className="w-5 h-5 text-emerald-700" />}
+                {iconState === 'AlertCircle' && <AlertCircle className="w-5 h-5 text-red-600" />}
               </div>
-
-              <h1 className="text-2xl font-display font-bold text-center text-zinc-900 mb-1.5 tracking-tight">
-                {title}
-              </h1>
-              <p className="text-center text-zinc-600 mb-7 text-[15px]">
-                {subtitle}
-              </p>
+              <div>
+                <h2 className="text-lg font-display font-bold text-zinc-900 tracking-tight">
+                  {title}
+                </h2>
+                {subtitle && <p className="text-zinc-600 text-[13px]">{subtitle}</p>}
+              </div>
             </motion.div>
           </AnimatePresence>
 
@@ -289,51 +361,7 @@ export default function Auth({ isRecovering }) {
               {!loading && <ArrowRight className="w-4 h-4" />}
             </button>
           </form>
-
-          {authMode === 'login' && (
-            <div className="flex flex-col sm:flex-row justify-between gap-3 mt-6">
-              <button
-                type="button"
-                onClick={() => { setAuthMode('magic_link'); setErrorMsg(''); }}
-                className="flex items-center justify-center gap-2 text-[13px] text-zinc-900 font-semibold hover:underline"
-              >
-                <Mail size={15} /> {t('auth.useMagicLink')}
-              </button>
-              <button
-                type="button"
-                onClick={() => { setAuthMode('forgot_password'); setErrorMsg(''); }}
-                className="flex items-center justify-center gap-2 text-[13px] text-zinc-600 font-semibold hover:text-zinc-900"
-              >
-                <Key size={15} /> {t('auth.forgotPassword')}
-              </button>
-            </div>
-          )}
-
-          {authMode !== 'login' && authMode !== 'update_password' && (
-            <button
-              type="button"
-              onClick={() => { setAuthMode('login'); setErrorMsg(''); }}
-              className="block text-center w-full mt-6 text-[13px] text-zinc-700 font-semibold hover:text-zinc-900 transition-colors duration-150"
-            >
-              {t('auth.backToSignIn')}
-            </button>
-          )}
-
-          <div className="mt-7 pt-5 border-t border-zinc-200">
-            <p className="text-center text-[14px] text-zinc-600 mb-3">
-              {authMode === 'signup' ? t('auth.hasAccount') : t('auth.noAccount')}
-              <button
-                onClick={() => { setAuthMode(authMode === 'signup' ? 'login' : 'signup'); setErrorMsg(''); }}
-                className="text-zinc-900 font-bold hover:underline ml-1"
-              >
-                {authMode === 'signup' ? t('auth.signInBtn') : t('auth.signUpBtn')}
-              </button>
-            </p>
-            <div className="flex justify-center gap-5 text-[13px] text-zinc-500">
-              <button onClick={() => navigate('/privacy-policy')} className="hover:text-zinc-900 transition-colors duration-150">{t('landing.privacy')}</button>
-              <button onClick={() => navigate('/terms-of-service')} className="hover:text-zinc-900 transition-colors duration-150">{t('landing.terms')}</button>
-            </div>
-          </div>
+        </div>
         </div>
       </motion.div>
     </div>

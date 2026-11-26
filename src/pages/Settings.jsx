@@ -118,7 +118,7 @@ export default function Settings() {
 
   return (
     <motion.div
-      className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 pb-12"
+      className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-12"
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.2 }}
@@ -190,7 +190,10 @@ export default function Settings() {
           </div>
         </div>
       ) : (
-      <form onSubmit={handleSaveProfile} className="bg-white border border-zinc-300 rounded-lg p-6 sm:p-8 space-y-5">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+        {/* Left Column: Business Profile + Data & Backup */}
+        <div className="lg:col-span-5 space-y-5">
+      <form onSubmit={handleSaveProfile} className="bg-white border border-zinc-300 rounded-lg p-6 sm:p-7 space-y-5">
 
         <div className="space-y-1.5">
           <label htmlFor="firmName" className="block text-[13px] font-semibold text-zinc-700">{t('settings.firmName')}</label>
@@ -272,10 +275,68 @@ export default function Settings() {
         )}
 
       </form>
-      )}
 
+          {/* Data & Backup */}
+          <section className="bg-white border border-zinc-300 rounded-lg p-6 space-y-4">
+            <div className="flex items-start gap-3">
+              <div className="w-9 h-9 rounded-md bg-zinc-100 border border-zinc-200 flex items-center justify-center shrink-0">
+                <Download size={18} className="text-zinc-700" />
+              </div>
+              <div>
+                <h2 className="text-[16px] font-display font-bold text-zinc-900">
+                  {t('settings.dataBackupSection')}
+                </h2>
+                <p className="text-[13px] text-zinc-600 mt-0.5">
+                  {t('settings.dataBackupDesc')}
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              disabled={exporting}
+              onClick={async () => {
+                setExporting(true);
+                try {
+                  const { data: { user } } = await supabase.auth.getUser();
+                  if (!user) return;
+                  const { data, error } = await supabase
+                    .from('customers')
+                    .select('name, firm_name, phone, email, address, gst_details, total_outstanding')
+                    .eq('business_id', user.id)
+                    .order('name', { ascending: true });
+                  if (error) throw error;
+                  const rows = (data || []).map((c) => [
+                    c.name || '',
+                    c.firm_name || '',
+                    c.phone || '',
+                    c.email || '',
+                    c.address || '',
+                    c.gst_details || '',
+                    Number(c.total_outstanding || 0),
+                  ]);
+                  exportCsv(
+                    ['Name', 'Firm Name', 'Phone', 'Email', 'Address', 'GST', 'Outstanding (INR)'],
+                    rows,
+                    `udharpe_customers_backup_${new Date().toISOString().slice(0, 10)}.csv`
+                  );
+                  toast.success(t('customers.exportSuccess'));
+                } catch (err) {
+                  toast.error(err.message || 'Export failed');
+                } finally {
+                  setExporting(false);
+                }
+              }}
+              className="btn-solid w-full px-4 py-2.5 text-[13px]"
+            >
+              <Download size={15} /> {exporting ? t('common.loading') : t('settings.downloadBackupBtn')}
+            </button>
+          </section>
+        </div>
+
+        {/* Right Column: Language + Billing Defaults + WhatsApp Reminders */}
+        <div className="lg:col-span-7 space-y-5">
       {/* Language & Regional Section */}
-      <section className="bg-white border border-zinc-300 rounded-lg p-6 sm:p-8 space-y-4">
+      <section className="bg-white border border-zinc-300 rounded-lg p-6 sm:p-7 space-y-4">
         <div className="flex items-start gap-3">
           <div className="w-9 h-9 rounded-md bg-zinc-100 border border-zinc-200 flex items-center justify-center shrink-0">
             <Globe size={18} className="text-zinc-700" />
@@ -292,10 +353,8 @@ export default function Settings() {
         <LanguageSelector variant="grid" />
       </section>
 
-      {!isAdmin && (
-        <>
           {/* Ledger & Billing Defaults */}
-          <section className="bg-white border border-zinc-300 rounded-lg p-6 sm:p-8 space-y-4">
+          <section className="bg-white border border-zinc-300 rounded-lg p-6 sm:p-7 space-y-4">
             <div className="flex items-start gap-3">
               <div className="w-9 h-9 rounded-md bg-zinc-100 border border-zinc-200 flex items-center justify-center shrink-0">
                 <Calendar size={18} className="text-zinc-700" />
@@ -339,7 +398,7 @@ export default function Settings() {
           </section>
 
           {/* WhatsApp Reminders */}
-          <section className="bg-white border border-zinc-300 rounded-lg p-6 sm:p-8 space-y-4">
+          <section className="bg-white border border-zinc-300 rounded-lg p-6 sm:p-7 space-y-4">
             <div className="flex items-start justify-between gap-4">
               <div className="flex items-start gap-3">
                 <div className="w-9 h-9 rounded-md bg-zinc-100 border border-zinc-200 flex items-center justify-center shrink-0">
@@ -396,63 +455,27 @@ export default function Settings() {
               </p>
             </div>
           </section>
+        </div>
+      </div>
+      )}
 
-          {/* Data & Backup */}
-          <section className="bg-white border border-zinc-300 rounded-lg p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="flex items-start gap-3">
-              <div className="w-9 h-9 rounded-md bg-zinc-100 border border-zinc-200 flex items-center justify-center shrink-0">
-                <Download size={18} className="text-zinc-700" />
-              </div>
-              <div>
-                <h2 className="text-[16px] font-display font-bold text-zinc-900">
-                  {t('settings.dataBackupSection')}
-                </h2>
-                <p className="text-[13px] text-zinc-600 mt-0.5">
-                  {t('settings.dataBackupDesc')}
-                </p>
-              </div>
+      {isAdmin && (
+        <section className="mt-5 bg-white border border-zinc-300 rounded-lg p-6 sm:p-8 space-y-4">
+          <div className="flex items-start gap-3">
+            <div className="w-9 h-9 rounded-md bg-zinc-100 border border-zinc-200 flex items-center justify-center shrink-0">
+              <Globe size={18} className="text-zinc-700" />
             </div>
-            <button
-              type="button"
-              disabled={exporting}
-              onClick={async () => {
-                setExporting(true);
-                try {
-                  const { data: { user } } = await supabase.auth.getUser();
-                  if (!user) return;
-                  const { data, error } = await supabase
-                    .from('customers')
-                    .select('name, firm_name, phone, email, address, gst_details, total_outstanding')
-                    .eq('business_id', user.id)
-                    .order('name', { ascending: true });
-                  if (error) throw error;
-                  const rows = (data || []).map((c) => [
-                    c.name || '',
-                    c.firm_name || '',
-                    c.phone || '',
-                    c.email || '',
-                    c.address || '',
-                    c.gst_details || '',
-                    Number(c.total_outstanding || 0),
-                  ]);
-                  exportCsv(
-                    ['Name', 'Firm Name', 'Phone', 'Email', 'Address', 'GST', 'Outstanding (INR)'],
-                    rows,
-                    `udharpe_customers_backup_${new Date().toISOString().slice(0, 10)}.csv`
-                  );
-                  toast.success(t('customers.exportSuccess'));
-                } catch (err) {
-                  toast.error(err.message || 'Export failed');
-                } finally {
-                  setExporting(false);
-                }
-              }}
-              className="btn-solid px-4 py-2.5 text-[13px] shrink-0"
-            >
-              <Download size={15} /> {exporting ? t('common.loading') : t('settings.downloadBackupBtn')}
-            </button>
-          </section>
-        </>
+            <div>
+              <h2 className="text-[16px] font-display font-bold text-zinc-900">
+                {t('settings.languageSection')}
+              </h2>
+              <p className="text-[13px] text-zinc-600 mt-0.5">
+                {t('settings.languageDesc')}
+              </p>
+            </div>
+          </div>
+          <LanguageSelector variant="grid" />
+        </section>
       )}
     </motion.div>
   );
