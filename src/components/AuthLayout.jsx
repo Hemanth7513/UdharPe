@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -95,7 +95,9 @@ export default function AuthLayout() {
             <div className="hidden md:flex items-center gap-0.5 p-1 rounded-xl bg-zinc-200/75 border border-zinc-300/80 shadow-inner">
               {navItems.map((item) => {
                 const Icon = item.icon;
-                const isActive = location.pathname === item.path;
+                const isActive =
+                  location.pathname === item.path ||
+                  (item.path === '/customers' && location.pathname.startsWith('/customers/'));
                 return (
                   <button
                     key={item.path}
@@ -226,7 +228,9 @@ export default function AuthLayout() {
         <div className="flex justify-around items-center">
           {navItems.map((item) => {
             const Icon = item.icon;
-            const isActive = location.pathname === item.path;
+            const isActive =
+              location.pathname === item.path ||
+              (item.path === '/customers' && location.pathname.startsWith('/customers/'));
             return (
               <button
                 key={item.name}
@@ -245,14 +249,23 @@ export default function AuthLayout() {
 
       {/* Main Content */}
       <main className="flex-1 w-full max-w-7xl mx-auto pb-24 md:pb-12 pt-6">
-        <motion.div
-          key={location.pathname}
-          initial={{ opacity: 0, y: 6 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+        <Suspense
+          fallback={
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+              <div className="h-8 w-44 bg-zinc-200/80 rounded-md animate-pulse mb-6" />
+              <div className="h-64 w-full bg-white border border-zinc-200 rounded-lg animate-pulse" />
+            </div>
+          }
         >
-          <Outlet />
-        </motion.div>
+          <motion.div
+            key={location.pathname}
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.16, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <Outlet />
+          </motion.div>
+        </Suspense>
       </main>
 
       <CommandPalette

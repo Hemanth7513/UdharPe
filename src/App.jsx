@@ -1,9 +1,8 @@
 import { useEffect, useState, Suspense, lazy } from 'react';
 import { Toaster } from 'react-hot-toast';
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { supabase } from './lib/supabase';
 import { isSuperAdminUser } from './lib/admin';
-import { AnimatePresence } from 'framer-motion';
 
 // Lazy loaded pages
 const Auth = lazy(() => import('./pages/Auth'));
@@ -25,7 +24,6 @@ function App() {
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isRecovering, setIsRecovering] = useState(false);
-  const location = useLocation();
 
   useEffect(() => {
     if (window.location.hash.includes('type=recovery')) {
@@ -58,13 +56,12 @@ function App() {
   return (
     <>
       <Toaster position="top-center" toastOptions={{ className: 'font-bold' }} />
-      <AnimatePresence mode="wait">
-        <Suspense fallback={
-          <div className="min-h-screen flex items-center justify-center bg-neu-bg">
-            <div className="animate-pulse text-neu-primary font-bold">Loading...</div>
-          </div>
-        }>
-          <Routes location={location} key={location.pathname}>
+      <Suspense fallback={
+        <div className="min-h-screen flex items-center justify-center bg-neu-bg">
+          <div className="animate-pulse text-neu-primary font-bold">Loading...</div>
+        </div>
+      }>
+        <Routes>
             <Route path="/" element={!session ? <Landing /> : <Navigate to={isSuperAdminUser(session.user) ? "/admin" : "/dashboard"} replace />} />
             <Route path="/auth" element={(!session || isRecovering) ? <Auth isRecovering={isRecovering} /> : <Navigate to={isSuperAdminUser(session.user) ? "/admin" : "/dashboard"} replace />} />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
@@ -108,8 +105,7 @@ function App() {
             {/* Fallback */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
-        </Suspense>
-      </AnimatePresence>
+      </Suspense>
     </>
   );
 }
