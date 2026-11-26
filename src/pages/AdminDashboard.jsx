@@ -99,7 +99,7 @@ export default function AdminDashboard() {
       b.totalOutstanding ?? 0,
       b.created_at ? new Date(b.created_at).toLocaleDateString() : '-'
     ]);
-    exportCsv(headers, rows, `UdharPe_Platform_Audit_${new Date().toISOString().split('T')[0]}.csv`);
+    exportCsv(`UdharPe_Platform_Audit_${new Date().toISOString().split('T')[0]}.csv`, headers, rows);
     toast.success("Platform audit report exported (.csv)!");
   };
 

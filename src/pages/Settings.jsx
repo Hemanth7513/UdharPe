@@ -315,9 +315,9 @@ export default function Settings() {
                     Number(c.total_outstanding || 0),
                   ]);
                   exportCsv(
+                    `udharpe_customers_backup_${new Date().toISOString().slice(0, 10)}.csv`,
                     ['Name', 'Firm Name', 'Phone', 'Email', 'Address', 'GST', 'Outstanding (INR)'],
-                    rows,
-                    `udharpe_customers_backup_${new Date().toISOString().slice(0, 10)}.csv`
+                    rows
                   );
                   toast.success(t('customers.exportSuccess'));
                 } catch (err) {
