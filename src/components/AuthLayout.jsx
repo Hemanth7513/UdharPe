@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../lib/supabase';
 import { isSuperAdminUser } from '../lib/admin';
-import { LayoutDashboard, Users, PlusCircle, LogOut, Settings, ShieldAlert, ChevronDown, ShieldCheck, Search } from 'lucide-react';
+import { LayoutDashboard, Users, PlusCircle, LogOut, Settings, ShieldAlert, ChevronDown, ShieldCheck, Search, Sparkles } from 'lucide-react';
 import CommandPalette from './CommandPalette';
 import BrandMark from './BrandMark';
 import LanguageSelector from './LanguageSelector';
@@ -65,6 +65,7 @@ export default function AuthLayout() {
         { name: t('nav.dashboard'), path: '/dashboard', icon: LayoutDashboard },
         { name: t('nav.customers'), path: '/customers', icon: Users },
         { name: t('nav.raiseBill'), path: '/billing', icon: PlusCircle },
+        { name: 'Subscription', path: '/subscription', icon: Sparkles },
         { name: t('nav.settings'), path: '/settings', icon: Settings },
       ];
 
@@ -233,7 +234,7 @@ export default function AuthLayout() {
                 }`}
               >
                 <Icon size={18} className="shrink-0" />
-                <span className="text-[12px] text-center">{item.name}</span>
+                <span className="text-[11px] text-center truncate max-w-full">{item.name}</span>
               </button>
             );
           })}

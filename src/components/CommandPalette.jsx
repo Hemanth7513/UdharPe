@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, LayoutDashboard, Users, PlusCircle, Settings, ShieldAlert, ArrowRight, User, X } from 'lucide-react';
+import { Search, LayoutDashboard, Users, PlusCircle, Settings, ShieldAlert, ArrowRight, User, X, Sparkles } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 export default function CommandPalette({ isOpen, onClose, isAdmin }) {
@@ -43,6 +43,7 @@ export default function CommandPalette({ isOpen, onClose, isAdmin }) {
       { id: 'nav-dash', label: t('nav.dashboard'), sub: t('commandPalette.dashboardSub'), path: '/dashboard', icon: LayoutDashboard },
       { id: 'nav-bill', label: t('nav.raiseBill'), sub: t('commandPalette.raiseBillSub'), path: '/billing', icon: PlusCircle },
       { id: 'nav-cust', label: t('nav.customers'), sub: t('commandPalette.customersSub'), path: '/customers', icon: Users },
+      { id: 'nav-sub', label: 'Subscription', sub: 'Plans & upcoming features', path: '/subscription', icon: Sparkles },
       { id: 'nav-set', label: t('nav.settings'), sub: t('commandPalette.settingsSub'), path: '/settings', icon: Settings },
     ];
   }, [isAdmin, t]);
