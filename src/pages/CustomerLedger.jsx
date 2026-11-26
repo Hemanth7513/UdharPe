@@ -11,7 +11,6 @@ import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import { exportCsv } from '../lib/csv';
 import { getIntlLocale } from '../i18n';
-import { getMerchantPrefs } from '../lib/preferences';
 
 export default function CustomerLedger() {
   const { id } = useParams();
@@ -20,7 +19,6 @@ export default function CustomerLedger() {
   const intlLocale = getIntlLocale(i18n.language);
   
   const [customer, setCustomer] = useState(null);
-  const [firmName, setFirmName] = useState('');
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [ledgerFilter, setLedgerFilter] = useState('all');
@@ -47,7 +45,6 @@ export default function CustomerLedger() {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
-      setFirmName(user.user_metadata?.firm_name || '');
 
       // 1. Fetch Customer Details
       const { data: custData, error: custError } = await supabase
@@ -187,26 +184,10 @@ export default function CustomerLedger() {
   };
 
   const handleWhatsAppRemind = () => {
-    if (!customer.phone) {
-      toast.error(t('ledger.noPhoneError'));
-      return;
-    }
-    const { includeFirmNameInReminder } = getMerchantPrefs();
-    const businessLabel =
-      includeFirmNameInReminder && firmName.trim()
-        ? firmName.trim()
-        : t('ledger.whatsappBusinessDefault');
-    const message = t('ledger.whatsappMessage', {
-      name: customer.name,
-      amount: Number(customer.total_outstanding).toLocaleString('en-IN'),
-      business: businessLabel,
+    toast('WhatsApp Reminders are coming in our Subscription plan — we are working on it!', {
+      icon: '✨',
     });
-    const encodedMessage = encodeURIComponent(message);
-    // Assumes Indian numbers if no country code, for a real app we'd format better
-    let phoneStr = customer.phone.replace(/\D/g, '');
-    if (phoneStr.length === 10) phoneStr = '91' + phoneStr;
-    
-    window.open(`https://wa.me/${phoneStr}?text=${encodedMessage}`, '_blank');
+    navigate('/subscription');
   };
 
   const generatePDF = (returnBase64 = false) => {
@@ -445,10 +426,13 @@ export default function CustomerLedger() {
               </button>
               <button
                 onClick={handleWhatsAppRemind}
-                className="btn-solid w-10 h-10 p-0 text-emerald-700 shrink-0"
-                title={t('ledger.whatsappRemind')}
+                className="btn-solid px-3 h-10 text-zinc-700 shrink-0 text-[13px]"
+                title="WhatsApp Reminder (Subscription — Coming Soon)"
               >
-                <MessageCircle size={18} />
+                <MessageCircle size={16} className="text-zinc-500" />
+                <span className="hidden sm:inline text-[11px] font-semibold bg-zinc-100 border border-zinc-200 rounded px-1.5 py-0.5 text-zinc-600">
+                  Subscription
+                </span>
               </button>
               <button
                 onClick={handleEmailStatement}

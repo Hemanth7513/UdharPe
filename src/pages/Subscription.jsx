@@ -4,13 +4,13 @@ import { Sparkles, Check, Clock } from 'lucide-react';
 const CORE_FEATURES = [
   'Unlimited customer Udhar & Jama entries',
   'PDF & CSV ledger statements',
-  'WhatsApp & email payment reminders',
+  'Email payment reminders & PDF statements',
   'English, Hindi, Telugu & Tamil interface',
 ];
 
 const UPCOMING_FEATURES = [
+  'WhatsApp payment reminders (instant & scheduled)',
   'Multi-staff access & role permissions',
-  'Automated scheduled payment reminders',
   'Advanced business & aging analytics',
   'Priority merchant support',
 ];

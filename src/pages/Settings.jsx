@@ -405,9 +405,18 @@ export default function Settings() {
                   <MessageCircle size={18} className="text-zinc-700" />
                 </div>
                 <div>
-                  <h2 className="text-[16px] font-display font-bold text-zinc-900">
-                    {t('settings.reminderSection')}
-                  </h2>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h2 className="text-[16px] font-display font-bold text-zinc-900">
+                      {t('settings.reminderSection')}
+                    </h2>
+                    <button
+                      type="button"
+                      onClick={() => navigate('/subscription')}
+                      className="text-[11px] font-semibold text-zinc-700 bg-zinc-100 hover:bg-zinc-200 border border-zinc-200 rounded px-2 py-0.5 transition-colors duration-150"
+                    >
+                      Subscription · Working on it
+                    </button>
+                  </div>
                   <p className="text-[13px] font-semibold text-zinc-800 mt-1">
                     {t('settings.includeFirmName')}
                   </p>

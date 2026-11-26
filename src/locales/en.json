@@ -53,7 +53,7 @@
     "gettingStarted": "Getting started",
     "step1": "Add your first customer in Customers",
     "step2": "Raise a bill to record credit (Udhar)",
-    "step3": "Send WhatsApp reminders & record Jama",
+    "step3": "Send email reminders & record Jama",
     "overdueAlert": "{{count}} overdue bills",
     "billLabel": "Udhar",
     "paymentLabel": "Jama"
@@ -251,10 +251,10 @@
     "sectionSubtitle": "We're currently working on flexible plans for growing businesses. Start using your core ledger for free today — plan details will be announced soon.",
     "freeTierTitle": "Core Ledger",
     "freeTierStatus": "Available Now",
-    "freeTierDesc": "Customer Udhar & Jama tracking, PDF/CSV statements, and WhatsApp reminders.",
+    "freeTierDesc": "Customer Udhar & Jama tracking, PDF/CSV statements, and email reminders.",
     "proTierTitle": "Business & Pro Plans",
     "proTierStatus": "Working on it",
-    "proTierDesc": "Multi-staff access, automated scheduled reminders, and advanced business insights — currently in development.",
+    "proTierDesc": "WhatsApp payment reminders, multi-staff access, and advanced business insights — currently in development.",
     "settingsTitle": "Subscription & Plans",
     "settingsCurrentPlan": "Current Plan: Core Ledger",
     "settingsComingSoon": "We are working on upcoming subscription plans for growing businesses. Stay tuned for updates."
