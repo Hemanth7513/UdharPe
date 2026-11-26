@@ -70,18 +70,43 @@ export default function Dashboard() {
         setNewUdhar(given);
       }
 
-      // Fetch recent un-settled bills
-      const { data: billsData, error: billsError } = await supabase
-        .from('bills')
-        .select(`id, amount, remaining_amount, created_at, status, customers ( name )`)
-        .eq('business_id', user.id)
-        .in('status', ['pending', 'partial'])
-        .order('created_at', { ascending: false })
-        .limit(5);
+      // Fetch recent Udhar bills & Jama settlements
+      const [{ data: billsData }, { data: recentSettsData }] = await Promise.all([
+        supabase
+          .from('bills')
+          .select('id, amount, remaining_amount, created_at, status, customers ( id, name )')
+          .eq('business_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(5),
+        supabase
+          .from('settlements')
+          .select('id, amount_paid, created_at, customers ( id, name )')
+          .eq('business_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(5),
+      ]);
 
-      if (!billsError && billsData) {
-        setRecentBills(billsData);
-      }
+      const combinedRecent = [
+        ...(billsData || []).map((b) => ({
+          id: `bill-${b.id}`,
+          type: 'bill',
+          amount: Number(b.amount),
+          status: b.status,
+          created_at: b.created_at,
+          customers: b.customers,
+        })),
+        ...(recentSettsData || []).map((s) => ({
+          id: `sett-${s.id}`,
+          type: 'payment',
+          amount: Number(s.amount_paid),
+          created_at: s.created_at,
+          customers: s.customers,
+        })),
+      ]
+        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+        .slice(0, 6);
+
+      setRecentBills(combinedRecent);
 
       // Fetch all bills for chart (last 30 days)
       const thirtyDaysAgo = new Date();
@@ -101,16 +126,18 @@ export default function Dashboard() {
         .gte('created_at', thirtyDaysAgo.toISOString())
         .order('created_at', { ascending: true });
 
-      // Process chart data by day
+      // Process chart data by local YYYY-MM-DD key so sorting works across locales & year boundaries
       const dataMap = {};
       const addData = (items, typeKey, amountKey) => {
         if (items) {
           items.forEach(item => {
-            const date = new Date(item.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-            if (!dataMap[date]) {
-              dataMap[date] = { date, given: 0, received: 0 };
+            const d = new Date(item.created_at);
+            const isoKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+            const label = d.toLocaleDateString(intlLocale, { month: 'short', day: 'numeric' });
+            if (!dataMap[isoKey]) {
+              dataMap[isoKey] = { isoKey, date: label, given: 0, received: 0 };
             }
-            dataMap[date][typeKey] += Number(item[amountKey]);
+            dataMap[isoKey][typeKey] += Number(item[amountKey]);
           });
         }
       };
@@ -118,7 +145,7 @@ export default function Dashboard() {
       addData(chartBills, 'given', 'amount');
       addData(chartSettlements, 'received', 'amount_paid');
 
-      const formattedChartData = Object.values(dataMap).sort((a, b) => new Date(a.date) - new Date(b.date));
+      const formattedChartData = Object.values(dataMap).sort((a, b) => a.isoKey.localeCompare(b.isoKey));
       setChartData(formattedChartData);
 
     } catch (error) {
@@ -238,21 +265,31 @@ export default function Dashboard() {
               </div>
             ) : (
               <div className="divide-y divide-zinc-200">
-                {recentBills.map(bill => (
+                {recentBills.map(tx => (
                   <div
-                    key={bill.id}
-                    onClick={() => bill.customers?.id && navigate(`/customers/${bill.customers.id}`)}
+                    key={tx.id}
+                    onClick={() => tx.customers?.id && navigate(`/customers/${tx.customers.id}`)}
                     className="py-3.5 flex justify-between items-center gap-4 hover:bg-zinc-50 px-2 -mx-2 rounded-md cursor-pointer transition-colors duration-150"
                   >
                     <div>
-                      <h4 className="font-semibold text-zinc-900 text-[15px]">{bill.customers?.name || t('common.unknown')}</h4>
+                      <h4 className="font-semibold text-zinc-900 text-[15px]">{tx.customers?.name || t('common.unknown')}</h4>
                       <p className="text-[13px] text-zinc-500">
-                        {new Date(bill.created_at).toLocaleDateString(intlLocale)}
+                        {new Date(tx.created_at).toLocaleDateString(intlLocale)}
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="font-bold text-red-600 text-[15px] tabular-nums">₹{Number(bill.remaining_amount).toLocaleString('en-IN')}</p>
-                      <p className="text-[13px] text-zinc-500">{t('common.pending')}</p>
+                      <p className={`font-bold text-[15px] tabular-nums ${tx.type === 'payment' ? 'text-emerald-700' : 'text-red-600'}`}>
+                        {tx.type === 'payment' ? '-' : '+'}₹{Number(tx.amount).toLocaleString('en-IN')}
+                      </p>
+                      <p className="text-[13px] text-zinc-500">
+                        {tx.type === 'payment'
+                          ? t('dashboard.paymentLabel')
+                          : tx.status === 'paid'
+                            ? t('common.paid')
+                            : tx.status === 'partial'
+                              ? t('common.partial')
+                              : t('common.pending')}
+                      </p>
                     </div>
                   </div>
                 ))}
