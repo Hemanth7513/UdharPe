@@ -109,6 +109,7 @@
     "overdue": "Overdue",
     "billAmount": "Bill Amount",
     "balanceDue": "Balance Due",
+    "runningBalance": "Running Balance",
     "editNote": "Edit Note",
     "applyPayment": "Apply Payment",
     "paymentModalTitle": "Record Payment (Jama)",

@@ -109,6 +109,7 @@
     "overdue": "గడువు దాటింది",
     "billAmount": "బిల్లు మొత్తం",
     "balanceDue": "మిగిలిన బాకీ",
+    "runningBalance": "తర్వాతి నిల్వ",
     "editNote": "గమనిక మార్చండి",
     "applyPayment": "చెల్లింపు జత చేయండి",
     "paymentModalTitle": "చెల్లింపు నమోదు (జమ)",

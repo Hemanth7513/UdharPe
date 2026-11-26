@@ -109,6 +109,7 @@
     "overdue": "अतिदेय",
     "billAmount": "बिल राशि",
     "balanceDue": "शेष बकाया",
+    "runningBalance": "तत्कालीन शेष",
     "editNote": "नोट बदलें",
     "applyPayment": "भुगतान जोड़ें",
     "paymentModalTitle": "भुगतान दर्ज करें (जमा)",

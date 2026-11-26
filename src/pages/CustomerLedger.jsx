@@ -473,7 +473,7 @@ export default function CustomerLedger() {
           {[
             { id: 'all', label: t('ledger.filterAll') },
             { id: 'bill', label: t('ledger.filterBills') },
-            { id: 'settlement', label: t('ledger.filterPayments') },
+            { id: 'payment', label: t('ledger.filterPayments') },
           ].map(tab => (
             <button
               key={tab.id}
@@ -569,7 +569,7 @@ export default function CustomerLedger() {
                   </p>
                   {tx.runningBalance !== undefined && (
                     <p className="text-[13px] font-medium text-zinc-500 mt-0.5 tabular-nums">
-                      {t('billing.currentBalance')}: ₹{tx.runningBalance.toLocaleString('en-IN')}
+                      {t('ledger.runningBalance')}: ₹{tx.runningBalance.toLocaleString('en-IN')}
                     </p>
                   )}
                 </div>
