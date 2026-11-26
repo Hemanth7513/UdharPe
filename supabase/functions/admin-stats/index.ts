@@ -114,7 +114,7 @@ serve(async (req) => {
 
     const { data: customerRows, error: totalCustErr } = await supabaseAdmin
       .from('customers')
-      .select('id, total_outstanding')
+      .select('id, business_id, total_outstanding')
     if (totalCustErr) throw totalCustErr
     const totalCustomers = (customerRows || []).length
     const totalOutstanding = (customerRows || []).reduce(
@@ -124,14 +124,30 @@ serve(async (req) => {
 
     const { data: bills, error: billsErr } = await supabaseAdmin
       .from('bills')
-      .select('amount')
+      .select('amount, business_id')
     if (billsErr) throw billsErr
 
     let totalVolume = 0
     const totalTransactions = bills?.length || 0
+
+    const custByBiz: Record<string, { count: number; outstanding: number }> = {}
+    for (const c of customerRows || []) {
+      if (!c.business_id) continue
+      if (!custByBiz[c.business_id]) custByBiz[c.business_id] = { count: 0, outstanding: 0 }
+      custByBiz[c.business_id].count += 1
+      custByBiz[c.business_id].outstanding += Number(c.total_outstanding || 0)
+    }
+
+    const billsByBiz: Record<string, { count: number; volume: number }> = {}
     if (bills) {
       bills.forEach((bill) => {
-        totalVolume += Number(bill.amount)
+        const amt = Number(bill.amount || 0)
+        totalVolume += amt
+        if (bill.business_id) {
+          if (!billsByBiz[bill.business_id]) billsByBiz[bill.business_id] = { count: 0, volume: 0 }
+          billsByBiz[bill.business_id].count += 1
+          billsByBiz[bill.business_id].volume += amt
+        }
       })
     }
 
@@ -145,12 +161,24 @@ serve(async (req) => {
       totalOutstanding,
       totalSettled,
       adminEmail: user.email,
-      businesses: (users?.users || []).map((u) => ({
-        id: u.id,
-        email: u.email,
-        created_at: u.created_at,
-        last_sign_in_at: u.last_sign_in_at,
-      })),
+      businesses: (users?.users || []).map((u) => {
+        const meta = (u.user_metadata || {}) as Record<string, unknown>
+        const cStats = custByBiz[u.id] || { count: 0, outstanding: 0 }
+        const bStats = billsByBiz[u.id] || { count: 0, volume: 0 }
+        return {
+          id: u.id,
+          email: u.email,
+          firm_name: typeof meta.firm_name === 'string' ? meta.firm_name.trim() : '',
+          owner_name: typeof meta.owner_name === 'string' ? meta.owner_name.trim() : '',
+          is_admin: isSuperAdmin(u),
+          customerCount: cStats.count,
+          billCount: bStats.count,
+          totalVolume: bStats.volume,
+          totalOutstanding: cStats.outstanding,
+          created_at: u.created_at,
+          last_sign_in_at: u.last_sign_in_at,
+        }
+      }),
     }
 
     return new Response(JSON.stringify(payload), {

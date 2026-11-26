@@ -87,15 +87,19 @@ export default function AdminDashboard() {
 
   const handleExportAuditReport = () => {
     if (!stats?.businesses) return;
-    const headers = ['Business ID', 'Firm Name', 'Owner Name', 'Email', 'Registration Date'];
+    const headers = ['Business ID', 'Firm Name', 'Owner Name', 'Email', 'Customers', 'Bills', 'Gross Volume (INR)', 'Outstanding (INR)', 'Registration Date'];
     const rows = stats.businesses.map(b => [
       b.id || '',
       b.firm_name || '-',
       b.owner_name || '-',
       b.email || '-',
+      b.customerCount ?? 0,
+      b.billCount ?? 0,
+      b.totalVolume ?? 0,
+      b.totalOutstanding ?? 0,
       b.created_at ? new Date(b.created_at).toLocaleDateString() : '-'
     ]);
-    exportCsv(`UdharPe_Platform_Audit_${new Date().toISOString().split('T')[0]}.csv`, headers, rows);
+    exportCsv(headers, rows, `UdharPe_Platform_Audit_${new Date().toISOString().split('T')[0]}.csv`);
     toast.success("Platform audit report exported (.csv)!");
   };
 
@@ -243,37 +247,70 @@ export default function AdminDashboard() {
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b-2 border-neu-text/10">
-                  <th className="p-3 text-xs font-bold text-neu-text uppercase tracking-wider">Firm / Merchant</th>
-                  <th className="p-3 text-xs font-bold text-neu-text uppercase tracking-wider">Contact Identifier</th>
-                  <th className="p-3 text-xs font-bold text-neu-text uppercase tracking-wider">Joined On</th>
-                  <th className="p-3 text-xs font-bold text-neu-text uppercase tracking-wider text-right">Audit</th>
+                <tr className="border-b border-zinc-200">
+                  <th className="py-3 px-3 text-[12px] font-semibold text-zinc-500 uppercase tracking-wider">Firm / Merchant</th>
+                  <th className="py-3 px-3 text-[12px] font-semibold text-zinc-500 uppercase tracking-wider">Contact</th>
+                  <th className="py-3 px-3 text-[12px] font-semibold text-zinc-500 uppercase tracking-wider text-right">Parties</th>
+                  <th className="py-3 px-3 text-[12px] font-semibold text-zinc-500 uppercase tracking-wider text-right">Volume</th>
+                  <th className="py-3 px-3 text-[12px] font-semibold text-zinc-500 uppercase tracking-wider text-right">Outstanding</th>
+                  <th className="py-3 px-3 text-[12px] font-semibold text-zinc-500 uppercase tracking-wider">Joined / Last Active</th>
+                  <th className="py-3 px-3 text-[12px] font-semibold text-zinc-500 uppercase tracking-wider text-right">Audit</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-zinc-200">
                 {filteredBusinesses.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="p-6 text-center text-neu-text/60 text-sm">
+                    <td colSpan={7} className="p-6 text-center text-zinc-500 text-sm">
                       No businesses matching your search.
                     </td>
                   </tr>
                 ) : (
                   filteredBusinesses.map(b => (
-                    <tr key={b.id} className="border-b border-neu-text/5 hover:bg-white/50 transition-colors">
-                      <td className="p-3">
-                        <div className="font-bold text-neu-heading text-sm">{b.firm_name || 'My Business'}</div>
-                        <div className="text-xs text-neu-text/60">{b.owner_name || 'Business Owner'}</div>
+                    <tr key={b.id} className="hover:bg-zinc-50/80 transition-colors">
+                      <td className="py-3.5 px-3">
+                        <div className="flex items-center gap-2">
+                          <span className="font-display font-bold text-zinc-900 text-[14px]">
+                            {b.firm_name || (b.is_admin ? 'Platform Superadmin' : (b.email?.split('@')[0] || 'Unnamed Business'))}
+                          </span>
+                          {b.is_admin && (
+                            <span className="text-[11px] font-semibold bg-zinc-900 text-white rounded px-1.5 py-0.5">
+                              Admin
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-[13px] text-zinc-500 mt-0.5">
+                          {b.owner_name || 'Owner not set'}
+                        </div>
                       </td>
-                      <td className="p-3 font-mono text-xs text-neu-text">{b.email}</td>
-                      <td className="p-3 text-neu-text font-medium text-xs">
-                        {new Date(b.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                      <td className="py-3.5 px-3 text-[13px] text-zinc-600">{b.email}</td>
+                      <td className="py-3.5 px-3 text-right font-semibold text-[14px] text-zinc-900 tabular-nums">
+                        {b.customerCount ?? 0}
                       </td>
-                      <td className="p-3 text-right">
+                      <td className="py-3.5 px-3 text-right text-[13px] tabular-nums">
+                        <div className="font-semibold text-zinc-900">
+                          ₹{Number(b.totalVolume || 0).toLocaleString('en-IN')}
+                        </div>
+                        <div className="text-zinc-500">{b.billCount ?? 0} bills</div>
+                      </td>
+                      <td className="py-3.5 px-3 text-right font-bold text-[14px] tabular-nums">
+                        <span className={Number(b.totalOutstanding || 0) > 0 ? 'text-red-600' : 'text-emerald-700'}>
+                          ₹{Number(b.totalOutstanding || 0).toLocaleString('en-IN')}
+                        </span>
+                      </td>
+                      <td className="py-3.5 px-3 text-[13px] text-zinc-600 tabular-nums">
+                        <div>{new Date(b.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
+                        {b.last_sign_in_at && (
+                          <div className="text-[12px] text-zinc-400">
+                            Active {new Date(b.last_sign_in_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+                          </div>
+                        )}
+                      </td>
+                      <td className="py-3.5 px-3 text-right">
                         <button 
                           onClick={() => handleDeepDive(b)}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-neu-primary text-neu-primary font-bold hover:bg-neu-primary hover:text-white transition-colors text-xs"
+                          className="btn-solid px-3 py-1.5 text-[13px]"
                         >
-                          <Eye size={13} /> Deep Dive
+                          <Eye size={14} /> Deep Dive
                         </button>
                       </td>
                     </tr>
