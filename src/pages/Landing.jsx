@@ -60,7 +60,7 @@ export default function Landing() {
       </main>
 
       {/* Architectural 3-Column Feature Strip */}
-      <section className="w-full max-w-7xl mx-auto px-6 pb-12">
+      <section className="w-full max-w-7xl mx-auto px-6 pb-10">
         <Tilt3DCard maxTilt={1.5}>
           <div className="grid md:grid-cols-3 bg-white border border-zinc-300 rounded-lg divide-y md:divide-y-0 md:divide-x divide-zinc-200">
             <div className="p-6">
@@ -77,6 +77,47 @@ export default function Landing() {
             </div>
           </div>
         </Tilt3DCard>
+      </section>
+
+      {/* Subscription Plans (In Development — No Pricing) */}
+      <section className="w-full max-w-7xl mx-auto px-6 pb-14">
+        <div className="bg-white border border-zinc-300 rounded-lg p-6 sm:p-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-6 border-b border-zinc-200">
+            <div>
+              <span className="inline-block text-[12px] font-semibold uppercase tracking-wider text-zinc-700 bg-zinc-100 border border-zinc-200 rounded px-2.5 py-0.5 mb-2">
+                {t('plans.badge')}
+              </span>
+              <h2 className="text-2xl font-display font-bold text-zinc-900 tracking-tight">
+                {t('plans.sectionTitle')}
+              </h2>
+              <p className="text-[15px] text-zinc-600 mt-1 max-w-2xl">
+                {t('plans.sectionSubtitle')}
+              </p>
+            </div>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-5 pt-6">
+            <div className="rounded-lg border border-zinc-200 bg-zinc-50/70 p-5">
+              <div className="flex items-center justify-between gap-2 mb-2">
+                <h3 className="text-[16px] font-display font-bold text-zinc-900">{t('plans.freeTierTitle')}</h3>
+                <span className="text-[12px] font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200 rounded px-2 py-0.5 shrink-0">
+                  {t('plans.freeTierStatus')}
+                </span>
+              </div>
+              <p className="text-[14px] text-zinc-600 leading-relaxed">{t('plans.freeTierDesc')}</p>
+            </div>
+
+            <div className="rounded-lg border border-dashed border-zinc-300 bg-white p-5">
+              <div className="flex items-center justify-between gap-2 mb-2">
+                <h3 className="text-[16px] font-display font-bold text-zinc-900">{t('plans.proTierTitle')}</h3>
+                <span className="text-[12px] font-semibold text-zinc-700 bg-zinc-100 border border-zinc-200 rounded px-2 py-0.5 shrink-0">
+                  {t('plans.proTierStatus')}
+                </span>
+              </div>
+              <p className="text-[14px] text-zinc-600 leading-relaxed">{t('plans.proTierDesc')}</p>
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* Footer */}

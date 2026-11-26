@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 import { isSuperAdminUser } from '../lib/admin';
-import { Settings as SettingsIcon, LogOut, User, Mail, Briefcase, Edit2, Save, X, ShieldCheck, Globe } from 'lucide-react';
+import { Settings as SettingsIcon, LogOut, User, Mail, Briefcase, Edit2, Save, X, ShieldCheck, Globe, Sparkles } from 'lucide-react';
 import toast from 'react-hot-toast';
 import LanguageSelector from '../components/LanguageSelector';
 
@@ -279,6 +279,33 @@ export default function Settings() {
         </div>
         <LanguageSelector variant="grid" />
       </section>
+
+      {/* Subscription & Plans Section (In Development — No Pricing) */}
+      {!isAdmin && (
+        <section className="bg-white border border-zinc-300 rounded-lg p-6 sm:p-8 space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div className="flex items-start gap-3">
+              <div className="w-9 h-9 rounded-md bg-zinc-100 border border-zinc-200 flex items-center justify-center shrink-0">
+                <Sparkles size={18} className="text-zinc-700" />
+              </div>
+              <div>
+                <h2 className="text-[16px] font-display font-bold text-zinc-900">
+                  {t('plans.settingsTitle')}
+                </h2>
+                <p className="text-[13px] font-medium text-zinc-700 mt-0.5">
+                  {t('plans.settingsCurrentPlan')}
+                </p>
+              </div>
+            </div>
+            <span className="self-start sm:self-center text-[12px] font-semibold text-zinc-700 bg-zinc-100 border border-zinc-200 rounded px-2.5 py-1">
+              {t('plans.proTierStatus')}
+            </span>
+          </div>
+          <p className="text-[14px] text-zinc-600 leading-relaxed">
+            {t('plans.settingsComingSoon')}
+          </p>
+        </section>
+      )}
     </motion.div>
   );
 }

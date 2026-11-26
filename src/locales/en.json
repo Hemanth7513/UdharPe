@@ -233,5 +233,19 @@
     "feature3Desc": "Download clean, professional party statements anytime for your records or CA.",
     "privacy": "Privacy Policy",
     "terms": "Terms of Service"
+  },
+  "plans": {
+    "badge": "Coming Soon",
+    "sectionTitle": "Subscription Plans",
+    "sectionSubtitle": "We're currently working on flexible plans for growing businesses. Start using your core ledger for free today — plan details will be announced soon.",
+    "freeTierTitle": "Core Ledger",
+    "freeTierStatus": "Available Now",
+    "freeTierDesc": "Customer Udhar & Jama tracking, PDF/CSV statements, and WhatsApp reminders.",
+    "proTierTitle": "Business & Pro Plans",
+    "proTierStatus": "Working on it",
+    "proTierDesc": "Multi-staff access, automated scheduled reminders, and advanced business insights — currently in development.",
+    "settingsTitle": "Subscription & Plans",
+    "settingsCurrentPlan": "Current Plan: Core Ledger",
+    "settingsComingSoon": "We are working on upcoming subscription plans for growing businesses. Stay tuned for updates."
   }
 }
