@@ -16,13 +16,13 @@ export default function LanguageSelector({ variant = 'grid' }) {
 
   if (variant === 'compact') {
     return (
-      <div className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-200 bg-white px-2.5 py-1.5 text-xs font-medium text-zinc-700">
+      <div className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-zinc-300 bg-white hover:bg-zinc-50 px-2.5 text-[13px] font-medium text-zinc-700 transition-colors duration-150">
         <Globe className="w-3.5 h-3.5 text-zinc-500 shrink-0" />
         <select
           aria-label="Language"
           value={currentLang}
           onChange={(e) => handleSelect(e.target.value)}
-          className="bg-transparent text-zinc-900 font-medium focus:outline-none cursor-pointer pr-1"
+          className="bg-transparent text-zinc-900 font-medium focus:outline-none cursor-pointer pr-0.5"
         >
           {SUPPORTED_LANGUAGES.map((lang) => (
             <option key={lang.code} value={lang.code}>

@@ -78,79 +78,81 @@ export default function AuthLayout() {
   return (
     <div className="min-h-screen flex flex-col bg-[#f4f4f5] text-zinc-900">
       {/* Top Navbar */}
-      <nav className="w-full bg-[#f4f4f5]/95 backdrop-blur-md border-b border-zinc-300 sticky top-0 z-50">
+      <nav className="w-full bg-[#f4f4f5]/85 backdrop-blur-xl border-b border-zinc-300/90 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+          <div className="flex justify-between items-center h-16 gap-3">
             {/* Brand Logo */}
             <button
               type="button"
               onClick={() => navigate(isAdmin ? '/admin' : '/dashboard')}
               aria-label="UdharPe Home"
-              className="flex items-center hover:opacity-85 transition-opacity duration-150"
+              className="flex items-center gap-2.5 shrink-0 hover:opacity-85 transition-opacity duration-150"
             >
-              <BrandMark size={40} />
+              <BrandMark size={38} />
             </button>
 
-            {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center gap-7">
+            {/* Desktop Segmented Navigation Dock */}
+            <div className="hidden md:flex items-center gap-0.5 p-1 rounded-xl bg-zinc-200/75 border border-zinc-300/80 shadow-inner">
               {navItems.map((item) => {
+                const Icon = item.icon;
                 const isActive = location.pathname === item.path;
                 return (
                   <button
-                    key={item.name}
+                    key={item.path}
                     onClick={() => navigate(item.path)}
-                    className={`relative py-5 text-[15px] font-medium transition-colors duration-150 ${
+                    className={`relative px-3.5 py-1.5 rounded-lg text-[13.5px] font-medium flex items-center gap-2 transition-colors duration-150 ${
                       isActive
-                        ? 'text-zinc-900 font-bold'
+                        ? 'text-white font-semibold'
                         : 'text-zinc-600 hover:text-zinc-900'
                     }`}
                   >
-                    {item.name}
                     {isActive && (
-                      <motion.div
-                        layoutId="activeNavUnderline"
-                        transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
-                        className="absolute bottom-0 left-0 right-0 h-[2px] bg-zinc-900"
+                      <motion.span
+                        layoutId="activeNavPill"
+                        transition={{ type: 'spring', stiffness: 420, damping: 32 }}
+                        className="absolute inset-0 bg-zinc-900 rounded-lg shadow-sm"
                       />
                     )}
+                    <Icon size={15} className={`relative z-10 shrink-0 ${isActive ? 'text-emerald-400' : 'text-zinc-500'}`} />
+                    <span className="relative z-10 whitespace-nowrap">{item.name}</span>
                   </button>
                 );
               })}
             </div>
 
-            {/* Search + Language + User Menu */}
-            <div className="relative flex items-center gap-2.5" ref={menuRef}>
+            {/* Unified Utility Rail: Language + Search + User Menu */}
+            <div className="relative flex items-center gap-2 shrink-0" ref={menuRef}>
               <div className="hidden lg:block">
                 <LanguageSelector variant="compact" />
               </div>
 
               <button
                 onClick={() => setIsCommandOpen(true)}
-                className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-md bg-white hover:bg-zinc-50 border border-zinc-300 text-zinc-600 hover:text-zinc-900 transition-colors duration-150 text-[13px] font-medium"
+                className="hidden sm:flex h-9 items-center gap-2 px-3 rounded-lg bg-white hover:bg-zinc-50 border border-zinc-300 text-zinc-600 hover:text-zinc-900 transition-colors duration-150 text-[13px] font-medium"
                 title={`${t('common.search')} (Ctrl+K)`}
               >
                 <Search size={14} className="text-zinc-500" />
-                <span>{t('common.search')}</span>
-                <kbd className="px-1.5 py-0.5 text-[13px] leading-none bg-zinc-100 border border-zinc-300 rounded text-zinc-600">⌘K</kbd>
+                <span className="hidden xl:inline">{t('common.search')}</span>
+                <kbd className="px-1.5 py-0.5 text-[11px] font-semibold leading-none bg-zinc-100 border border-zinc-300 rounded text-zinc-600">⌘K</kbd>
               </button>
 
               <button
                 onClick={() => setIsCommandOpen(true)}
-                className="sm:hidden p-2 rounded-md bg-white border border-zinc-300 text-zinc-700"
+                className="sm:hidden w-9 h-9 flex items-center justify-center rounded-lg bg-white border border-zinc-300 text-zinc-700"
                 aria-label="Search"
               >
-                <Search size={18} />
+                <Search size={17} />
               </button>
 
               <button
                 onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
-                className="flex items-center gap-2.5 p-1 pr-2.5 rounded-md bg-white hover:bg-zinc-50 border border-zinc-300 transition-colors duration-150 text-left"
+                className="flex h-9 items-center gap-2 pl-1 pr-2.5 rounded-lg bg-white hover:bg-zinc-50 border border-zinc-300 transition-colors duration-150 text-left"
               >
-                <div className="w-8 h-8 rounded bg-zinc-900 text-white font-display font-bold text-[13px] flex items-center justify-center">
+                <div className="w-7 h-7 rounded-md bg-zinc-900 text-white font-display font-bold text-[12px] flex items-center justify-center">
                   {userInitials}
                 </div>
                 <div className="hidden sm:block">
-                  <div className="text-[13px] font-bold text-zinc-900 truncate max-w-[130px] leading-tight">{firmName}</div>
+                  <div className="text-[13px] font-bold text-zinc-900 truncate max-w-[120px] leading-tight">{firmName}</div>
                 </div>
                 <ChevronDown size={14} className={`text-zinc-500 transition-transform duration-150 ${isProfileMenuOpen ? 'rotate-180' : ''}`} />
               </button>
