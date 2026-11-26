@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 import { ArrowDownRight, CheckCircle, ArrowRight } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -8,6 +9,7 @@ import SkeletonLoader from '../components/SkeletonLoader';
 
 export default function Settlement() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -121,14 +123,13 @@ export default function Settlement() {
           </motion.div>
         ) : customers.length === 0 ? (
           <div className="py-10 text-center space-y-4">
-            <h2 className="text-xl font-display font-bold text-zinc-900">No pending balances</h2>
-            <p className="text-zinc-600 text-[15px]">None of your customers currently have an outstanding balance to settle.</p>
+            <h2 className="text-xl font-display font-bold text-zinc-900">{t('settlement.noCustomersWithDue')}</h2>
             <button
               type="button"
               onClick={() => navigate('/dashboard')}
               className="btn-solid mx-auto"
             >
-              Back to Dashboard
+              {t('nav.dashboard')}
             </button>
           </div>
         ) : (
@@ -136,7 +137,7 @@ export default function Settlement() {
             {/* Customer Selection */}
             <div className="relative">
               <label htmlFor="settlementCustomer" className="block text-[13px] font-semibold text-zinc-800 mb-1.5">
-                Customer / Party *
+                {t('settlement.selectCustomer')} *
               </label>
               <input
                 id="settlementCustomer"
@@ -149,7 +150,7 @@ export default function Settlement() {
                 }}
                 onFocus={() => setIsDropdownOpen(true)}
                 onBlur={() => setTimeout(() => setIsDropdownOpen(false), 200)}
-                placeholder="Search customer with outstanding balance..."
+                placeholder={t('settlement.searchPlaceholder')}
                 className="input-field py-3 font-semibold"
               />
 
@@ -199,7 +200,7 @@ export default function Settlement() {
             <div>
               <div className="flex justify-between items-baseline mb-1.5">
                 <label htmlFor="settlementAmount" className="block text-[13px] font-semibold text-zinc-800">
-                  Amount Received (₹) *
+                  {t('settlement.amountReceived')} *
                 </label>
                 {Number(amount) > 0 && (
                   <span className="text-[13px] font-semibold text-emerald-700 tabular-nums">
@@ -230,7 +231,7 @@ export default function Settlement() {
                     onClick={() => setAmount(String(maxPayable))}
                     className="px-3 py-1.5 rounded-md border border-zinc-900 bg-zinc-900 text-white text-[13px] font-semibold tabular-nums"
                   >
-                    Full Balance (₹{maxPayable.toLocaleString('en-IN')})
+                    {t('settlement.fullBalance')} (₹{maxPayable.toLocaleString('en-IN')})
                   </button>
                   {maxPayable > 100 && (
                     <button
@@ -238,7 +239,7 @@ export default function Settlement() {
                       onClick={() => setAmount(String(Math.round(maxPayable / 2)))}
                       className="px-3 py-1.5 rounded-md border border-zinc-200 bg-zinc-50 hover:bg-zinc-100 text-[13px] font-semibold text-zinc-700 tabular-nums"
                     >
-                      50% (₹{Math.round(maxPayable / 2).toLocaleString('en-IN')})
+                      {t('settlement.halfBalance')} (₹{Math.round(maxPayable / 2).toLocaleString('en-IN')})
                     </button>
                   )}
                   {[500, 1000, 2000, 5000]
@@ -260,14 +261,14 @@ export default function Settlement() {
             {/* Note */}
             <div>
               <label htmlFor="settlementNote" className="block text-[13px] font-semibold text-zinc-800 mb-1.5">
-                Payment Mode / Note (Optional)
+                {t('settlement.paymentModeNote')}
               </label>
               <input
                 id="settlementNote"
                 type="text"
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
-                placeholder="e.g. Cash, UPI Ref #1234, Bank Transfer"
+                placeholder={t('settlement.paymentModePlaceholder')}
                 className="input-field"
               />
             </div>
@@ -277,7 +278,7 @@ export default function Settlement() {
               disabled={isSubmitting || !selectedCustomerId}
               className="btn-primary w-full py-3.5 text-[15px] disabled:opacity-50"
             >
-              {isSubmitting ? 'Recording Payment...' : 'Record Payment (Jama)'}
+              {isSubmitting ? t('settings.saving') : t('settlement.submitBtn')}
               {!isSubmitting && <ArrowRight size={18} />}
             </button>
           </form>

@@ -1,14 +1,18 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 import { Users, Receipt, Plus, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import AnimatedCurrency from '../components/AnimatedCurrency';
 import { Tilt3DCard } from '../components/FramerComponents';
+import { getIntlLocale } from '../i18n';
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
+  const intlLocale = getIntlLocale(i18n.language);
   const [loading, setLoading] = useState(true);
   const [totalOutstanding, setTotalOutstanding] = useState(0);
   const [paymentsReceived, setPaymentsReceived] = useState(0);
@@ -142,7 +146,7 @@ export default function Dashboard() {
       {/* Compact Single-Row Header */}
       <header className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-display font-bold text-zinc-900 tracking-tight">Overview</h1>
+          <h1 className="text-3xl font-display font-bold text-zinc-900 tracking-tight">{t('dashboard.title')}</h1>
           <p className="text-zinc-600 mt-0.5 text-[15px]">{firmName}</p>
         </div>
 
@@ -150,7 +154,7 @@ export default function Dashboard() {
           onClick={() => navigate('/billing')}
           className="btn-primary py-2.5 px-5 text-[14px] self-start sm:self-auto"
         >
-          <Plus size={16} /> Raise Bill
+          <Plus size={16} /> {t('nav.raiseBill')}
         </button>
       </header>
 
@@ -161,21 +165,21 @@ export default function Dashboard() {
           {/* Unified 3-Column KPI Strip */}
           <div className="grid grid-cols-1 sm:grid-cols-3 bg-white border border-zinc-300 rounded-lg divide-y sm:divide-y-0 sm:divide-x divide-zinc-200">
             <div className="p-5 sm:p-6">
-              <p className="text-[13px] font-medium text-zinc-600 mb-1.5">Total Udhar (Baki)</p>
+              <p className="text-[13px] font-medium text-zinc-600 mb-1.5">{t('dashboard.totalUdhar')}</p>
               <p className="text-2xl sm:text-3xl font-display font-bold text-red-600 tracking-tight truncate">
                 <AnimatedCurrency value={totalOutstanding} />
               </p>
             </div>
 
             <div className="p-5 sm:p-6">
-              <p className="text-[13px] font-medium text-zinc-600 mb-1.5">Jama / Received (This Month)</p>
+              <p className="text-[13px] font-medium text-zinc-600 mb-1.5">{t('dashboard.jamaMonth')}</p>
               <p className="text-2xl sm:text-3xl font-display font-bold text-emerald-700 tracking-tight truncate">
                 <AnimatedCurrency value={paymentsReceived} />
               </p>
             </div>
 
             <div className="p-5 sm:p-6">
-              <p className="text-[13px] font-medium text-zinc-600 mb-1.5">Udhar Given (This Month)</p>
+              <p className="text-[13px] font-medium text-zinc-600 mb-1.5">{t('dashboard.udharMonth')}</p>
               <p className="text-2xl sm:text-3xl font-display font-bold text-zinc-900 tracking-tight truncate">
                 <AnimatedCurrency value={newUdhar} />
               </p>
@@ -185,7 +189,7 @@ export default function Dashboard() {
           {/* 30-Day Activity Chart */}
           {chartData.length > 0 && (
             <div className="bg-white border border-zinc-300 rounded-lg p-5 sm:p-6">
-              <h2 className="text-lg font-display font-bold text-zinc-900 mb-4">30-Day Activity</h2>
+              <h2 className="text-lg font-display font-bold text-zinc-900 mb-4">{t('dashboard.cashflowTrend')}</h2>
               <div className="h-60 w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={chartData} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
@@ -206,8 +210,8 @@ export default function Dashboard() {
                       contentStyle={{ backgroundColor: '#ffffff', borderRadius: '8px', border: '1px solid #d4d4d8', color: '#18181b' }}
                       itemStyle={{ fontWeight: 600, fontSize: '13px' }}
                     />
-                    <Area type="monotone" dataKey="given" name="Udhar Given" stroke="#dc2626" strokeWidth={2.5} fillOpacity={1} fill="url(#colorGiven)" />
-                    <Area type="monotone" dataKey="received" name="Payments Received" stroke="#15803d" strokeWidth={2.5} fillOpacity={1} fill="url(#colorReceived)" />
+                    <Area type="monotone" dataKey="given" name={t('dashboard.udharGiven')} stroke="#dc2626" strokeWidth={2.5} fillOpacity={1} fill="url(#colorGiven)" />
+                    <Area type="monotone" dataKey="received" name={t('dashboard.jamaReceived')} stroke="#15803d" strokeWidth={2.5} fillOpacity={1} fill="url(#colorReceived)" />
                   </AreaChart>
                 </ResponsiveContainer>
               </div>
@@ -217,21 +221,20 @@ export default function Dashboard() {
           {/* Recent Transactions */}
           <div className="bg-white border border-zinc-300 rounded-lg p-5 sm:p-6">
             <div className="flex justify-between items-center pb-3.5 mb-2 border-b border-zinc-200">
-              <h2 className="text-lg font-display font-bold text-zinc-900">Recent Transactions</h2>
+              <h2 className="text-lg font-display font-bold text-zinc-900">{t('dashboard.recentTransactions')}</h2>
               {recentBills.length > 0 && (
                 <button
                   onClick={() => navigate('/customers')}
                   className="text-[13px] font-semibold text-zinc-600 hover:text-zinc-900 transition-colors duration-150"
                 >
-                  View all →
+                  {t('dashboard.viewAll')} →
                 </button>
               )}
             </div>
 
             {recentBills.length === 0 ? (
               <div className="py-10 text-center">
-                <p className="text-zinc-900 font-semibold text-[15px] mb-1">No pending bills yet</p>
-                <p className="text-zinc-600 text-[14px]">When you raise an Udhar entry, it will appear here.</p>
+                <p className="text-zinc-900 font-semibold text-[15px] mb-1">{t('dashboard.noTransactions')}</p>
               </div>
             ) : (
               <div className="divide-y divide-zinc-200">
@@ -242,14 +245,14 @@ export default function Dashboard() {
                     className="py-3.5 flex justify-between items-center gap-4 hover:bg-zinc-50 px-2 -mx-2 rounded-md cursor-pointer transition-colors duration-150"
                   >
                     <div>
-                      <h4 className="font-semibold text-zinc-900 text-[15px]">{bill.customers?.name || 'Unknown'}</h4>
+                      <h4 className="font-semibold text-zinc-900 text-[15px]">{bill.customers?.name || t('common.unknown')}</h4>
                       <p className="text-[13px] text-zinc-500">
-                        Recorded on {new Date(bill.created_at).toLocaleDateString()}
+                        {new Date(bill.created_at).toLocaleDateString(intlLocale)}
                       </p>
                     </div>
                     <div className="text-right">
                       <p className="font-bold text-red-600 text-[15px] tabular-nums">₹{Number(bill.remaining_amount).toLocaleString('en-IN')}</p>
-                      <p className="text-[13px] text-zinc-500">Pending</p>
+                      <p className="text-[13px] text-zinc-500">{t('common.pending')}</p>
                     </div>
                   </div>
                 ))}
@@ -272,17 +275,17 @@ export default function Dashboard() {
                 </div>
                 <div>
                   <p className="font-display font-bold text-zinc-900 text-2xl tabular-nums leading-tight">{customerCount}</p>
-                  <p className="text-[14px] text-zinc-600 font-medium">Total Customers</p>
+                  <p className="text-[14px] text-zinc-600 font-medium">{t('dashboard.totalCustomers')}</p>
                 </div>
               </div>
-              <span className="text-[13px] font-semibold text-zinc-500">Open →</span>
+              <span className="text-[13px] font-semibold text-zinc-500">→</span>
             </button>
           </Tilt3DCard>
 
           {/* Compact Quick Actions Panel */}
           <div className="bg-white border border-zinc-300 rounded-lg overflow-hidden divide-y divide-zinc-200">
             <div className="px-5 py-3.5 bg-zinc-50/80">
-              <h3 className="text-[14px] font-display font-bold text-zinc-900">Quick Actions</h3>
+              <h3 className="text-[14px] font-display font-bold text-zinc-900">{t('dashboard.quickActions')}</h3>
             </div>
             <button
               type="button"
@@ -290,7 +293,7 @@ export default function Dashboard() {
               className="w-full px-5 py-3.5 flex items-center justify-between text-left hover:bg-zinc-50 transition-colors duration-150"
             >
               <span className="flex items-center gap-2.5 text-[14px] font-semibold text-zinc-900">
-                <ArrowUpRight size={16} className="text-zinc-600" /> Give Credit (Udhar)
+                <ArrowUpRight size={16} className="text-zinc-600" /> {t('nav.raiseBill')}
               </span>
               <span className="text-[13px] text-zinc-400">→</span>
             </button>
@@ -300,7 +303,7 @@ export default function Dashboard() {
               className="w-full px-5 py-3.5 flex items-center justify-between text-left hover:bg-zinc-50 transition-colors duration-150"
             >
               <span className="flex items-center gap-2.5 text-[14px] font-semibold text-emerald-700">
-                <ArrowDownRight size={16} /> Record Payment (Jama)
+                <ArrowDownRight size={16} /> {t('nav.recordPayment')}
               </span>
               <span className="text-[13px] text-zinc-400">→</span>
             </button>
@@ -310,7 +313,7 @@ export default function Dashboard() {
               className="w-full px-5 py-3.5 flex items-center justify-between text-left hover:bg-zinc-50 transition-colors duration-150"
             >
               <span className="flex items-center gap-2.5 text-[14px] font-semibold text-zinc-900">
-                <Plus size={16} className="text-zinc-600" /> Add Customer
+                <Plus size={16} className="text-zinc-600" /> {t('customers.addCustomer')}
               </span>
               <span className="text-[13px] text-zinc-400">→</span>
             </button>
@@ -319,24 +322,28 @@ export default function Dashboard() {
           {/* Compact Getting Started Guide (only when 0 customers) */}
           {customerCount === 0 && (
             <div className="bg-white border border-zinc-300 rounded-lg p-5 space-y-3">
-              <h3 className="text-[15px] font-display font-bold text-zinc-900">Getting started</h3>
-              <p className="text-[14px] text-zinc-600">Set up your ledger in two quick steps:</p>
+              <h3 className="text-[15px] font-display font-bold text-zinc-900">{t('dashboard.gettingStarted')}</h3>
               <div className="space-y-2 pt-1">
                 <button
                   type="button"
                   onClick={() => navigate('/customers')}
                   className="w-full p-3 rounded-md border border-zinc-200 hover:border-zinc-400 text-left transition-colors duration-150"
                 >
-                  <div className="text-[13px] font-bold text-zinc-900">1. Add your first customer</div>
-                  <div className="text-[13px] text-zinc-500">Save phone &amp; email for reminders.</div>
+                  <div className="text-[13px] font-bold text-zinc-900">1. {t('dashboard.step1')}</div>
                 </button>
                 <button
                   type="button"
                   onClick={() => navigate('/billing')}
                   className="w-full p-3 rounded-md border border-zinc-200 hover:border-zinc-400 text-left transition-colors duration-150"
                 >
-                  <div className="text-[13px] font-bold text-zinc-900">2. Record your first bill</div>
-                  <div className="text-[13px] text-zinc-500">Track credit and due dates.</div>
+                  <div className="text-[13px] font-bold text-zinc-900">2. {t('dashboard.step2')}</div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => navigate('/customers')}
+                  className="w-full p-3 rounded-md border border-zinc-200 hover:border-zinc-400 text-left transition-colors duration-150"
+                >
+                  <div className="text-[13px] font-bold text-zinc-900">3. {t('dashboard.step3')}</div>
                 </button>
               </div>
             </div>

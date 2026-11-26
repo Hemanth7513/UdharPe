@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 import { Receipt, CheckCircle, ArrowRight, UserPlus } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -12,6 +13,7 @@ import { findDuplicateCustomer } from '../lib/customers';
 export default function Billing() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation();
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
   
@@ -175,8 +177,8 @@ export default function Billing() {
           <Receipt size={22} />
         </div>
         <div>
-          <h1 className="text-3xl font-display font-bold text-zinc-900 tracking-tight">Record Udhar</h1>
-          <p className="text-zinc-600 text-[14px] mt-0.5">Add a new entry to a party's ledger</p>
+          <h1 className="text-3xl font-display font-bold text-zinc-900 tracking-tight">{t('billing.title')}</h1>
+          <p className="text-zinc-600 text-[14px] mt-0.5">{t('billing.subtitle')}</p>
         </div>
       </header>
 
@@ -202,7 +204,7 @@ export default function Billing() {
             <div className="relative">
               <div className="flex justify-between items-end mb-1.5">
                 <label htmlFor="customerSearch" className="block text-[13px] font-semibold text-zinc-800">
-                  Customer / Party *
+                  {t('billing.selectCustomer')} *
                 </label>
                 {customers.length > 0 && (
                   <button
@@ -210,16 +212,16 @@ export default function Billing() {
                     onClick={() => setIsAddCustomerModalOpen(true)}
                     className="text-zinc-900 font-semibold flex items-center gap-1 hover:underline text-[13px]"
                   >
-                    <UserPlus size={15} /> New Party
+                    <UserPlus size={15} /> {t('billing.addNewParty')}
                   </button>
                 )}
               </div>
 
               {customers.length === 0 ? (
                 <div className="p-4 rounded-md border border-red-200 bg-red-50 text-red-700 font-medium text-[14px] flex justify-between items-center">
-                  <span>No parties found. Please add a customer first.</span>
+                  <span>{t('customers.noCustomersFound')}</span>
                   <button type="button" onClick={() => setIsAddCustomerModalOpen(true)} className="btn-primary text-[13px] py-1.5 px-3">
-                    Add Customer
+                    {t('customers.addCustomer')}
                   </button>
                 </div>
               ) : (
@@ -235,7 +237,7 @@ export default function Billing() {
                     }}
                     onFocus={() => setIsDropdownOpen(true)}
                     onBlur={() => setTimeout(() => setIsDropdownOpen(false), 200)}
-                    placeholder="Search party by name..."
+                    placeholder={t('billing.searchCustomerPlaceholder')}
                     className="input-field py-3 font-semibold"
                   />
 
@@ -277,7 +279,7 @@ export default function Billing() {
             <div>
               <div className="flex justify-between items-baseline mb-1.5">
                 <label htmlFor="amount" className="block text-[13px] font-semibold text-zinc-800">
-                  Amount (₹) *
+                  {t('billing.amountLabel')} *
                 </label>
                 {Number(amount) > 0 && (
                   <span className="text-[13px] font-semibold text-zinc-600 tabular-nums">
@@ -316,7 +318,7 @@ export default function Billing() {
             {/* Due Date */}
             <div>
               <label className="block text-[13px] font-semibold text-zinc-800 mb-1.5">
-                Due Date (Time Period) *
+                {t('billing.dueDateLabel')} *
               </label>
               <DueDatePicker value={dueDate} onChange={setDueDate} />
             </div>
@@ -324,14 +326,14 @@ export default function Billing() {
             {/* Description / Note */}
             <div>
               <label htmlFor="description" className="block text-[13px] font-semibold text-zinc-800 mb-1.5">
-                Description / Note (Optional)
+                {t('billing.noteLabel')}
               </label>
               <input
                 id="description"
                 type="text"
                 value={description}
                 onChange={e => setDescription(e.target.value)}
-                placeholder="e.g. Invoice #1042, Materials, etc."
+                placeholder={t('billing.notePlaceholder')}
                 className="input-field"
               />
             </div>
@@ -341,7 +343,7 @@ export default function Billing() {
               disabled={isSubmitting || customers.length === 0}
               className="btn-primary w-full py-3.5 text-[15px] mt-2"
             >
-              {isSubmitting ? 'Recording...' : 'Record Udhar Entry'}
+              {isSubmitting ? t('settings.saving') : t('billing.submitBtn')}
               {!isSubmitting && <ArrowRight size={18} />}
             </button>
           </form>

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 import { Search, Plus, UserPlus, ChevronLeft, Phone, Mail, Download } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -12,6 +13,7 @@ import { exportCsv } from '../lib/csv';
 
 export default function Customers() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [customers, setCustomers] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -203,17 +205,17 @@ export default function Customers() {
             <ChevronLeft size={20} />
           </button>
           <div>
-            <h1 className="text-3xl font-display font-bold text-zinc-900 tracking-tight">My Customers</h1>
-            <p className="text-zinc-600 mt-0.5 text-[14px] tabular-nums">{customers.length} total clients</p>
+            <h1 className="text-3xl font-display font-bold text-zinc-900 tracking-tight">{t('customers.title')}</h1>
+            <p className="text-zinc-600 mt-0.5 text-[14px] tabular-nums">{customers.length} {t('nav.customers')}</p>
           </div>
         </div>
 
         <div className="flex w-full sm:w-auto gap-2.5">
           <button onClick={handleExportExcel} className="btn-solid px-4 py-2 text-[14px]">
-            <Download size={16} /> <span className="hidden sm:inline">Export</span>
+            <Download size={16} /> <span className="hidden sm:inline">{t('customers.exportCsv')}</span>
           </button>
           <button onClick={openAddModal} className="btn-primary flex-1 sm:flex-none">
-            <UserPlus size={18} /> Add Customer
+            <UserPlus size={18} /> {t('customers.addCustomer')}
           </button>
         </div>
       </header>
@@ -223,7 +225,7 @@ export default function Customers() {
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
         <input
           type="text"
-          placeholder="Search by name or phone..."
+          placeholder={t('customers.searchPlaceholder')}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="w-full bg-white border border-zinc-300 text-zinc-900 placeholder-zinc-400 rounded-lg pl-11 pr-4 py-3 outline-none focus:border-zinc-900 focus:ring-2 focus:ring-zinc-900/10 transition-colors duration-150 text-[15px]"
@@ -233,13 +235,13 @@ export default function Customers() {
       {/* Customer List */}
       {filteredCustomers.length === 0 ? (
         <div className="bg-white border border-zinc-300 rounded-lg p-12 text-center">
-          <h3 className="text-xl font-display font-bold text-zinc-900 mb-2">No customers found</h3>
+          <h3 className="text-xl font-display font-bold text-zinc-900 mb-2">{t('customers.noCustomersFound')}</h3>
           <p className="text-zinc-600 text-[15px] max-w-md mx-auto">
-            {searchQuery ? "We couldn't find anyone matching your search." : "You haven't added any customers yet. Add your first customer to start tracking Udhar."}
+            {t('customers.noCustomersHint')}
           </p>
           {!searchQuery && (
             <button onClick={openAddModal} className="btn-primary mx-auto mt-6">
-              Add First Customer
+              {t('customers.addCustomer')}
             </button>
           )}
         </div>
@@ -255,7 +257,7 @@ export default function Customers() {
                         {customer.name.charAt(0).toUpperCase()}
                       </div>
                       <div className="text-right">
-                        <p className="text-[13px] text-zinc-500 font-medium">Outstanding</p>
+                        <p className="text-[13px] text-zinc-500 font-medium">{t('customers.outstanding')}</p>
                         <p className={`font-display font-bold text-lg tabular-nums ${Number(customer.total_outstanding) > 0 ? 'text-red-600' : 'text-emerald-700'}`}>
                           ₹{Number(customer.total_outstanding).toLocaleString('en-IN')}
                         </p>
@@ -281,7 +283,7 @@ export default function Customers() {
                       onClick={() => openEditModal(customer)}
                       className="text-[13px] font-semibold text-zinc-600 hover:text-zinc-900 underline underline-offset-4 transition-colors duration-150"
                     >
-                      Edit Details
+                      {t('customers.editDetails')}
                     </button>
                   </div>
 
@@ -290,13 +292,13 @@ export default function Customers() {
                       onClick={() => navigate(`/customers/${customer.id}`)}
                       className="btn-solid flex-1 py-2 text-[14px]"
                     >
-                      View Ledger
+                      {t('customers.viewLedger')}
                     </button>
                     <button
                       onClick={() => navigate(`/billing?customer_id=${customer.id}`)}
                       className="btn-primary flex-1 py-2 text-[14px]"
                     >
-                      <Plus size={16} /> Udhar
+                      <Plus size={16} /> {t('customers.udharBtn')}
                     </button>
                   </div>
                 </div>
@@ -307,48 +309,48 @@ export default function Customers() {
       )}
 
       {/* Add/Edit Customer Modal */}
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={modalMode === 'add' ? "Add Party" : "Edit Party"}>
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={modalMode === 'add' ? t('customers.addPartyModal') : t('customers.editPartyModal')}>
         <form onSubmit={modalMode === 'add' ? handleAddCustomer : handleEditCustomer} className="space-y-5">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div>
-              <label htmlFor="customerName" className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">Party Name *</label>
+              <label htmlFor="customerName" className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">{t('customers.partyName')} *</label>
               <input 
                 id="customerName"
                 type="text" required value={newCustomer.name} onChange={e => setNewCustomer({...newCustomer, name: e.target.value})}
-                placeholder="e.g. Ramesh Singh" className="input-field"
+                placeholder={t('customers.partyNamePlaceholder')} className="input-field"
               />
             </div>
             <div>
-              <label htmlFor="customerFirm" className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">Firm Name</label>
+              <label htmlFor="customerFirm" className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">{t('settings.firmName')}</label>
               <input 
                 id="customerFirm"
                 type="text" value={newCustomer.firm_name} onChange={e => setNewCustomer({...newCustomer, firm_name: e.target.value})}
-                placeholder="e.g. Ramesh Electronics" className="input-field"
+                placeholder={t('settings.firmNamePlaceholder')} className="input-field"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div>
-              <label htmlFor="customerPhone" className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">Phone Number</label>
+              <label htmlFor="customerPhone" className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">{t('customers.phoneLabel')}</label>
               <input 
                 id="customerPhone"
                 type="tel" value={newCustomer.phone} onChange={e => setNewCustomer({...newCustomer, phone: e.target.value})}
-                placeholder="e.g. 9876543210" className="input-field"
+                placeholder={t('customers.phonePlaceholder')} className="input-field"
               />
             </div>
             <div>
-              <label htmlFor="customerEmail" className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">Email Address (For Reminders)</label>
+              <label htmlFor="customerEmail" className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">{t('customers.emailLabel')}</label>
               <input 
                 id="customerEmail"
                 type="email" value={newCustomer.email} onChange={e => setNewCustomer({...newCustomer, email: e.target.value})}
-                placeholder="ramesh@example.com" className="input-field"
+                placeholder={t('customers.emailPlaceholder')} className="input-field"
               />
             </div>
           </div>
 
           <div>
-            <label htmlFor="customerGst" className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">GST Number (Optional)</label>
+            <label htmlFor="customerGst" className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">GST (Optional)</label>
             <input 
               id="customerGst"
               type="text" value={newCustomer.gst_details} onChange={e => setNewCustomer({...newCustomer, gst_details: e.target.value})}
@@ -357,16 +359,16 @@ export default function Customers() {
           </div>
 
           <div>
-            <label htmlFor="customerAddress" className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">Address</label>
+            <label htmlFor="customerAddress" className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">{t('customers.addressLabel')}</label>
             <textarea 
               id="customerAddress"
               rows="2" value={newCustomer.address} onChange={e => setNewCustomer({...newCustomer, address: e.target.value})}
-              placeholder="Full address of the party" className="input-field resize-none"
+              placeholder={t('customers.addressPlaceholder')} className="input-field resize-none"
             />
           </div>
 
           <button type="submit" disabled={isSubmitting} className="btn-solid w-full mt-6 py-4">
-            {isSubmitting ? 'Saving...' : (modalMode === 'add' ? 'Save Party' : 'Update Party')}
+            {isSubmitting ? t('settings.saving') : (modalMode === 'add' ? t('customers.saveParty') : t('customers.updateParty'))}
           </button>
         </form>
       </Modal>

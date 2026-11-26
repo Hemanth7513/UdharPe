@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 import { motion } from 'framer-motion';
 import { ArrowLeft, User, Receipt, ArrowDownRight, ArrowUpRight, MessageCircle, Download, Mail } from 'lucide-react';
@@ -9,10 +10,13 @@ import SkeletonLoader from '../components/SkeletonLoader';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import { exportCsv } from '../lib/csv';
+import { getIntlLocale } from '../i18n';
 
 export default function CustomerLedger() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
+  const intlLocale = getIntlLocale(i18n.language);
   
   const [customer, setCustomer] = useState(null);
   const [transactions, setTransactions] = useState([]);
@@ -181,10 +185,14 @@ export default function CustomerLedger() {
 
   const handleWhatsAppRemind = () => {
     if (!customer.phone) {
-      toast.error("Customer does not have a phone number saved.");
+      toast.error(t('ledger.noPhoneError'));
       return;
     }
-    const message = `Namaste ${customer.name},\nThis is a friendly reminder regarding your outstanding balance of ₹${Number(customer.total_outstanding).toLocaleString('en-IN')} with our business. Kindly arrange for the settlement at your convenience. Thank you!`;
+    const message = t('ledger.whatsappMessage', {
+      name: customer.name,
+      amount: Number(customer.total_outstanding).toLocaleString('en-IN'),
+      business: t('ledger.whatsappBusinessDefault'),
+    });
     const encodedMessage = encodeURIComponent(message);
     // Assumes Indian numbers if no country code, for a real app we'd format better
     let phoneStr = customer.phone.replace(/\D/g, '');
@@ -385,7 +393,7 @@ export default function CustomerLedger() {
         onClick={() => navigate('/customers')}
         className="mb-5 flex items-center gap-2 text-zinc-600 hover:text-zinc-900 transition-colors duration-150 font-semibold text-[14px]"
       >
-        <ArrowLeft size={16} /> Back to Parties
+        <ArrowLeft size={16} /> {t('ledger.backToCustomers')}
       </button>
 
       {/* Customer Header Card */}
@@ -402,7 +410,7 @@ export default function CustomerLedger() {
 
         <div className="text-left md:text-right w-full md:w-auto flex flex-col md:items-end gap-3">
           <div>
-            <p className="text-[13px] text-zinc-500 font-medium mb-0.5">Total Outstanding</p>
+            <p className="text-[13px] text-zinc-500 font-medium mb-0.5">{t('ledger.totalOutstanding')}</p>
             <p className={`text-3xl sm:text-4xl font-display font-bold tabular-nums ${Number(customer.total_outstanding) > 0 ? 'text-red-600' : 'text-emerald-700'}`}>
               ₹{Number(customer.total_outstanding).toLocaleString('en-IN')}
             </p>
@@ -417,20 +425,20 @@ export default function CustomerLedger() {
                 }}
                 className="btn-primary flex-1 md:flex-none py-2 px-4 text-[14px]"
               >
-                Record Payment
+                {t('ledger.recordPayment')}
               </button>
               <button
                 onClick={handleEmailReminder}
                 disabled={isSendingEmail}
                 className="btn-solid py-2 px-3.5 text-[14px] shrink-0 disabled:opacity-50"
-                title={customer.email ? `Send payment reminder to ${customer.email}` : 'Add customer email to send reminder'}
+                title={customer.email ? `${t('ledger.emailReminder')}: ${customer.email}` : t('ledger.noEmailError')}
               >
-                <Mail size={16} /> {isSendingEmail ? 'Sending...' : 'Email Reminder'}
+                <Mail size={16} /> {isSendingEmail ? t('settings.saving') : t('ledger.emailReminder')}
               </button>
               <button
                 onClick={handleWhatsAppRemind}
                 className="btn-solid w-10 h-10 p-0 text-emerald-700 shrink-0"
-                title="Send WhatsApp Reminder"
+                title={t('ledger.whatsappRemind')}
               >
                 <MessageCircle size={18} />
               </button>
@@ -438,21 +446,21 @@ export default function CustomerLedger() {
                 onClick={handleEmailStatement}
                 disabled={isSendingEmail}
                 className="btn-solid w-10 h-10 p-0 shrink-0 disabled:opacity-50"
-                title="Email PDF Statement"
+                title={t('ledger.emailStatement')}
               >
                 <Mail size={18} />
               </button>
               <button
                 onClick={generatePDF}
                 className="btn-solid w-10 h-10 p-0 shrink-0"
-                title="Download PDF Statement"
+                title={t('ledger.downloadPdf')}
               >
                 <Download size={18} />
               </button>
               <button
                 onClick={handleExportExcel}
                 className="btn-solid w-10 h-10 p-0 text-emerald-700 shrink-0 font-bold text-[13px]"
-                title="Download CSV"
+                title={t('ledger.exportExcel')}
               >
                 CSV
               </button>
@@ -468,12 +476,12 @@ export default function CustomerLedger() {
       </div>
 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
-        <h2 className="text-xl font-display font-bold text-zinc-900">Transaction History</h2>
+        <h2 className="text-xl font-display font-bold text-zinc-900">{t('dashboard.recentTransactions')}</h2>
         <div className="flex items-center gap-1 p-1 bg-zinc-200/70 rounded-md border border-zinc-300 self-start sm:self-auto">
           {[
-            { id: 'all', label: 'All' },
-            { id: 'bill', label: 'Bills' },
-            { id: 'settlement', label: 'Payments' },
+            { id: 'all', label: t('ledger.filterAll') },
+            { id: 'bill', label: t('ledger.filterBills') },
+            { id: 'settlement', label: t('ledger.filterPayments') },
           ].map(tab => (
             <button
               key={tab.id}
@@ -498,23 +506,23 @@ export default function CustomerLedger() {
       </div>
 
       <div className="bg-white border border-zinc-300 rounded-lg divide-y divide-zinc-200" style={{ perspective: '900px' }}>
-        {transactions.filter(t => ledgerFilter === 'all' || t.type === ledgerFilter).length === 0 ? (
+        {transactions.filter(tx => ledgerFilter === 'all' || tx.type === ledgerFilter).length === 0 ? (
           <div className="p-10 text-center">
-            <p className="text-zinc-600 font-medium text-[15px]">No transactions matching this filter.</p>
+            <p className="text-zinc-600 font-medium text-[15px]">{t('ledger.noEntries')}</p>
           </div>
         ) : (
           transactions
-            .filter(t => ledgerFilter === 'all' || t.type === ledgerFilter)
-            .map((t, idx) => (
+            .filter(tx => ledgerFilter === 'all' || tx.type === ledgerFilter)
+            .map((tx, idx) => (
             <motion.div
-              key={t.id}
+              key={tx.id}
               initial={{ opacity: 0, rotateX: -6, y: 6 }}
               animate={{ opacity: 1, rotateX: 0, y: 0 }}
               transition={{ delay: Math.min(idx * 0.03, 0.24), duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
               className="p-5 sm:p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:bg-zinc-50/70 transition-colors duration-150"
             >
               <div className="flex items-start gap-4">
-                {t.type === 'bill' ? (
+                {tx.type === 'bill' ? (
                   <div className="w-10 h-10 rounded-md border border-red-200 bg-red-50 flex items-center justify-center text-red-600 shrink-0 mt-0.5">
                     <ArrowUpRight size={20} />
                   </div>
@@ -525,63 +533,63 @@ export default function CustomerLedger() {
                 )}
                 <div>
                   <h4 className="font-display font-bold text-zinc-900 text-[16px] flex items-center gap-2.5 flex-wrap">
-                    <span>{t.type === 'bill' ? (t.bill_no || 'Udhar Given') : 'Payment Received'}</span>
-                    {t.type === 'bill' && t.status === 'paid' && (
-                      <span className="text-[13px] font-semibold text-emerald-700">· Paid</span>
+                    <span>{tx.type === 'bill' ? (tx.bill_no || t('dashboard.udharGiven')) : t('dashboard.jamaReceived')}</span>
+                    {tx.type === 'bill' && tx.status === 'paid' && (
+                      <span className="text-[13px] font-semibold text-emerald-700">· {t('common.paid')}</span>
                     )}
-                    {t.type === 'bill' && t.status === 'partial' && (
-                      <span className="text-[13px] font-semibold text-amber-700">· Partial</span>
+                    {tx.type === 'bill' && tx.status === 'partial' && (
+                      <span className="text-[13px] font-semibold text-amber-700">· {t('common.partial')}</span>
                     )}
-                    {t.type === 'bill' && t.status === 'pending' && (
-                      <span className="text-[13px] font-semibold text-red-600">· Pending</span>
+                    {tx.type === 'bill' && tx.status === 'pending' && (
+                      <span className="text-[13px] font-semibold text-red-600">· {t('common.pending')}</span>
                     )}
                   </h4>
                   <p className="text-[13px] text-zinc-500 mt-0.5">
-                    {new Date(t.created_at).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}
+                    {new Date(tx.created_at).toLocaleString(intlLocale, { dateStyle: 'medium', timeStyle: 'short' })}
                   </p>
-                  {t.note && (
+                  {tx.note && (
                     <p className="text-[14px] text-zinc-700 mt-1.5 italic">
-                      "{t.note}"
+                      "{tx.note}"
                     </p>
                   )}
-                  {t.type === 'bill' && t.remaining_amount > 0 && (
+                  {tx.type === 'bill' && tx.remaining_amount > 0 && (
                     <p className="text-[13px] text-red-600 font-semibold mt-1.5 tabular-nums">
-                      Remaining: ₹{Number(t.remaining_amount).toLocaleString('en-IN')}
+                      {t('ledger.balanceDue')}: ₹{Number(tx.remaining_amount).toLocaleString('en-IN')}
                     </p>
                   )}
 
                   <button
                     onClick={() => {
-                      setEditingTransaction(t);
-                      setEditNote(t.note || '');
+                      setEditingTransaction(tx);
+                      setEditNote(tx.note || '');
                       setIsEditModalOpen(true);
                     }}
                     className="mt-2 text-[13px] font-semibold text-zinc-500 hover:text-zinc-900 transition-colors duration-150 block"
                   >
-                    Edit Note
+                    {t('ledger.editNote')}
                   </button>
                 </div>
               </div>
               <div className="text-left sm:text-right w-full sm:w-auto flex flex-row sm:flex-col justify-between sm:items-end items-center">
                 <div>
-                  <p className={`font-display font-bold text-xl tabular-nums ${t.type === 'bill' ? 'text-red-600' : 'text-emerald-700'}`}>
-                    {t.type === 'bill' ? '+' : '-'}₹{t.amount.toLocaleString('en-IN')}
+                  <p className={`font-display font-bold text-xl tabular-nums ${tx.type === 'bill' ? 'text-red-600' : 'text-emerald-700'}`}>
+                    {tx.type === 'bill' ? '+' : '-'}₹{tx.amount.toLocaleString('en-IN')}
                   </p>
-                  {t.runningBalance !== undefined && (
+                  {tx.runningBalance !== undefined && (
                     <p className="text-[13px] font-medium text-zinc-500 mt-0.5 tabular-nums">
-                      Balance: ₹{t.runningBalance.toLocaleString('en-IN')}
+                      {t('billing.currentBalance')}: ₹{tx.runningBalance.toLocaleString('en-IN')}
                     </p>
                   )}
                 </div>
-                {t.type === 'bill' && t.remaining_amount > 0 && (
+                {tx.type === 'bill' && tx.remaining_amount > 0 && (
                   <button
                     onClick={() => {
-                      setSelectedBillForPayment(t);
+                      setSelectedBillForPayment(tx);
                       setIsPaymentModalOpen(true);
                     }}
                     className="mt-0 sm:mt-2 btn-solid py-1.5 px-3 text-[13px]"
                   >
-                    Apply Payment
+                    {t('ledger.applyPayment')}
                   </button>
                 )}
               </div>
@@ -602,16 +610,16 @@ export default function CustomerLedger() {
       </motion.button>
 
       {/* Record Payment Modal */}
-      <Modal isOpen={isPaymentModalOpen} onClose={() => { setIsPaymentModalOpen(false); setSelectedBillForPayment(null); }} title={selectedBillForPayment ? `Record Payment for ${selectedBillForPayment.bill_no || 'Bill'}` : "Record Payment"}>
+      <Modal isOpen={isPaymentModalOpen} onClose={() => { setIsPaymentModalOpen(false); setSelectedBillForPayment(null); }} title={selectedBillForPayment ? `${t('ledger.paymentModalTitle')} (${selectedBillForPayment.bill_no || ''})` : t('ledger.paymentModalTitle')}>
         <form onSubmit={handleRecordPayment} className="space-y-5">
           {selectedBillForPayment && (
             <div className="bg-neu-primary/10 border border-neu-primary/20 rounded-xl p-4 mb-4 text-sm font-bold text-neu-primary">
-              Remaining Balance for this Bill: ₹{Number(selectedBillForPayment.remaining_amount).toLocaleString()}
+              {t('ledger.balanceDue')}: ₹{Number(selectedBillForPayment.remaining_amount).toLocaleString('en-IN')}
             </div>
           )}
           <div>
             <label htmlFor="paymentAmount" className="block text-sm font-bold text-neu-heading mb-2 pl-1 uppercase tracking-wide">
-              Amount Paid (₹) *
+              {t('ledger.amountReceived')} *
             </label>
             <div className="relative">
               <span className="absolute left-5 top-1/2 -translate-y-1/2 text-neu-heading font-black text-xl">₹</span>
@@ -634,7 +642,7 @@ export default function CustomerLedger() {
                     onClick={() => setPaymentAmount(String(maxPayable))}
                     className="px-3 py-1 rounded-full text-xs font-bold bg-neu-primary/10 text-neu-primary border border-neu-primary/30 hover:bg-neu-primary hover:text-white transition-colors"
                   >
-                    Full Balance (₹{maxPayable.toLocaleString('en-IN')})
+                    {t('ledger.fullBalance')} (₹{maxPayable.toLocaleString('en-IN')})
                   </button>
                   {maxPayable > 100 && (
                     <button
@@ -642,7 +650,7 @@ export default function CustomerLedger() {
                       onClick={() => setPaymentAmount(String(Math.round(maxPayable / 2)))}
                       className="px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors"
                     >
-                      50% (₹{Math.round(maxPayable / 2).toLocaleString('en-IN')})
+                      {t('ledger.halfBalance')} (₹{Math.round(maxPayable / 2).toLocaleString('en-IN')})
                     </button>
                   )}
                   {[500, 1000, 2000, 5000].filter(amt => amt < maxPayable).map(amt => (

@@ -1,13 +1,16 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 import { isSuperAdminUser } from '../lib/admin';
-import { Settings as SettingsIcon, LogOut, User, Mail, Briefcase, Edit2, Save, X, ShieldCheck } from 'lucide-react';
+import { Settings as SettingsIcon, LogOut, User, Mail, Briefcase, Edit2, Save, X, ShieldCheck, Globe } from 'lucide-react';
 import toast from 'react-hot-toast';
+import LanguageSelector from '../components/LanguageSelector';
 
 export default function Settings() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -115,10 +118,10 @@ export default function Settings() {
           </div>
         <div>
             <h1 className="text-3xl font-display font-bold text-zinc-900 tracking-tight">
-              {isAdmin ? 'Admin Settings' : 'Settings'}
+              {isAdmin ? t('nav.admin') + ' ' + t('settings.title') : t('settings.title')}
             </h1>
             <p className="text-zinc-600 text-[14px] mt-0.5">
-              {isAdmin ? 'Platform Superadmin account & session' : 'Manage your firm profile'}
+              {isAdmin ? 'Platform Superadmin account & session' : t('settings.subtitle')}
             </p>
           </div>
         </div>
@@ -178,7 +181,7 @@ export default function Settings() {
       <form onSubmit={handleSaveProfile} className="bg-white border border-zinc-300 rounded-lg p-6 sm:p-8 space-y-5">
 
         <div className="space-y-1.5">
-          <label htmlFor="firmName" className="block text-[13px] font-semibold text-zinc-700">Firm Name</label>
+          <label htmlFor="firmName" className="block text-[13px] font-semibold text-zinc-700">{t('settings.firmName')}</label>
           <div className="relative">
             <Briefcase size={17} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500" />
             <input
@@ -186,6 +189,7 @@ export default function Settings() {
               type="text"
               required
               disabled={!isEditing}
+              placeholder={t('settings.firmNamePlaceholder')}
               value={profile.firm_name}
               onChange={(e) => setProfile({ ...profile, firm_name: e.target.value })}
               className={`w-full pl-11 pr-4 py-2.5 rounded-md font-semibold text-zinc-900 outline-none transition-colors duration-150 ${isEditing ? 'bg-white border border-zinc-300 focus:border-zinc-900 focus:ring-2 focus:ring-zinc-900/10' : 'bg-zinc-50 border border-zinc-200'}`}
@@ -194,7 +198,7 @@ export default function Settings() {
         </div>
 
         <div className="space-y-1.5">
-          <label htmlFor="ownerName" className="block text-[13px] font-semibold text-zinc-700">Owner Name</label>
+          <label htmlFor="ownerName" className="block text-[13px] font-semibold text-zinc-700">{t('settings.ownerName')}</label>
           <div className="relative">
             <User size={17} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500" />
             <input
@@ -202,6 +206,7 @@ export default function Settings() {
               type="text"
               required
               disabled={!isEditing}
+              placeholder={t('settings.ownerNamePlaceholder')}
               value={profile.owner_name}
               onChange={(e) => setProfile({ ...profile, owner_name: e.target.value })}
               className={`w-full pl-11 pr-4 py-2.5 rounded-md font-semibold text-zinc-900 outline-none transition-colors duration-150 ${isEditing ? 'bg-white border border-zinc-300 focus:border-zinc-900 focus:ring-2 focus:ring-zinc-900/10' : 'bg-zinc-50 border border-zinc-200'}`}
@@ -210,7 +215,7 @@ export default function Settings() {
         </div>
 
         <div className="space-y-1.5">
-          <label className="block text-[13px] font-semibold text-zinc-700">Email Address</label>
+          <label className="block text-[13px] font-semibold text-zinc-700">{t('settings.emailAddress')}</label>
           <div className="relative">
             <Mail size={17} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
             <input
@@ -230,14 +235,14 @@ export default function Settings() {
               onClick={handleCancel}
               className="btn-solid flex-1 py-2.5"
             >
-              <X size={17} /> Cancel
+              <X size={17} /> {t('common.cancel')}
             </button>
             <button
               type="submit"
               disabled={saving}
               className="btn-primary flex-1 py-2.5"
             >
-              <Save size={17} /> {saving ? 'Saving...' : 'Save Changes'}
+              <Save size={17} /> {saving ? t('settings.saving') : t('settings.saveChanges')}
             </button>
           </div>
         )}
@@ -249,13 +254,31 @@ export default function Settings() {
               onClick={handleLogout}
               className="w-full py-2.5 rounded-md border border-red-200 bg-red-50 hover:bg-red-100 flex items-center justify-center gap-2 text-red-700 font-semibold transition-colors duration-150 text-[14px]"
             >
-              <LogOut size={18} /> Log Out Securely
+              <LogOut size={18} /> {t('settings.logoutBtn')}
             </button>
           </div>
         )}
 
       </form>
       )}
+
+      {/* Language & Regional Section */}
+      <section className="bg-white border border-zinc-300 rounded-lg p-6 sm:p-8 space-y-4">
+        <div className="flex items-start gap-3">
+          <div className="w-9 h-9 rounded-md bg-zinc-100 border border-zinc-200 flex items-center justify-center shrink-0">
+            <Globe size={18} className="text-zinc-700" />
+          </div>
+          <div>
+            <h2 className="text-[16px] font-display font-bold text-zinc-900">
+              {t('settings.languageSection')}
+            </h2>
+            <p className="text-[13px] text-zinc-600 mt-0.5">
+              {t('settings.languageDesc')}
+            </p>
+          </div>
+        </div>
+        <LanguageSelector variant="grid" />
+      </section>
     </motion.div>
   );
 }

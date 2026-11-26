@@ -1,16 +1,16 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
+import { getIntlLocale } from '../i18n';
 
 const QUICK_TERMS = [
-  { id: '0', label: 'Today', days: 0 },
-  { id: '7', label: '+7 Days', days: 7 },
-  { id: '15', label: '+15 Days', days: 15 },
-  { id: '30', label: '+30 Days', days: 30 },
-  { id: '45', label: '+45 Days', days: 45 },
+  { id: '0', labelKey: 'dueDate.today', days: 0 },
+  { id: '7', labelKey: 'dueDate.days7', days: 7 },
+  { id: '15', labelKey: 'dueDate.days15', days: 15 },
+  { id: '30', labelKey: 'dueDate.days30', days: 30 },
+  { id: '45', labelKey: 'dueDate.days45', days: 45 },
 ];
-
-const WEEKDAYS = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
 
 function toLocalISODate(date) {
   const y = date.getFullYear();
@@ -31,6 +31,8 @@ function addDaysToToday(days) {
  * and an Architectural Stone popover calendar for custom dates.
  */
 export default function DueDatePicker({ value, onChange }) {
+  const { t, i18n } = useTranslation();
+  const intlLocale = getIntlLocale(i18n.language);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [viewMonth, setViewMonth] = useState(() => {
     const d = value ? new Date(`${value}T00:00:00`) : new Date();
@@ -71,21 +73,21 @@ export default function DueDatePicker({ value, onChange }) {
   }, [value]);
 
   const humanSummary = useMemo(() => {
-    if (!value) return 'Select due date';
+    if (!value) return t('dueDate.selectDueDate');
     const selected = new Date(`${value}T00:00:00`);
     const today = new Date(`${todayISO}T00:00:00`);
     const diffDays = Math.round((selected - today) / (1000 * 60 * 60 * 24));
-    const formatted = selected.toLocaleDateString('en-IN', {
+    const formatted = selected.toLocaleDateString(intlLocale, {
       weekday: 'short',
       day: 'numeric',
       month: 'short',
       year: 'numeric',
     });
-    if (diffDays === 0) return `${formatted} · Due today`;
-    if (diffDays === 1) return `${formatted} · Tomorrow`;
-    if (diffDays > 1) return `${formatted} · In ${diffDays} days`;
-    return `${formatted} · ${Math.abs(diffDays)} days ago`;
-  }, [value, todayISO]);
+    if (diffDays === 0) return `${formatted} · ${t('dueDate.dueToday')}`;
+    if (diffDays === 1) return `${formatted} · ${t('dueDate.tomorrow')}`;
+    if (diffDays > 1) return `${formatted} · ${t('dueDate.inDays', { count: diffDays })}`;
+    return `${formatted} · ${t('dueDate.daysAgo', { count: Math.abs(diffDays) })}`;
+  }, [value, todayISO, intlLocale, t]);
 
   const calendarDays = useMemo(() => {
     const year = viewMonth.getFullYear();
@@ -131,7 +133,7 @@ export default function DueDatePicker({ value, onChange }) {
                   className="absolute inset-0 bg-zinc-900 rounded"
                 />
               )}
-              <span className="relative z-10">{term.label}</span>
+              <span className="relative z-10">{t(term.labelKey)}</span>
             </button>
           );
         })}
@@ -152,7 +154,7 @@ export default function DueDatePicker({ value, onChange }) {
               className="absolute inset-0 bg-zinc-900 rounded"
             />
           )}
-          <span className="relative z-10">Custom</span>
+          <span className="relative z-10">{t('dueDate.custom')}</span>
         </button>
       </div>
 
@@ -188,7 +190,7 @@ export default function DueDatePicker({ value, onChange }) {
                 <ChevronLeft size={16} />
               </button>
               <span className="font-display font-bold text-[15px] text-zinc-900">
-                {viewMonth.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })}
+                {viewMonth.toLocaleDateString(intlLocale, { month: 'long', year: 'numeric' })}
               </span>
               <button
                 type="button"
@@ -201,8 +203,8 @@ export default function DueDatePicker({ value, onChange }) {
             </div>
 
             <div className="grid grid-cols-7 gap-1 text-center mb-1.5">
-              {WEEKDAYS.map((d) => (
-                <span key={d} className="text-[13px] font-medium text-zinc-500 py-1">
+              {t('dueDate.weekdays', { returnObjects: true }).map((d, idx) => (
+                <span key={`${d}-${idx}`} className="text-[13px] font-medium text-zinc-500 py-1">
                   {d}
                 </span>
               ))}

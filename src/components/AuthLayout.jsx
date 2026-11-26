@@ -1,15 +1,18 @@
 import { useState, useEffect, useRef } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../lib/supabase';
 import { isSuperAdminUser } from '../lib/admin';
 import { LayoutDashboard, Users, PlusCircle, LogOut, Settings, ShieldAlert, ChevronDown, ShieldCheck, Search } from 'lucide-react';
 import CommandPalette from './CommandPalette';
 import BrandMark from './BrandMark';
+import LanguageSelector from './LanguageSelector';
 
 export default function AuthLayout() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation();
   const [isAdmin, setIsAdmin] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
@@ -55,14 +58,14 @@ export default function AuthLayout() {
 
   const navItems = isAdmin
     ? [
-        { name: 'Platform Command Center', path: '/admin', icon: ShieldAlert },
-        { name: 'Settings', path: '/settings', icon: Settings },
+        { name: t('nav.commandCenter'), path: '/admin', icon: ShieldAlert },
+        { name: t('nav.settings'), path: '/settings', icon: Settings },
       ]
     : [
-        { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
-        { name: 'Customers', path: '/customers', icon: Users },
-        { name: 'Raise Bill', path: '/billing', icon: PlusCircle },
-        { name: 'Settings', path: '/settings', icon: Settings },
+        { name: t('nav.dashboard'), path: '/dashboard', icon: LayoutDashboard },
+        { name: t('nav.customers'), path: '/customers', icon: Users },
+        { name: t('nav.raiseBill'), path: '/billing', icon: PlusCircle },
+        { name: t('nav.settings'), path: '/settings', icon: Settings },
       ];
 
   const firmName = isAdmin
@@ -114,15 +117,19 @@ export default function AuthLayout() {
               })}
             </div>
 
-            {/* Search + User Menu */}
+            {/* Search + Language + User Menu */}
             <div className="relative flex items-center gap-2.5" ref={menuRef}>
+              <div className="hidden lg:block">
+                <LanguageSelector variant="compact" />
+              </div>
+
               <button
                 onClick={() => setIsCommandOpen(true)}
                 className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-md bg-white hover:bg-zinc-50 border border-zinc-300 text-zinc-600 hover:text-zinc-900 transition-colors duration-150 text-[13px] font-medium"
-                title="Search (Ctrl+K)"
+                title={`${t('common.search')} (Ctrl+K)`}
               >
                 <Search size={14} className="text-zinc-500" />
-                <span>Search...</span>
+                <span>{t('common.search')}</span>
                 <kbd className="px-1.5 py-0.5 text-[13px] leading-none bg-zinc-100 border border-zinc-300 rounded text-zinc-600">⌘K</kbd>
               </button>
 
@@ -176,7 +183,7 @@ export default function AuthLayout() {
                         }}
                         className="w-full flex items-center gap-2.5 px-3 py-2 rounded-md text-[14px] font-medium text-zinc-700 hover:bg-zinc-100 hover:text-zinc-900 transition-colors duration-150 text-left"
                       >
-                        <Settings size={15} className="text-zinc-500" /> Business Profile &amp; Settings
+                        <Settings size={15} className="text-zinc-500" /> {t('nav.settings')}
                       </button>
 
                       {isAdmin ? (
@@ -187,7 +194,7 @@ export default function AuthLayout() {
                           }}
                           className="w-full flex items-center gap-2.5 px-3 py-2 rounded-md text-[14px] font-medium text-zinc-900 hover:bg-zinc-100 transition-colors duration-150 text-left"
                         >
-                          <ShieldAlert size={15} /> Platform Command Center
+                          <ShieldAlert size={15} /> {t('nav.commandCenter')}
                         </button>
                       ) : null}
 
@@ -200,7 +207,7 @@ export default function AuthLayout() {
                         }}
                         className="w-full flex items-center gap-2.5 px-3 py-2 rounded-md text-[14px] font-medium text-red-600 hover:bg-red-50 transition-colors duration-150 text-left"
                       >
-                        <LogOut size={15} /> Sign Out of UdharPe
+                        <LogOut size={15} /> {t('nav.signOut')}
                       </button>
                     </div>
                   </motion.div>

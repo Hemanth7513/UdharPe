@@ -1,11 +1,13 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, LayoutDashboard, Users, PlusCircle, Settings, ShieldAlert, ArrowRight, User, X } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 export default function CommandPalette({ isOpen, onClose, isAdmin }) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [query, setQuery] = useState('');
   const [customers, setCustomers] = useState([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -33,17 +35,17 @@ export default function CommandPalette({ isOpen, onClose, isAdmin }) {
   const baseActions = useMemo(() => {
     if (isAdmin) {
       return [
-        { id: 'nav-admin', label: 'Platform Command Center', sub: 'Analytics & Merchant Audit', path: '/admin', icon: ShieldAlert },
-        { id: 'nav-settings', label: 'System Settings', sub: 'Account & Profile', path: '/settings', icon: Settings },
+        { id: 'nav-admin', label: t('nav.commandCenter'), sub: 'Analytics & Merchant Audit', path: '/admin', icon: ShieldAlert },
+        { id: 'nav-settings', label: t('nav.settings'), sub: t('commandPalette.settingsSub'), path: '/settings', icon: Settings },
       ];
     }
     return [
-      { id: 'nav-dash', label: 'Dashboard', sub: 'Business Overview & KPIs', path: '/dashboard', icon: LayoutDashboard },
-      { id: 'nav-bill', label: 'Raise Bill', sub: 'Record Udhar for a customer', path: '/billing', icon: PlusCircle },
-      { id: 'nav-cust', label: 'Customers', sub: 'Customer directory & balances', path: '/customers', icon: Users },
-      { id: 'nav-set', label: 'Settings', sub: 'Business Profile & Account', path: '/settings', icon: Settings },
+      { id: 'nav-dash', label: t('nav.dashboard'), sub: t('commandPalette.dashboardSub'), path: '/dashboard', icon: LayoutDashboard },
+      { id: 'nav-bill', label: t('nav.raiseBill'), sub: t('commandPalette.raiseBillSub'), path: '/billing', icon: PlusCircle },
+      { id: 'nav-cust', label: t('nav.customers'), sub: t('commandPalette.customersSub'), path: '/customers', icon: Users },
+      { id: 'nav-set', label: t('nav.settings'), sub: t('commandPalette.settingsSub'), path: '/settings', icon: Settings },
     ];
-  }, [isAdmin]);
+  }, [isAdmin, t]);
 
   const results = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -59,14 +61,14 @@ export default function CommandPalette({ isOpen, onClose, isAdmin }) {
           .map((c) => ({
             id: `cust-${c.id}`,
             label: c.name,
-            sub: `${c.phone || 'No phone'} · Outstanding ₹${Number(c.total_outstanding || 0).toLocaleString('en-IN')}`,
+            sub: `${c.phone || t('common.noPhone')} · ${t('commandPalette.outstandingPrefix')} ₹${Number(c.total_outstanding || 0).toLocaleString('en-IN')}`,
             path: `/customers/${c.id}`,
             icon: User,
             isCustomer: true,
           }));
 
     return [...matchedActions, ...matchedCustomers];
-  }, [query, baseActions, customers, isAdmin]);
+  }, [query, baseActions, customers, isAdmin, t]);
 
   useEffect(() => {
     setSelectedIndex(0);
@@ -120,12 +122,12 @@ export default function CommandPalette({ isOpen, onClose, isAdmin }) {
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder={isAdmin ? 'Search admin section...' : 'Search customer name, phone, or action...'}
+                placeholder={t('commandPalette.placeholder')}
                 className="w-full bg-transparent text-zinc-900 placeholder-zinc-400 text-[15px] font-medium outline-none"
               />
               <button
                 onClick={onClose}
-                aria-label="Close search"
+                aria-label={t('common.close')}
                 className="p-1 text-zinc-500 hover:text-zinc-900 rounded transition-colors duration-150"
               >
                 <X size={16} />
@@ -135,7 +137,7 @@ export default function CommandPalette({ isOpen, onClose, isAdmin }) {
             <div className="max-h-80 overflow-y-auto p-2 space-y-1">
               {results.length === 0 ? (
                 <div className="py-8 text-center text-[13px] text-zinc-500">
-                  No matching pages or customers found.
+                  {t('commandPalette.noResults')}
                 </div>
               ) : (
                 results.map((item, idx) => {

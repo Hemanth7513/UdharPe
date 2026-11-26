@@ -1,13 +1,16 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 import { isSuperAdminUser } from '../lib/admin';
 import { ArrowRight, Briefcase, Eye, EyeOff, Loader2, CheckCircle2, AlertCircle, Mail, Key } from 'lucide-react';
 import BrandMark from '../components/BrandMark';
+import LanguageSelector from '../components/LanguageSelector';
 
 export default function Auth({ isRecovering }) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [authMode, setAuthMode] = useState(isRecovering ? 'update_password' : 'login');
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
@@ -135,11 +138,11 @@ export default function Auth({ isRecovering }) {
 
   const renderHeader = () => {
     switch (authMode) {
-      case 'signup': return { title: 'Join UdharPe', subtitle: 'Register your business to get started.' };
-      case 'forgot_password': return { title: 'Reset Password', subtitle: 'Enter your email to receive a reset link.' };
-      case 'magic_link': return { title: 'Magic Link Login', subtitle: 'Get a secure login link sent to your email.' };
-      case 'update_password': return { title: 'Set New Password', subtitle: 'Enter your new password below.' };
-      default: return { title: 'Welcome Back', subtitle: 'Log in to your firm\'s ledger.' };
+      case 'signup': return { title: t('auth.signUpTitle'), subtitle: '' };
+      case 'forgot_password': return { title: t('auth.forgotTitle'), subtitle: '' };
+      case 'magic_link': return { title: t('auth.magicLinkTitle'), subtitle: '' };
+      case 'update_password': return { title: t('auth.updatePasswordTitle'), subtitle: '' };
+      default: return { title: t('auth.signInTitle'), subtitle: '' };
     }
   };
 
@@ -153,7 +156,7 @@ export default function Auth({ isRecovering }) {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
       >
-        <div className="text-center mb-6">
+        <div className="flex items-center justify-between mb-6">
           <button
             type="button"
             onClick={() => navigate('/')}
@@ -162,6 +165,7 @@ export default function Auth({ isRecovering }) {
           >
             <BrandMark size={46} />
           </button>
+          <LanguageSelector variant="compact" />
         </div>
 
         <div className="bg-white border border-zinc-300 rounded-lg p-7 sm:p-9" style={{ perspective: '900px' }}>
@@ -214,19 +218,19 @@ export default function Auth({ isRecovering }) {
             {authMode === 'signup' && (
               <div className="space-y-5">
                 <div>
-                  <label htmlFor="firmName" className="block text-[13px] font-semibold text-zinc-800 mb-1.5">Firm Name</label>
+                  <label htmlFor="firmName" className="block text-[13px] font-semibold text-zinc-800 mb-1.5">{t('auth.firmNameLabel')}</label>
                   <input
                     id="firmName"
                     type="text" required value={firmName} onChange={e => setFirmName(e.target.value)}
-                    placeholder="e.g. Sharma Electronics" className="input-field"
+                    placeholder={t('settings.firmNamePlaceholder')} className="input-field"
                   />
                 </div>
                 <div>
-                  <label htmlFor="ownerName" className="block text-[13px] font-semibold text-zinc-800 mb-1.5">Owner Name</label>
+                  <label htmlFor="ownerName" className="block text-[13px] font-semibold text-zinc-800 mb-1.5">{t('settings.ownerName')}</label>
                   <input
                     id="ownerName"
                     type="text" required value={ownerName} onChange={e => setOwnerName(e.target.value)}
-                    placeholder="e.g. Rajesh Sharma" className="input-field"
+                    placeholder={t('settings.ownerNamePlaceholder')} className="input-field"
                   />
                 </div>
               </div>
@@ -234,7 +238,7 @@ export default function Auth({ isRecovering }) {
 
             {authMode !== 'update_password' && (
               <div>
-                <label htmlFor="email" className="block text-[13px] font-semibold text-zinc-800 mb-1.5">Email Address</label>
+                <label htmlFor="email" className="block text-[13px] font-semibold text-zinc-800 mb-1.5">{t('auth.emailLabel')}</label>
                 <input
                   id="email"
                   type="email" required value={email} onChange={e => setEmail(e.target.value)}
@@ -248,7 +252,7 @@ export default function Auth({ isRecovering }) {
               <div className="space-y-5">
                 <div>
                   <label htmlFor="password" className="block text-[13px] font-semibold text-zinc-800 mb-1.5">
-                    {authMode === 'update_password' ? 'New Password' : 'Password'}
+                    {t('auth.passwordLabel')}
                   </label>
                   <input
                     id="password"
@@ -275,12 +279,12 @@ export default function Auth({ isRecovering }) {
             )}
 
             <button type="submit" disabled={loading} className="btn-primary w-full">
-              {loading ? 'Processing...' : (
-                authMode === 'login' ? 'Log In' :
-                authMode === 'signup' ? 'Create Profile' :
-                authMode === 'forgot_password' ? 'Send Reset Link' :
-                authMode === 'magic_link' ? 'Send Magic Link' :
-                'Update Password'
+              {loading ? t('common.loading') : (
+                authMode === 'login' ? t('auth.signInBtn') :
+                authMode === 'signup' ? t('auth.signUpBtn') :
+                authMode === 'forgot_password' ? t('auth.sendResetLink') :
+                authMode === 'magic_link' ? t('auth.sendMagicLink') :
+                t('auth.updatePasswordBtn')
               )}
               {!loading && <ArrowRight className="w-4 h-4" />}
             </button>
@@ -293,14 +297,14 @@ export default function Auth({ isRecovering }) {
                 onClick={() => { setAuthMode('magic_link'); setErrorMsg(''); }}
                 className="flex items-center justify-center gap-2 text-[13px] text-zinc-900 font-semibold hover:underline"
               >
-                <Mail size={15} /> OTP / Magic Link
+                <Mail size={15} /> {t('auth.useMagicLink')}
               </button>
               <button
                 type="button"
                 onClick={() => { setAuthMode('forgot_password'); setErrorMsg(''); }}
                 className="flex items-center justify-center gap-2 text-[13px] text-zinc-600 font-semibold hover:text-zinc-900"
               >
-                <Key size={15} /> Forgot Password?
+                <Key size={15} /> {t('auth.forgotPassword')}
               </button>
             </div>
           )}
@@ -311,23 +315,23 @@ export default function Auth({ isRecovering }) {
               onClick={() => { setAuthMode('login'); setErrorMsg(''); }}
               className="block text-center w-full mt-6 text-[13px] text-zinc-700 font-semibold hover:text-zinc-900 transition-colors duration-150"
             >
-              Back to Login
+              {t('auth.backToSignIn')}
             </button>
           )}
 
           <div className="mt-7 pt-5 border-t border-zinc-200">
             <p className="text-center text-[14px] text-zinc-600 mb-3">
-              {authMode === 'signup' ? 'Already registered? ' : "Don't have an account? "}
+              {authMode === 'signup' ? t('auth.hasAccount') : t('auth.noAccount')}
               <button
                 onClick={() => { setAuthMode(authMode === 'signup' ? 'login' : 'signup'); setErrorMsg(''); }}
                 className="text-zinc-900 font-bold hover:underline ml-1"
               >
-                {authMode === 'signup' ? 'Log In Here' : 'Register Firm'}
+                {authMode === 'signup' ? t('auth.signInBtn') : t('auth.signUpBtn')}
               </button>
             </p>
             <div className="flex justify-center gap-5 text-[13px] text-zinc-500">
-              <button onClick={() => navigate('/privacy-policy')} className="hover:text-zinc-900 transition-colors duration-150">Privacy Policy</button>
-              <button onClick={() => navigate('/terms-of-service')} className="hover:text-zinc-900 transition-colors duration-150">Terms of Service</button>
+              <button onClick={() => navigate('/privacy-policy')} className="hover:text-zinc-900 transition-colors duration-150">{t('landing.privacy')}</button>
+              <button onClick={() => navigate('/terms-of-service')} className="hover:text-zinc-900 transition-colors duration-150">{t('landing.terms')}</button>
             </div>
           </div>
         </div>

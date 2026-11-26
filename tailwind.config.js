@@ -16,8 +16,8 @@ export default {
         'neu-success': '#15803d',
       },
       fontFamily: {
-        sans: ['"DM Sans"', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
-        display: ['"Space Grotesk"', 'sans-serif'],
+        sans: ['"DM Sans"', '"Noto Sans Devanagari"', '"Noto Sans Telugu"', '"Noto Sans Tamil"', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
+        display: ['"Space Grotesk"', '"Noto Sans Devanagari"', '"Noto Sans Telugu"', '"Noto Sans Tamil"', 'sans-serif'],
       },
       boxShadow: {
         'neu': '0 1px 2px 0 rgba(24, 24, 27, 0.04)',
