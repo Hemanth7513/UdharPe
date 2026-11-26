@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { isSuperAdminUser } from '../lib/admin';
-import { ShieldAlert, Building, ChevronLeft, Eye, Download, Search } from 'lucide-react';
+import { ShieldAlert, Building, Eye, Download, Search } from 'lucide-react';
 import Modal from '../components/Modal';
 import SkeletonLoader from '../components/SkeletonLoader';
 import toast from 'react-hot-toast';
@@ -157,19 +157,11 @@ export default function AdminDashboard() {
       initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
     >
       <header className="mb-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <button 
-            onClick={() => navigate('/dashboard')}
-            className="w-10 h-10 neu-card flex items-center justify-center text-neu-text hover:text-neu-primary transition-colors shrink-0"
-          >
-            <ChevronLeft size={20} />
-          </button>
-          <div>
-            <h1 className="text-3xl font-black text-neu-heading tracking-tight flex items-center gap-3">
-              Super Admin <ShieldAlert className="text-neu-primary" />
-            </h1>
-            <p className="text-neu-text font-medium text-sm mt-1">Platform Command Center &amp; Health Overview</p>
-          </div>
+        <div>
+          <h1 className="text-3xl font-black text-neu-heading tracking-tight flex items-center gap-3">
+            Super Admin <ShieldAlert className="text-neu-primary" />
+          </h1>
+          <p className="text-neu-text font-medium text-sm mt-1">Platform Command Center &amp; Health Overview</p>
         </div>
         
         <div className="flex items-center gap-3 flex-wrap">
