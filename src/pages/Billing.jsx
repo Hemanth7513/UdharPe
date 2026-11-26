@@ -445,44 +445,44 @@ export default function Billing() {
         <form onSubmit={handleAddCustomer} className="space-y-5">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div>
-              <label htmlFor="newCustomerName" className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">Party Name *</label>
+              <label htmlFor="newCustomerName" className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">{t('customers.partyName')} *</label>
               <input 
                 id="newCustomerName"
                 type="text" required value={newCustomer.name} onChange={e => setNewCustomer({...newCustomer, name: e.target.value})}
-                placeholder="e.g. Ramesh Singh" className="input-field"
+                placeholder={t('customers.partyNamePlaceholder')} className="input-field"
               />
             </div>
             <div>
-              <label htmlFor="newCustomerFirm" className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">Firm Name</label>
+              <label htmlFor="newCustomerFirm" className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">{t('settings.firmName')}</label>
               <input 
                 id="newCustomerFirm"
                 type="text" value={newCustomer.firm_name} onChange={e => setNewCustomer({...newCustomer, firm_name: e.target.value})}
-                placeholder="e.g. Ramesh Electronics" className="input-field"
+                placeholder={t('settings.firmNamePlaceholder')} className="input-field"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div>
-              <label htmlFor="newCustomerPhone" className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">Phone Number</label>
+              <label htmlFor="newCustomerPhone" className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">{t('customers.phoneLabel')}</label>
               <input 
                 id="newCustomerPhone"
                 type="tel" value={newCustomer.phone} onChange={e => setNewCustomer({...newCustomer, phone: e.target.value})}
-                placeholder="e.g. 9876543210" className="input-field"
+                placeholder={t('customers.phonePlaceholder')} className="input-field"
               />
             </div>
             <div>
-              <label htmlFor="newCustomerEmail" className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">Email Address (For Reminders)</label>
+              <label htmlFor="newCustomerEmail" className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">{t('customers.emailLabel')}</label>
               <input 
                 id="newCustomerEmail"
                 type="email" value={newCustomer.email} onChange={e => setNewCustomer({...newCustomer, email: e.target.value})}
-                placeholder="ramesh@example.com" className="input-field"
+                placeholder={t('customers.emailPlaceholder')} className="input-field"
               />
             </div>
           </div>
 
           <div>
-            <label htmlFor="newCustomerGst" className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">GST Number (Optional)</label>
+            <label htmlFor="newCustomerGst" className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">GST (Optional)</label>
             <input 
               id="newCustomerGst"
               type="text" value={newCustomer.gst_details} onChange={e => setNewCustomer({...newCustomer, gst_details: e.target.value})}
@@ -491,16 +491,16 @@ export default function Billing() {
           </div>
 
           <div>
-            <label htmlFor="newCustomerAddress" className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">Address</label>
+            <label htmlFor="newCustomerAddress" className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">{t('customers.addressLabel')}</label>
             <textarea 
               id="newCustomerAddress"
               rows="2" value={newCustomer.address} onChange={e => setNewCustomer({...newCustomer, address: e.target.value})}
-              placeholder="Full address of the party" className="input-field resize-none"
+              placeholder={t('customers.addressPlaceholder')} className="input-field resize-none"
             />
           </div>
 
           <button type="submit" disabled={isAddingCustomer} className="btn-solid w-full mt-6 py-4">
-            {isAddingCustomer ? 'Saving...' : 'Save Party'}
+            {isAddingCustomer ? t('settings.saving') : t('customers.saveParty')}
           </button>
         </form>
       </Modal>

@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 import { isSuperAdminUser } from '../lib/admin';
-import { Settings as SettingsIcon, LogOut, User, Mail, Briefcase, Edit2, Save, X, ShieldCheck, Globe, Calendar, MessageCircle, Download } from 'lucide-react';
+import { Settings as SettingsIcon, LogOut, User, Mail, Briefcase, Edit2, Save, X, ShieldCheck, Globe, Calendar, Download } from 'lucide-react';
 import toast from 'react-hot-toast';
 import LanguageSelector from '../components/LanguageSelector';
 import { getMerchantPrefs, saveMerchantPrefs } from '../lib/preferences';
@@ -394,74 +394,6 @@ export default function Settings() {
                   );
                 })}
               </div>
-            </div>
-          </section>
-
-          {/* WhatsApp Reminders */}
-          <section className="bg-white border border-zinc-300 rounded-lg p-6 sm:p-7 space-y-4">
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex items-start gap-3">
-                <div className="w-9 h-9 rounded-md bg-zinc-100 border border-zinc-200 flex items-center justify-center shrink-0">
-                  <MessageCircle size={18} className="text-zinc-700" />
-                </div>
-                <div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <h2 className="text-[16px] font-display font-bold text-zinc-900">
-                      {t('settings.reminderSection')}
-                    </h2>
-                    <button
-                      type="button"
-                      onClick={() => navigate('/subscription')}
-                      className="text-[11px] font-semibold text-zinc-700 bg-zinc-100 hover:bg-zinc-200 border border-zinc-200 rounded px-2 py-0.5 transition-colors duration-150"
-                    >
-                      Subscription · Working on it
-                    </button>
-                  </div>
-                  <p className="text-[13px] font-semibold text-zinc-800 mt-1">
-                    {t('settings.includeFirmName')}
-                  </p>
-                  <p className="text-[13px] text-zinc-600 mt-0.5">
-                    {t('settings.includeFirmNameDesc')}
-                  </p>
-                </div>
-              </div>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={prefs.includeFirmNameInReminder}
-                onClick={() => {
-                  const next = saveMerchantPrefs({
-                    includeFirmNameInReminder: !prefs.includeFirmNameInReminder,
-                  });
-                  setPrefs(next);
-                  toast.success(t('settings.prefsUpdated'));
-                }}
-                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-150 ${
-                  prefs.includeFirmNameInReminder ? 'bg-zinc-900' : 'bg-zinc-300'
-                }`}
-              >
-                <span
-                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow transition duration-150 ${
-                    prefs.includeFirmNameInReminder ? 'translate-x-5' : 'translate-x-0'
-                  }`}
-                />
-              </button>
-            </div>
-
-            <div className="rounded-md bg-zinc-50 border border-zinc-200 p-3.5 space-y-1">
-              <p className="text-[12px] font-semibold uppercase tracking-wider text-zinc-500">
-                {t('settings.reminderPreview')}
-              </p>
-              <p className="text-[13px] text-zinc-700 whitespace-pre-line leading-relaxed">
-                {t('ledger.whatsappMessage', {
-                  name: 'Ramesh',
-                  amount: '2,500',
-                  business:
-                    prefs.includeFirmNameInReminder && profile.firm_name.trim()
-                      ? profile.firm_name.trim()
-                      : t('ledger.whatsappBusinessDefault'),
-                })}
-              </p>
             </div>
           </section>
         </div>

@@ -2,7 +2,6 @@ const PREFS_KEY = 'udharpe_merchant_prefs';
 
 const DEFAULT_PREFS = {
   defaultDueDays: 15,
-  includeFirmNameInReminder: true,
 };
 
 export function getMerchantPrefs() {
@@ -14,10 +13,6 @@ export function getMerchantPrefs() {
       defaultDueDays: [0, 7, 15, 30, 45].includes(Number(parsed.defaultDueDays))
         ? Number(parsed.defaultDueDays)
         : DEFAULT_PREFS.defaultDueDays,
-      includeFirmNameInReminder:
-        typeof parsed.includeFirmNameInReminder === 'boolean'
-          ? parsed.includeFirmNameInReminder
-          : DEFAULT_PREFS.includeFirmNameInReminder,
     };
   } catch {
     return { ...DEFAULT_PREFS };
