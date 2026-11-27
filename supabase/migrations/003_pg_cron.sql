@@ -1,8 +1,8 @@
--- Daily overdue reminders via pg_cron + pg_net
+-- Daily overdue reminders via pg_cron + pg_net + Supabase Vault
 -- Requires extensions: pg_cron, pg_net
--- Set secrets in the database before enabling:
---   ALTER DATABASE postgres SET app.settings.supabase_url = 'https://YOUR_REF.supabase.co';
---   ALTER DATABASE postgres SET app.settings.cron_secret = 'YOUR_CRON_SECRET';
+-- Store secrets in Supabase Vault (hosted Postgres does not allow ALTER DATABASE SET app.settings.*):
+--   SELECT vault.create_secret('https://YOUR_REF.supabase.co', 'supabase_url');
+--   SELECT vault.create_secret('YOUR_CRON_SECRET', 'cron_secret');
 -- The edge function send-reminders requires Authorization: Bearer <CRON_SECRET>
 
 CREATE EXTENSION IF NOT EXISTS pg_cron WITH SCHEMA pg_catalog;
@@ -20,10 +20,10 @@ SELECT cron.schedule(
   '30 3 * * *',
   $$
   SELECT net.http_post(
-    url := current_setting('app.settings.supabase_url', true) || '/functions/v1/send-reminders',
+    url := (SELECT decrypted_secret FROM vault.decrypted_secrets WHERE name = 'supabase_url' LIMIT 1) || '/functions/v1/send-reminders',
     headers := jsonb_build_object(
       'Content-Type', 'application/json',
-      'Authorization', 'Bearer ' || current_setting('app.settings.cron_secret', true)
+      'Authorization', 'Bearer ' || (SELECT decrypted_secret FROM vault.decrypted_secrets WHERE name = 'cron_secret' LIMIT 1)
     ),
     body := '{}'::jsonb
   );
