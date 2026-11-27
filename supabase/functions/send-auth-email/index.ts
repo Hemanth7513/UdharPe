@@ -64,11 +64,41 @@ serve(async (req) => {
     const frontendUrl = allowedFrontendOrigins.has(requestOrigin)
       ? requestOrigin
       : (Deno.env.get('FRONTEND_URL') || 'https://udhar-pe.vercel.app')
+    const redirectTo = type === 'recovery' ? `${frontendUrl}/auth` : `${frontendUrl}/dashboard`
+
+    // Uniform response for recovery/magiclink to reduce email enumeration
+    const genericOk = () =>
+      new Response(JSON.stringify({ ok: true }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+      })
+
+    // In Resend sandbox (onboarding@resend.dev), send directly via Supabase Auth for other recipients
+    // so generateLink doesn't consume the 60s rate-limit before fallback runs.
+    const isResendSandbox = FROM_EMAIL.includes('resend.dev')
+    if (isResendSandbox && (type === 'recovery' || type === 'magiclink')) {
+      if (type === 'recovery') {
+        const { error: directErr } = await supabaseAdmin.auth.resetPasswordForEmail(normalizedEmail, { redirectTo })
+        if (directErr) {
+          throw new Error(directErr.message || 'Failed to send password reset email.')
+        }
+        return genericOk()
+      }
+      const { error: directErr } = await supabaseAdmin.auth.signInWithOtp({
+        email: normalizedEmail,
+        options: { emailRedirectTo: redirectTo, shouldCreateUser: false },
+      })
+      if (directErr) {
+        throw new Error(directErr.message || 'Failed to send magic link email.')
+      }
+      return genericOk()
+    }
+
     const generateOptions: any = {
       type,
       email: normalizedEmail,
       options: {
-        redirectTo: type === 'recovery' ? `${frontendUrl}/auth` : `${frontendUrl}/dashboard`,
+        redirectTo,
       },
     }
 
@@ -83,13 +113,6 @@ serve(async (req) => {
     }
 
     const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink(generateOptions)
-
-    // Uniform response for recovery/magiclink to reduce email enumeration
-    const genericOk = () =>
-      new Response(JSON.stringify({ ok: true }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200,
-      })
 
     if (linkError) {
       console.error('Link Generation Error:', linkError.message)
