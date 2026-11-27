@@ -109,6 +109,26 @@ serve(async (req) => {
       })
     }
 
+    if (action === 'get_security_events') {
+      const { data: events, error: secErr } = await supabaseAdmin
+        .from('security_events')
+        .select('id, event_type, identifier, details, created_at')
+        .order('created_at', { ascending: false })
+        .limit(25)
+
+      if (secErr) {
+        return new Response(JSON.stringify({ events: [], tableMissing: true }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200,
+        })
+      }
+
+      return new Response(JSON.stringify({ events: events || [] }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+      })
+    }
+
     const { data: users, error: authErr } = await supabaseAdmin.auth.admin.listUsers({ perPage: 1000 })
     if (authErr) throw authErr
     const totalBusinesses = users?.users?.length || 0

@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 import { isSuperAdminUser } from '../lib/admin';
-import { Settings as SettingsIcon, LogOut, User, Mail, Briefcase, Edit2, Save, X, ShieldCheck, Globe, Calendar, Download, RotateCw, Lock, Eye, EyeOff } from 'lucide-react';
+import { Settings as SettingsIcon, LogOut, User, Mail, Briefcase, Edit2, Save, X, ShieldCheck, Globe, Calendar, Download, RotateCw, Lock, Eye, EyeOff, Activity, ShieldAlert, Clock } from 'lucide-react';
 import toast from 'react-hot-toast';
 import LanguageSelector from '../components/LanguageSelector';
 import { getMerchantPrefs, saveMerchantPrefs } from '../lib/preferences';
@@ -32,6 +32,10 @@ export default function Settings() {
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
   const [showPasswords, setShowPasswords] = useState(false);
   const [updatingPassword, setUpdatingPassword] = useState(false);
+  const [lastSignInAt, setLastSignInAt] = useState('');
+  const [healthStatus, setHealthStatus] = useState({ checking: false, ok: null, latencyMs: null, totalBusinesses: null, totalCustomers: null });
+  const [securityEvents, setSecurityEvents] = useState([]);
+  const [loadingEvents, setLoadingEvents] = useState(false);
   
   const [profile, setProfile] = useState({
     firm_name: '',
@@ -52,7 +56,9 @@ export default function Settings() {
       const user = session?.user ?? (navigator.onLine ? (await supabase.auth.getUser()).data?.user : null);
       if (!user) return;
 
-      setIsAdmin(isSuperAdminUser(user));
+      const adminFlag = isSuperAdminUser(user);
+      setIsAdmin(adminFlag);
+      setLastSignInAt(user.last_sign_in_at || '');
 
       const userProfile = {
         firm_name: user.user_metadata?.firm_name || '',
@@ -62,10 +68,47 @@ export default function Settings() {
       
       setProfile(userProfile);
       setOriginalProfile(userProfile);
+
+      if (adminFlag && navigator.onLine) {
+        runAdminDiagnostics();
+      }
     } catch (error) {
       console.error('Error fetching profile:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const runAdminDiagnostics = async () => {
+    setHealthStatus((prev) => ({ ...prev, checking: true }));
+    setLoadingEvents(true);
+    const start = performance.now();
+    try {
+      const [statsRes, eventsRes] = await Promise.all([
+        supabase.functions.invoke('admin-stats'),
+        supabase.functions.invoke('admin-stats', { body: { action: 'get_security_events' } }),
+      ]);
+      const latencyMs = Math.round(performance.now() - start);
+
+      if (statsRes.error || statsRes.data?.error) {
+        setHealthStatus({ checking: false, ok: false, latencyMs, totalBusinesses: null, totalCustomers: null });
+      } else {
+        setHealthStatus({
+          checking: false,
+          ok: true,
+          latencyMs,
+          totalBusinesses: statsRes.data?.totalBusinesses ?? 0,
+          totalCustomers: statsRes.data?.totalCustomers ?? 0,
+        });
+      }
+
+      if (!eventsRes.error && Array.isArray(eventsRes.data?.events)) {
+        setSecurityEvents(eventsRes.data.events);
+      }
+    } catch {
+      setHealthStatus({ checking: false, ok: false, latencyMs: null, totalBusinesses: null, totalCustomers: null });
+    } finally {
+      setLoadingEvents(false);
     }
   };
 
@@ -215,51 +258,264 @@ export default function Settings() {
       </header>
 
       {isAdmin ? (
-        <div className="bg-white border border-zinc-300 rounded-lg p-6 sm:p-8 space-y-5">
-          <div className="space-y-1.5">
-            <label className="block text-[13px] font-semibold text-zinc-700">Access Level</label>
-            <div className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-md bg-zinc-50 border border-zinc-200 font-semibold text-zinc-900">
-              <ShieldCheck size={18} className="text-zinc-900" />
-              <span>Platform Superadmin</span>
-            </div>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+          {/* Left Column: Superadmin Session & Password */}
+          <div className="lg:col-span-5 space-y-5">
+            <section className="bg-white border border-zinc-300 rounded-lg p-6 sm:p-7 space-y-5">
+              <div className="space-y-1.5">
+                <label className="block text-[13px] font-semibold text-zinc-700">Access Level</label>
+                <div className="flex items-center justify-between gap-2.5 px-3.5 py-2.5 rounded-md bg-zinc-50 border border-zinc-200 font-semibold text-zinc-900">
+                  <span className="flex items-center gap-2">
+                    <ShieldCheck size={18} className="text-emerald-700" />
+                    Platform Superadmin
+                  </span>
+                  <span className="text-[11px] font-semibold px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200">
+                    Verified
+                  </span>
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="block text-[13px] font-semibold text-zinc-700">Email Address</label>
+                <div className="relative">
+                  <Mail size={17} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
+                  <input
+                    type="email"
+                    disabled
+                    value={profile.email}
+                    className="w-full pl-11 pr-4 py-2.5 rounded-md font-medium text-zinc-600 bg-zinc-50 border border-zinc-200"
+                  />
+                </div>
+              </div>
+
+              {lastSignInAt && (
+                <div className="flex items-center gap-2 text-[13px] text-zinc-600 bg-zinc-50 border border-zinc-200 rounded-md px-3 py-2">
+                  <Clock size={14} className="text-zinc-500 shrink-0" />
+                  <span>Last sign-in: <strong className="text-zinc-900">{new Date(lastSignInAt).toLocaleString('en-IN')}</strong></span>
+                </div>
+              )}
+
+              <div className="pt-3 border-t border-zinc-200 space-y-2.5">
+                <button
+                  type="button"
+                  onClick={() => navigate('/admin')}
+                  className="btn-primary w-full py-2.5"
+                >
+                  Open Platform Command Center
+                </button>
+                <div className="grid grid-cols-2 gap-2.5">
+                  <button
+                    type="button"
+                    onClick={handleHardRefresh}
+                    className="btn-solid py-2.5 text-[13px]"
+                    title={t('settings.hardRefreshDesc', 'Clear cached app files and load the latest version')}
+                  >
+                    <RotateCw size={15} /> {t('settings.hardRefresh', 'Hard Refresh')}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="py-2.5 px-3 rounded-md border border-red-200 bg-red-50 hover:bg-red-100 flex items-center justify-center gap-2 text-red-700 font-semibold transition-colors duration-150 text-[13px]"
+                  >
+                    <LogOut size={15} /> Log Out
+                  </button>
+                </div>
+              </div>
+            </section>
+
+            {/* Superadmin Change Password */}
+            <section className="bg-white border border-zinc-300 rounded-lg p-6 sm:p-7 space-y-4">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-start gap-3">
+                  <div className="w-9 h-9 rounded-md bg-zinc-100 border border-zinc-200 flex items-center justify-center shrink-0">
+                    <Lock size={18} className="text-zinc-700" />
+                  </div>
+                  <div>
+                    <h2 className="text-[16px] font-display font-bold text-zinc-900">
+                      Change Password
+                    </h2>
+                    <p className="text-[13px] text-zinc-600 mt-0.5">
+                      Rotate your superadmin password
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowPasswords((prev) => !prev)}
+                  className="p-2 rounded-md border border-zinc-200 text-zinc-600 hover:text-zinc-900 hover:bg-zinc-50 transition-colors"
+                  aria-label={showPasswords ? 'Hide passwords' : 'Show passwords'}
+                >
+                  {showPasswords ? <EyeOff size={15} /> : <Eye size={15} />}
+                </button>
+              </div>
+
+              <form onSubmit={handleChangePassword} className="space-y-3">
+                <div>
+                  <label htmlFor="adminCurrentPassword" className="block text-[13px] font-semibold text-zinc-800 mb-1">
+                    Current Password
+                  </label>
+                  <input
+                    id="adminCurrentPassword"
+                    type={showPasswords ? 'text' : 'password'}
+                    required
+                    autoComplete="current-password"
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="input-field"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="adminNewPassword" className="block text-[13px] font-semibold text-zinc-800 mb-1">
+                    New Password
+                  </label>
+                  <input
+                    id="adminNewPassword"
+                    type={showPasswords ? 'text' : 'password'}
+                    required
+                    minLength={8}
+                    autoComplete="new-password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="Min 8 characters"
+                    className="input-field"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="adminConfirmNewPassword" className="block text-[13px] font-semibold text-zinc-800 mb-1">
+                    Confirm New Password
+                  </label>
+                  <input
+                    id="adminConfirmNewPassword"
+                    type={showPasswords ? 'text' : 'password'}
+                    required
+                    minLength={8}
+                    autoComplete="new-password"
+                    value={confirmNewPassword}
+                    onChange={(e) => setConfirmNewPassword(e.target.value)}
+                    placeholder="Re-enter password"
+                    className="input-field"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={updatingPassword}
+                  className="btn-primary w-full"
+                >
+                  {updatingPassword ? 'Updating...' : 'Update Password'}
+                </button>
+              </form>
+            </section>
           </div>
 
-          <div className="space-y-1.5">
-            <label className="block text-[13px] font-semibold text-zinc-700">Email Address</label>
-            <div className="relative">
-              <Mail size={17} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
-              <input
-                type="email"
-                disabled
-                value={profile.email}
-                className="w-full pl-11 pr-4 py-2.5 rounded-md font-medium text-zinc-600 bg-zinc-50 border border-zinc-200"
-              />
-            </div>
-          </div>
+          {/* Right Column: Platform Diagnostics, Security Events & Language */}
+          <div className="lg:col-span-7 space-y-5">
+            <section className="bg-white border border-zinc-300 rounded-lg p-6 sm:p-7 space-y-4">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-start gap-3">
+                  <div className="w-9 h-9 rounded-md bg-zinc-100 border border-zinc-200 flex items-center justify-center shrink-0">
+                    <Activity size={18} className="text-zinc-700" />
+                  </div>
+                  <div>
+                    <h2 className="text-[16px] font-display font-bold text-zinc-900">
+                      Platform Health &amp; Edge Diagnostics
+                    </h2>
+                    <p className="text-[13px] text-zinc-600 mt-0.5">
+                      Live check of Supabase Edge Functions &amp; platform counts
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={runAdminDiagnostics}
+                  disabled={healthStatus.checking}
+                  className="btn-solid px-3 py-1.5 text-[13px]"
+                >
+                  <RotateCw size={14} className={healthStatus.checking ? 'animate-spin' : ''} />
+                  {healthStatus.checking ? 'Checking...' : 'Run Check'}
+                </button>
+              </div>
 
-          <div className="pt-4 border-t border-zinc-200 flex flex-col sm:flex-row gap-3">
-            <button
-              type="button"
-              onClick={() => navigate('/admin')}
-              className="btn-primary flex-1 py-2.5"
-            >
-              Open Platform Command Center
-            </button>
-            <button
-              type="button"
-              onClick={handleHardRefresh}
-              className="btn-solid px-4 py-2.5 text-[14px]"
-              title={t('settings.hardRefreshDesc', 'Clear cached app files and load the latest version')}
-            >
-              <RotateCw size={16} /> {t('settings.hardRefresh', 'Hard Refresh')}
-            </button>
-            <button
-              type="button"
-              onClick={handleLogout}
-              className="flex-1 py-2.5 rounded-md border border-red-200 bg-red-50 hover:bg-red-100 flex items-center justify-center gap-2 text-red-700 font-semibold transition-colors duration-150 text-[14px]"
-            >
-              <LogOut size={18} /> Log Out Securely
-            </button>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="p-3.5 rounded-md bg-zinc-50 border border-zinc-200">
+                  <p className="text-[12px] font-medium text-zinc-500">Edge API Status</p>
+                  <p className={`text-[15px] font-display font-bold mt-0.5 ${healthStatus.ok ? 'text-emerald-700' : healthStatus.ok === false ? 'text-red-600' : 'text-zinc-700'}`}>
+                    {healthStatus.ok === true ? `Healthy (${healthStatus.latencyMs}ms)` : healthStatus.ok === false ? 'Degraded / Offline' : 'Not checked'}
+                  </p>
+                </div>
+                <div className="p-3.5 rounded-md bg-zinc-50 border border-zinc-200">
+                  <p className="text-[12px] font-medium text-zinc-500">Registered Businesses</p>
+                  <p className="text-[15px] font-display font-bold text-zinc-900 tabular-nums mt-0.5">
+                    {healthStatus.totalBusinesses ?? '—'}
+                  </p>
+                </div>
+                <div className="p-3.5 rounded-md bg-zinc-50 border border-zinc-200">
+                  <p className="text-[12px] font-medium text-zinc-500">Total Customers</p>
+                  <p className="text-[15px] font-display font-bold text-zinc-900 tabular-nums mt-0.5">
+                    {healthStatus.totalCustomers ?? '—'}
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            <section className="bg-white border border-zinc-300 rounded-lg p-6 sm:p-7 space-y-4">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-start gap-3">
+                  <div className="w-9 h-9 rounded-md bg-zinc-100 border border-zinc-200 flex items-center justify-center shrink-0">
+                    <ShieldAlert size={18} className="text-zinc-700" />
+                  </div>
+                  <div>
+                    <h2 className="text-[16px] font-display font-bold text-zinc-900">
+                      Recent Security &amp; Bot Events
+                    </h2>
+                    <p className="text-[13px] text-zinc-600 mt-0.5">
+                      Latest blocked bot signups, disposable emails &amp; rate-limit hits
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {loadingEvents ? (
+                <p className="text-[13px] text-zinc-500 animate-pulse">Loading security events...</p>
+              ) : securityEvents.length === 0 ? (
+                <div className="p-4 rounded-md bg-zinc-50 border border-zinc-200 text-[13px] text-zinc-600">
+                  No suspicious bot or rate-limit events recorded yet.
+                </div>
+              ) : (
+                <div className="divide-y divide-zinc-200 border border-zinc-200 rounded-md overflow-hidden max-h-64 overflow-y-auto">
+                  {securityEvents.map((ev) => (
+                    <div key={ev.id} className="px-3.5 py-2.5 bg-white flex items-center justify-between gap-3 text-[13px]">
+                      <div className="min-w-0">
+                        <span className="font-semibold text-zinc-900">{ev.event_type}</span>
+                        {ev.identifier && (
+                          <span className="ml-2 text-zinc-500 font-mono text-[12px] truncate">{ev.identifier}</span>
+                        )}
+                      </div>
+                      <span className="text-[12px] text-zinc-500 shrink-0 tabular-nums">
+                        {new Date(ev.created_at).toLocaleString('en-IN')}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
+
+            <section className="bg-white border border-zinc-300 rounded-lg p-6 sm:p-7 space-y-4">
+              <div className="flex items-start gap-3">
+                <div className="w-9 h-9 rounded-md bg-zinc-100 border border-zinc-200 flex items-center justify-center shrink-0">
+                  <Globe size={18} className="text-zinc-700" />
+                </div>
+                <div>
+                  <h2 className="text-[16px] font-display font-bold text-zinc-900">
+                    {t('settings.languageSection')}
+                  </h2>
+                  <p className="text-[13px] text-zinc-600 mt-0.5">
+                    {t('settings.languageDesc')}
+                  </p>
+                </div>
+              </div>
+              <LanguageSelector variant="grid" />
+            </section>
           </div>
         </div>
       ) : (
@@ -567,24 +823,6 @@ export default function Settings() {
       </div>
       )}
 
-      {isAdmin && (
-        <section className="mt-5 bg-white border border-zinc-300 rounded-lg p-6 sm:p-8 space-y-4">
-          <div className="flex items-start gap-3">
-            <div className="w-9 h-9 rounded-md bg-zinc-100 border border-zinc-200 flex items-center justify-center shrink-0">
-              <Globe size={18} className="text-zinc-700" />
-            </div>
-            <div>
-              <h2 className="text-[16px] font-display font-bold text-zinc-900">
-                {t('settings.languageSection')}
-              </h2>
-              <p className="text-[13px] text-zinc-600 mt-0.5">
-                {t('settings.languageDesc')}
-              </p>
-            </div>
-          </div>
-          <LanguageSelector variant="grid" />
-        </section>
-      )}
     </motion.div>
   );
 }
