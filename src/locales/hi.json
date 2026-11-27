@@ -35,6 +35,12 @@
   "dashboard": {
     "title": "डैशबोर्ड",
     "subtitle": "व्यापार उधार और खाता विवरण",
+    "greetingMorning": "सुप्रभात",
+    "greetingAfternoon": "नमस्ते",
+    "greetingEvening": "शुभ संध्या",
+    "greetingMorningNamed": "सुप्रभात, {{name}} जी",
+    "greetingAfternoonNamed": "नमस्ते, {{name}} जी",
+    "greetingEveningNamed": "शुभ संध्या, {{name}} जी",
     "totalUdhar": "कुल बकाया (उधार)",
     "jamaMonth": "इस माह प्राप्त (जमा)",
     "udharMonth": "इस माह दिया गया उधार",

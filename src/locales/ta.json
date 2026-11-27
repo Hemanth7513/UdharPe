@@ -35,6 +35,12 @@
   "dashboard": {
     "title": "டாஷ்போர்டு",
     "subtitle": "வணிக கடன் மற்றும் கணக்கு விவரம்",
+    "greetingMorning": "காலை வணக்கம்",
+    "greetingAfternoon": "மதிய வணக்கம்",
+    "greetingEvening": "மாலை வணக்கம்",
+    "greetingMorningNamed": "காலை வணக்கம், {{name}}",
+    "greetingAfternoonNamed": "மதிய வணக்கம், {{name}}",
+    "greetingEveningNamed": "மாலை வணக்கம், {{name}}",
     "totalUdhar": "மொத்த நிலுவைத் தொகை (பாக்கி)",
     "jamaMonth": "இந்த மாதம் பெற்ற தொகை (வரவு)",
     "udharMonth": "இந்த மாதம் கொடுத்த கடன் (உதார்)",

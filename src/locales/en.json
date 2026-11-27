@@ -35,6 +35,12 @@
   "dashboard": {
     "title": "Dashboard",
     "subtitle": "Business credit & ledger overview",
+    "greetingMorning": "Good morning",
+    "greetingAfternoon": "Good afternoon",
+    "greetingEvening": "Good evening",
+    "greetingMorningNamed": "Good morning, {{name}}",
+    "greetingAfternoonNamed": "Good afternoon, {{name}}",
+    "greetingEveningNamed": "Good evening, {{name}}",
     "totalUdhar": "Total Udhar (Baki)",
     "jamaMonth": "Jama / Received (This Month)",
     "udharMonth": "Udhar Given (This Month)",

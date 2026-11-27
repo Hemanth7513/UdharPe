@@ -35,6 +35,12 @@
   "dashboard": {
     "title": "డాష్‌బోర్డ్",
     "subtitle": "వ్యాపార ఉధార్ మరియు ఖాతా వివరాలు",
+    "greetingMorning": "శుభోదయం",
+    "greetingAfternoon": "శుభ మధ్యాహ్నం",
+    "greetingEvening": "శుభ సాయంత్రం",
+    "greetingMorningNamed": "శుభోదయం, {{name}} గారు",
+    "greetingAfternoonNamed": "శుభ మధ్యాహ్నం, {{name}} గారు",
+    "greetingEveningNamed": "శుభ సాయంత్రం, {{name}} గారు",
     "totalUdhar": "మొత్తం రావాల్సిన బాకీ (ఉధార్)",
     "jamaMonth": "ఈ నెల వసూలైన మొత్తం (జమ)",
     "udharMonth": "ఈ నెల ఇచ్చిన ఉధార్",

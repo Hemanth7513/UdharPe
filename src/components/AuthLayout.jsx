@@ -91,8 +91,8 @@ export default function AuthLayout() {
               <BrandMark size={38} />
             </button>
 
-            {/* Desktop Segmented Navigation Dock */}
-            <div className="hidden md:flex items-center gap-0.5 p-1 rounded-xl bg-zinc-200/75 border border-zinc-300/80 shadow-inner">
+            {/* Desktop Editorial Navigation (Open & Fluid, No Box Container) */}
+            <div className="hidden md:flex items-center gap-1">
               {navItems.map((item) => {
                 const Icon = item.icon;
                 const isActive =
@@ -102,21 +102,21 @@ export default function AuthLayout() {
                   <button
                     key={item.path}
                     onClick={() => navigate(item.path)}
-                    className={`relative px-3.5 py-1.5 rounded-lg text-[13.5px] font-medium flex items-center gap-2 transition-colors duration-150 ${
+                    className={`relative px-3.5 py-2 rounded-md text-[14px] flex items-center gap-2 transition-colors duration-150 ${
                       isActive
-                        ? 'text-white font-semibold'
-                        : 'text-zinc-600 hover:text-zinc-900'
+                        ? 'text-zinc-900 font-semibold'
+                        : 'text-zinc-500 font-medium hover:text-zinc-900 hover:bg-zinc-200/55'
                     }`}
                   >
+                    <Icon size={16} className={`shrink-0 transition-colors duration-150 ${isActive ? 'text-emerald-700' : 'text-zinc-400'}`} />
+                    <span className="whitespace-nowrap">{item.name}</span>
                     {isActive && (
                       <motion.span
-                        layoutId="activeNavPill"
-                        transition={{ type: 'spring', stiffness: 420, damping: 32 }}
-                        className="absolute inset-0 bg-zinc-900 rounded-lg shadow-sm"
+                        layoutId="activeNavIndicator"
+                        transition={{ type: 'spring', stiffness: 460, damping: 34 }}
+                        className="absolute left-3 right-3 -bottom-[11px] h-[2.5px] rounded-full bg-zinc-900"
                       />
                     )}
-                    <Icon size={15} className={`relative z-10 shrink-0 ${isActive ? 'text-emerald-400' : 'text-zinc-500'}`} />
-                    <span className="relative z-10 whitespace-nowrap">{item.name}</span>
                   </button>
                 );
               })}

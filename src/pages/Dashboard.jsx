@@ -20,6 +20,7 @@ export default function Dashboard() {
   const [recentBills, setRecentBills] = useState([]);
   const [chartData, setChartData] = useState([]);
   const [firmName, setFirmName] = useState('Your Business');
+  const [ownerName, setOwnerName] = useState('');
   const [customerCount, setCustomerCount] = useState(0);
 
   const fetchDashboardData = useCallback(async () => {
@@ -27,6 +28,7 @@ export default function Dashboard() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
       setFirmName(user.user_metadata?.firm_name || 'Your Business');
+      setOwnerName((user.user_metadata?.owner_name || '').trim());
 
       // Fetch customers for total outstanding & count
       const { data: customersData, error: custError } = await supabase
@@ -163,6 +165,12 @@ export default function Dashboard() {
     );
   }
 
+  const hour = new Date().getHours();
+  const timeSlot = hour >= 5 && hour < 12 ? 'Morning' : hour >= 12 && hour < 17 ? 'Afternoon' : 'Evening';
+  const greetingText = ownerName
+    ? t(`dashboard.greeting${timeSlot}Named`, { name: ownerName })
+    : t(`dashboard.greeting${timeSlot}`);
+
   return (
     <motion.div
       className="px-4 sm:px-6 lg:px-8 space-y-6"
@@ -170,11 +178,11 @@ export default function Dashboard() {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.2 }}
     >
-      {/* Compact Single-Row Header */}
+      {/* Compact Single-Row Header with Time-Based Owner Greeting */}
       <header className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-display font-bold text-zinc-900 tracking-tight">{t('dashboard.title')}</h1>
-          <p className="text-zinc-600 mt-0.5 text-[15px]">{firmName}</p>
+          <h1 className="text-3xl font-display font-bold text-zinc-900 tracking-tight">{greetingText}</h1>
+          <p className="text-zinc-600 mt-0.5 text-[15px]">{firmName} · {t('dashboard.subtitle')}</p>
         </div>
 
         <button
