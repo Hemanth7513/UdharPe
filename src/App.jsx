@@ -1,6 +1,6 @@
 import { useEffect, useState, Suspense, lazy } from 'react';
 import { Toaster } from 'react-hot-toast';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { supabase } from './lib/supabase';
 import { isSuperAdminUser } from './lib/admin';
 
@@ -22,9 +22,14 @@ import AuthLayout from './components/AuthLayout';
 import OfflineScreen from './components/OfflineScreen';
 
 function App() {
+  const { pathname } = useLocation();
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isRecovering, setIsRecovering] = useState(false);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
 
   useEffect(() => {
     if (window.location.hash.includes('type=recovery')) {
