@@ -55,7 +55,15 @@ serve(async (req) => {
       { auth: { autoRefreshToken: false, persistSession: false } }
     )
 
-    const frontendUrl = Deno.env.get('FRONTEND_URL') || 'http://localhost:5173'
+    const allowedFrontendOrigins = new Set([
+      'https://udhar-pe.vercel.app',
+      'http://localhost:5173',
+      'http://127.0.0.1:5173',
+    ])
+    const requestOrigin = req.headers.get('Origin') ?? ''
+    const frontendUrl = allowedFrontendOrigins.has(requestOrigin)
+      ? requestOrigin
+      : (Deno.env.get('FRONTEND_URL') || 'https://udhar-pe.vercel.app')
     const generateOptions: any = {
       type,
       email: normalizedEmail,
