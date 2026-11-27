@@ -20,7 +20,7 @@ export default function AdminDashboard() {
   
   const [isDeepDiveOpen, setIsDeepDiveOpen] = useState(false);
   const [selectedBusiness, setSelectedBusiness] = useState(null);
-  const [deepDiveData, setDeepDiveData] = useState({ customerCount: 0, billCount: 0, totalOutstanding: 0, firmName: '', ownerName: '' });
+  const [deepDiveData, setDeepDiveData] = useState({ customerCount: 0, billCount: 0, totalOutstanding: 0, firmName: '', ownerName: '', customers: [] });
   const [loadingDeepDive, setLoadingDeepDive] = useState(false);
 
   const checkAdminAndFetchStats = useCallback(async () => {
@@ -76,7 +76,8 @@ export default function AdminDashboard() {
         billCount: data.billCount || 0,
         totalOutstanding: data.totalOutstanding || 0,
         firmName: business.firm_name || '',
-        ownerName: business.owner_name || ''
+        ownerName: business.owner_name || '',
+        customers: data.customers || [],
       });
     } catch {
       toast.error('Failed to load business details');
@@ -420,32 +421,65 @@ export default function AdminDashboard() {
             Extracting data for {selectedBusiness?.email}...
           </div>
         ) : (
-          <div className="space-y-6">
-            <div className="neu-card p-4 bg-neu-primary/5 border border-neu-primary/20">
-              <p className="text-xs text-neu-text font-bold uppercase tracking-wide">Target Business</p>
-              <p className="font-bold text-neu-heading">{selectedBusiness?.email}</p>
-              <p className="text-xs text-neu-text font-medium mt-1">ID: {selectedBusiness?.id}</p>
+          <div className="space-y-5">
+            <div className="rounded-lg p-4 bg-zinc-50 border border-zinc-200">
+              <p className="text-[12px] text-zinc-500 font-semibold uppercase tracking-wider">Target Business</p>
+              <p className="font-display font-bold text-zinc-900 text-[16px] mt-0.5">
+                {selectedBusiness?.firm_name || selectedBusiness?.email}
+              </p>
+              <p className="text-[13px] text-zinc-600">{selectedBusiness?.email}</p>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="neu-card p-4 text-center">
-                <p className="text-sm font-bold text-neu-text uppercase tracking-wider mb-1">Customers</p>
-                <p className="text-3xl font-black text-neu-heading">{deepDiveData.customerCount}</p>
+            <div className="grid grid-cols-3 gap-3">
+              <div className="rounded-lg border border-zinc-200 bg-white p-3.5 text-center">
+                <p className="text-[12px] font-semibold text-zinc-500 uppercase tracking-wider mb-1">Customers</p>
+                <p className="text-2xl font-display font-bold text-zinc-900 tabular-nums">{deepDiveData.customerCount}</p>
               </div>
-              <div className="neu-card p-4 text-center">
-                <p className="text-sm font-bold text-neu-text uppercase tracking-wider mb-1">Bills Logged</p>
-                <p className="text-3xl font-black text-neu-heading">{deepDiveData.billCount}</p>
+              <div className="rounded-lg border border-zinc-200 bg-white p-3.5 text-center">
+                <p className="text-[12px] font-semibold text-zinc-500 uppercase tracking-wider mb-1">Bills</p>
+                <p className="text-2xl font-display font-bold text-zinc-900 tabular-nums">{deepDiveData.billCount}</p>
               </div>
-              <div className="neu-card p-4 text-center col-span-2">
-                <p className="text-sm font-bold text-neu-text uppercase tracking-wider mb-1">Total Outstanding</p>
-                <p className="text-3xl font-black text-neu-danger">₹{Number(deepDiveData.totalOutstanding || 0).toLocaleString()}</p>
+              <div className="rounded-lg border border-zinc-200 bg-white p-3.5 text-center">
+                <p className="text-[12px] font-semibold text-zinc-500 uppercase tracking-wider mb-1">Outstanding</p>
+                <p className="text-xl font-display font-bold text-red-600 tabular-nums">
+                  ₹{Number(deepDiveData.totalOutstanding || 0).toLocaleString('en-IN')}
+                </p>
               </div>
             </div>
-            
-            <div className="mt-4 pt-4 border-t border-neu-text/10 text-center">
-              <p className="text-sm font-medium text-neu-text italic">
-                Viewing capabilities restricted to metrics to preserve target business data privacy.
-              </p>
+
+            <div className="border-t border-zinc-200 pt-4">
+              <h3 className="text-[14px] font-display font-bold text-zinc-900 mb-3">
+                Registered Customers ({deepDiveData.customers?.length || 0})
+              </h3>
+              {!deepDiveData.customers || deepDiveData.customers.length === 0 ? (
+                <div className="py-6 text-center text-[13px] text-zinc-500 bg-zinc-50 rounded-lg border border-zinc-200">
+                  No customers added by this business yet.
+                </div>
+              ) : (
+                <div className="max-h-72 overflow-y-auto divide-y divide-zinc-200 border border-zinc-200 rounded-lg">
+                  {deepDiveData.customers.map((c) => (
+                    <div key={c.id} className="p-3.5 flex items-center justify-between gap-3 bg-white hover:bg-zinc-50">
+                      <div className="min-w-0">
+                        <p className="font-semibold text-zinc-900 text-[14px] truncate">
+                          {c.name}
+                          {c.firm_name ? <span className="text-zinc-500 font-normal"> · {c.firm_name}</span> : null}
+                        </p>
+                        <p className="text-[12px] text-zinc-500 truncate mt-0.5">
+                          {[c.phone, c.email, c.gst_details].filter(Boolean).join(' · ') || 'No contact info'}
+                        </p>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <p className={`font-display font-bold text-[14px] tabular-nums ${Number(c.total_outstanding || 0) > 0 ? 'text-red-600' : 'text-emerald-700'}`}>
+                          ₹{Number(c.total_outstanding || 0).toLocaleString('en-IN')}
+                        </p>
+                        <p className="text-[11px] text-zinc-500">
+                          {Number(c.total_outstanding || 0) > 0 ? 'Pending' : 'Settled'}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )}

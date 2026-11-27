@@ -77,12 +77,12 @@ serve(async (req) => {
       })
     }
 
-    // Aggregates only — no raw customer/bill PII
     if (action === 'get_business_details' && businessId) {
       const { data: outstandingRows, error: outErr } = await supabaseAdmin
         .from('customers')
-        .select('total_outstanding')
+        .select('id, name, firm_name, phone, email, gst_details, total_outstanding, created_at')
         .eq('business_id', businessId)
+        .order('total_outstanding', { ascending: false })
       if (outErr) throw outErr
 
       const { data: billRows, error: billErr } = await supabaseAdmin
@@ -102,6 +102,7 @@ serve(async (req) => {
         customerCount,
         billCount,
         totalOutstanding,
+        customers: outstandingRows || [],
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
