@@ -201,6 +201,8 @@
     "dataBackupSection": "डेटा और बैकअप",
     "dataBackupDesc": "अपने सभी ग्राहकों और उनके वर्तमान बकाया का CSV बैकअप डाउनलोड करें।",
     "downloadBackupBtn": "ग्राहक बैकअप डाउनलोड करें (CSV)",
+    "hardRefresh": "हार्ड रिफ़्रेश",
+    "hardRefreshDesc": "कैश साफ़ करें और ऐप का नवीनतम संस्करण लोड करें",
     "prefsUpdated": "सेटिंग अपडेट की गई",
     "accountSection": "खाता और सुरक्षा",
     "logoutBtn": "सुरक्षित लॉग आउट"

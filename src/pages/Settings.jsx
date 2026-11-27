@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 import { isSuperAdminUser } from '../lib/admin';
-import { Settings as SettingsIcon, LogOut, User, Mail, Briefcase, Edit2, Save, X, ShieldCheck, Globe, Calendar, Download } from 'lucide-react';
+import { Settings as SettingsIcon, LogOut, User, Mail, Briefcase, Edit2, Save, X, ShieldCheck, Globe, Calendar, Download, RotateCw } from 'lucide-react';
 import toast from 'react-hot-toast';
 import LanguageSelector from '../components/LanguageSelector';
 import { getMerchantPrefs, saveMerchantPrefs } from '../lib/preferences';
@@ -117,6 +117,22 @@ export default function Settings() {
     navigate('/auth');
   };
 
+  const handleHardRefresh = async () => {
+    try {
+      if ('serviceWorker' in navigator) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(registrations.map((reg) => reg.unregister()));
+      }
+      if ('caches' in window) {
+        const cacheKeys = await caches.keys();
+        await Promise.all(cacheKeys.map((key) => caches.delete(key)));
+      }
+    } catch {
+      // Proceed with reload even if cache cleanup is restricted
+    }
+    window.location.reload();
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -188,6 +204,14 @@ export default function Settings() {
               className="btn-primary flex-1 py-2.5"
             >
               Open Platform Command Center
+            </button>
+            <button
+              type="button"
+              onClick={handleHardRefresh}
+              className="btn-solid px-4 py-2.5 text-[14px]"
+              title={t('settings.hardRefreshDesc', 'Clear cached app files and load the latest version')}
+            >
+              <RotateCw size={16} /> {t('settings.hardRefresh', 'Hard Refresh')}
             </button>
             <button
               type="button"
@@ -338,6 +362,14 @@ export default function Settings() {
               className="btn-solid w-full px-4 py-2.5 text-[13px]"
             >
               <Download size={15} /> {exporting ? t('common.loading') : t('settings.downloadBackupBtn')}
+            </button>
+            <button
+              type="button"
+              onClick={handleHardRefresh}
+              className="btn-solid w-full px-4 py-2.5 text-[13px]"
+              title={t('settings.hardRefreshDesc', 'Clear cached app files and load the latest version')}
+            >
+              <RotateCw size={15} /> {t('settings.hardRefresh', 'Hard Refresh')}
             </button>
           </section>
         </div>
