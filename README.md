@@ -1,40 +1,23 @@
-# UdharPe
+# UdharPe — Business Credit & Digital Ledger Platform
 
-UdharPe is a credit tracking and digital ledger platform designed for local businesses and merchants.
+UdharPe is a modern business credit (*Udhar*) and payment (*Jama*) ledger platform built for Indian merchants, wholesalers, and local businesses. It replaces paper bahi-khata books with an accurate, auditable, multi-language web application.
 
-## Features
+**Live App:** https://udhar-pe.vercel.app
 
-- **Merchant Dashboard**: Real-time overview of outstanding balances, payments, and recent ledger activity.
-- **Customer Ledgers**: Individual customer ledger tracking with chronological credit and payment entries.
-- **Invoicing & Payments**: Transaction processing with atomic database RPCs and running balance calculation.
-- **Audit Reports**: Secure platform audit reporting and CSV data export.
-- **PWA Ready**: Offline-first capability with service worker caching.
+## Core Capabilities
 
-## Tech Stack
+- **Merchant Dashboard:** Real-time summary of total receivables, collections, recent ledger activity, and quick search (`Ctrl+K` / `⌘K`).
+- **Customer Ledgers:** Per-customer credit and settlement history with chronological running balances, GST/contact details, and instant status tracking.
+- **Billing & Settlements:** Atomic bill creation (`create_bill`) and payment recording (`record_payment`) backed by PostgreSQL RPCs and append-only settlement records.
+- **PDF & CSV Statements:** Downloadable ledger statements (all entries or settled bills) and spreadsheet-safe CSV exports with formula-injection protection.
+- **Payment Reminders:** Email reminders and statement delivery via Supabase Edge Functions and Resend.
+- **Multi-Language Support:** Full interface available in **English**, **Hindi (हिन्दी)**, **Telugu (తెలుగు)**, and **Tamil (தமிழ்)**.
+- **Offline Awareness & PWA:** Automatic offline detection screen with one-tap connection retry and service worker support.
+- **Superadmin Command Center:** Platform-wide merchant, customer, and 30-day credit vs. collection analytics protected by cryptographic `app_metadata.role` verification.
 
-- **Frontend**: React 19, Vite, Tailwind CSS, Framer Motion, Lucide Icons
-- **Backend & Auth**: Supabase Auth, PostgreSQL with Row Level Security (RLS)
-- **Functions**: Supabase Edge Functions (Deno / TypeScript)
-- **Email**: Transactional email integration via Resend
+## Architecture & Tech Stack
 
-## Getting Started
-
-1. Clone the repository and install dependencies:
-   ```bash
-   npm install
-   ```
-
-2. Copy the sample environment file and add your credentials:
-   ```bash
-   cp .env.example .env
-   ```
-
-3. Start the development server:
-   ```bash
-   npm run dev
-   ```
-
-4. Build for production:
-   ```bash
-   npm run build
-   ```
+- **Frontend:** React 19, Vite, Tailwind CSS, Framer Motion, Recharts, jsPDF, i18next, Lucide Icons
+- **Backend & Database:** Supabase Auth, PostgreSQL with Row Level Security (RLS), atomic SQL RPCs, and immutable settlement policies
+- **Serverless Edge Functions:** Deno / TypeScript (`admin-stats`, `send-email`, `send-auth-email`, `send-reminders`)
+- **Hosting & Security:** Vercel with strict Content Security Policy (CSP), `X-Frame-Options: DENY`, HSTS, and CORS origin allowlisting
