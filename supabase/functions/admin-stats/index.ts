@@ -115,7 +115,8 @@ serve(async (req) => {
 
     const { data: customerRows, error: totalCustErr } = await supabaseAdmin
       .from('customers')
-      .select('id, business_id, total_outstanding')
+      .select('id, business_id, name, firm_name, phone, email, gst_details, total_outstanding, created_at')
+      .order('total_outstanding', { ascending: false })
     if (totalCustErr) throw totalCustErr
     const totalCustomers = (customerRows || []).length
     const totalOutstanding = (customerRows || []).reduce(
@@ -189,6 +190,32 @@ serve(async (req) => {
     const dailyActivity = Object.values(dailyMap).sort((a, b) => a.isoKey.localeCompare(b.isoKey))
     const totalSettled = Math.max(0, totalVolume - totalOutstanding)
 
+    const userLookup: Record<string, { firm_name: string; email: string }> = {}
+    for (const u of users?.users || []) {
+      const meta = (u.user_metadata || {}) as Record<string, unknown>
+      userLookup[u.id] = {
+        firm_name: typeof meta.firm_name === 'string' && meta.firm_name.trim() ? meta.firm_name.trim() : (u.email?.split('@')[0] || 'Business'),
+        email: u.email || '',
+      }
+    }
+
+    const allCustomers = (customerRows || []).map((c) => {
+      const biz = userLookup[c.business_id] || { firm_name: 'Unknown Business', email: '' }
+      return {
+        id: c.id,
+        business_id: c.business_id,
+        business_firm: biz.firm_name,
+        business_email: biz.email,
+        name: c.name || '',
+        firm_name: c.firm_name || '',
+        phone: c.phone || '',
+        email: c.email || '',
+        gst_details: c.gst_details || '',
+        total_outstanding: Number(c.total_outstanding || 0),
+        created_at: c.created_at,
+      }
+    })
+
     const payload = {
       totalBusinesses,
       totalCustomers,
@@ -197,6 +224,7 @@ serve(async (req) => {
       totalOutstanding,
       totalSettled,
       dailyActivity,
+      allCustomers,
       adminEmail: user.email,
       businesses: (users?.users || []).map((u) => {
         const meta = (u.user_metadata || {}) as Record<string, unknown>

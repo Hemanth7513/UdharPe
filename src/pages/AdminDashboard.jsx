@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { isSuperAdminUser } from '../lib/admin';
-import { ShieldAlert, Building, Eye, Download, Search, TrendingUp } from 'lucide-react';
+import { ShieldAlert, Building, Eye, Download, Search, TrendingUp, Users } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import Modal from '../components/Modal';
 import SkeletonLoader from '../components/SkeletonLoader';
@@ -17,6 +17,8 @@ export default function AdminDashboard() {
   const [error, setError] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeTab, setActiveTab] = useState('businesses');
+  const [selectedBizFilter, setSelectedBizFilter] = useState('all');
   
   const [isDeepDiveOpen, setIsDeepDiveOpen] = useState(false);
   const [selectedBusiness, setSelectedBusiness] = useState(null);
@@ -116,6 +118,24 @@ export default function AdminDashboard() {
       (b.id && b.id.toLowerCase().includes(query))
     );
   }, [stats, searchQuery]);
+
+  const filteredCustomers = useMemo(() => {
+    if (!stats?.allCustomers) return [];
+    return stats.allCustomers.filter((c) => {
+      if (selectedBizFilter !== 'all' && c.business_id !== selectedBizFilter) return false;
+      if (!searchQuery.trim()) return true;
+      const q = searchQuery.toLowerCase();
+      return (
+        (c.name && c.name.toLowerCase().includes(q)) ||
+        (c.firm_name && c.firm_name.toLowerCase().includes(q)) ||
+        (c.phone && c.phone.toLowerCase().includes(q)) ||
+        (c.email && c.email.toLowerCase().includes(q)) ||
+        (c.gst_details && c.gst_details.toLowerCase().includes(q)) ||
+        (c.business_firm && c.business_firm.toLowerCase().includes(q)) ||
+        (c.business_email && c.business_email.toLowerCase().includes(q))
+      );
+    });
+  }, [stats, searchQuery, selectedBizFilter]);
 
   const recoveryRate = useMemo(() => {
     if (!stats || !stats.totalVolume || stats.totalVolume <= 0) return 0;
@@ -321,21 +341,61 @@ export default function AdminDashboard() {
 
       {stats && (
         <div className="mt-8 bg-white border border-zinc-300 rounded-lg p-6 md:p-8">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-            <h2 className="text-xl font-bold text-neu-heading flex items-center gap-2">
-              <Building size={20} className="text-neu-primary" /> Registered Businesses ({filteredBusinesses.length})
-            </h2>
-            <div className="relative min-w-[260px]">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neu-text/50" size={16} />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                placeholder="Search firm, owner, ID..."
-                className="w-full pl-10 pr-4 py-2 bg-neu-bg text-neu-heading rounded-xl text-sm font-medium border border-slate-200/80 outline-none focus:ring-2 focus:ring-neu-primary/20"
-              />
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
+            <div className="flex items-center gap-1 p-1 rounded-lg bg-zinc-100 border border-zinc-200 self-start">
+              <button
+                type="button"
+                onClick={() => setActiveTab('businesses')}
+                className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-[13px] font-semibold transition-colors duration-150 ${
+                  activeTab === 'businesses'
+                    ? 'bg-zinc-900 text-white shadow-sm'
+                    : 'text-zinc-600 hover:text-zinc-900'
+                }`}
+              >
+                <Building size={15} /> Registered Businesses ({filteredBusinesses.length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab('customers')}
+                className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-[13px] font-semibold transition-colors duration-150 ${
+                  activeTab === 'customers'
+                    ? 'bg-zinc-900 text-white shadow-sm'
+                    : 'text-zinc-600 hover:text-zinc-900'
+                }`}
+              >
+                <Users size={15} /> Customers ({filteredCustomers.length})
+              </button>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+              {activeTab === 'customers' && (
+                <select
+                  value={selectedBizFilter}
+                  onChange={(e) => setSelectedBizFilter(e.target.value)}
+                  className="h-9 px-3 rounded-lg border border-zinc-300 bg-white text-[13px] font-medium text-zinc-800 outline-none focus:border-zinc-900"
+                >
+                  <option value="all">All Businesses</option>
+                  {(stats.businesses || []).map((b) => (
+                    <option key={b.id} value={b.id}>
+                      {b.firm_name || b.email}
+                    </option>
+                  ))}
+                </select>
+              )}
+              <div className="relative min-w-[240px]">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" size={16} />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  placeholder={activeTab === 'businesses' ? 'Search firm, owner, email...' : 'Search customer, phone, GST, firm...'}
+                  className="w-full h-9 pl-10 pr-4 bg-zinc-50 text-zinc-900 rounded-lg text-[13px] font-medium border border-zinc-300 outline-none focus:border-zinc-900"
+                />
+              </div>
             </div>
           </div>
+
+          {activeTab === 'businesses' ? (
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
@@ -411,6 +471,59 @@ export default function AdminDashboard() {
               </tbody>
             </table>
           </div>
+          ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b border-zinc-200">
+                  <th className="py-3 px-3 text-[12px] font-semibold text-zinc-500 uppercase tracking-wider">Customer / Party</th>
+                  <th className="py-3 px-3 text-[12px] font-semibold text-zinc-500 uppercase tracking-wider">Registered Business</th>
+                  <th className="py-3 px-3 text-[12px] font-semibold text-zinc-500 uppercase tracking-wider">Phone &amp; Email</th>
+                  <th className="py-3 px-3 text-[12px] font-semibold text-zinc-500 uppercase tracking-wider">GST</th>
+                  <th className="py-3 px-3 text-[12px] font-semibold text-zinc-500 uppercase tracking-wider text-right">Outstanding</th>
+                  <th className="py-3 px-3 text-[12px] font-semibold text-zinc-500 uppercase tracking-wider">Added On</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-zinc-200">
+                {filteredCustomers.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="p-6 text-center text-zinc-500 text-sm">
+                      No customers matching your filter.
+                    </td>
+                  </tr>
+                ) : (
+                  filteredCustomers.map((c) => (
+                    <tr key={c.id} className="hover:bg-zinc-50/80 transition-colors">
+                      <td className="py-3.5 px-3">
+                        <div className="font-display font-bold text-zinc-900 text-[14px]">{c.name}</div>
+                        {c.firm_name && <div className="text-[13px] text-zinc-500">{c.firm_name}</div>}
+                      </td>
+                      <td className="py-3.5 px-3">
+                        <div className="font-semibold text-zinc-800 text-[13px]">{c.business_firm}</div>
+                        <div className="text-[12px] text-zinc-500">{c.business_email}</div>
+                      </td>
+                      <td className="py-3.5 px-3 text-[13px] text-zinc-600">
+                        <div>{c.phone || '-'}</div>
+                        <div className="text-[12px] text-zinc-500">{c.email || '-'}</div>
+                      </td>
+                      <td className="py-3.5 px-3 text-[13px] font-medium text-zinc-700 uppercase">
+                        {c.gst_details || '-'}
+                      </td>
+                      <td className="py-3.5 px-3 text-right font-bold text-[14px] tabular-nums">
+                        <span className={c.total_outstanding > 0 ? 'text-red-600' : 'text-emerald-700'}>
+                          ₹{c.total_outstanding.toLocaleString('en-IN')}
+                        </span>
+                      </td>
+                      <td className="py-3.5 px-3 text-[13px] text-zinc-600 tabular-nums">
+                        {c.created_at ? new Date(c.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '-'}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+          )}
         </div>
       )}
 
