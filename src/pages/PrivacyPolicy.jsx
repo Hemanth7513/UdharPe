@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { ChevronLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import BrandMark from '../components/BrandMark';
 
 export default function PrivacyPolicy() {
   const navigate = useNavigate();
@@ -15,7 +16,14 @@ export default function PrivacyPolicy() {
           >
             <ChevronLeft size={18} /> Back
           </button>
-          <span className="text-[18px] font-display font-bold tracking-tight text-zinc-900">UdharPe</span>
+          <button
+            type="button"
+            onClick={() => navigate('/')}
+            aria-label="UdharPe Home"
+            className="flex items-center hover:opacity-85 transition-opacity duration-150"
+          >
+            <BrandMark size={38} />
+          </button>
         </div>
       </header>
 
