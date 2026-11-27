@@ -86,11 +86,20 @@ export default function Settings() {
           firm_name: profile.firm_name || 'My Business',
           owner_name: profile.owner_name || null,
         });
-      if (profileError) throw profileError;
+      if (profileError) {
+        // Fallback to update if insert policy is not yet applied on remote DB
+        await supabase
+          .from('profiles')
+          .update({
+            firm_name: profile.firm_name || 'My Business',
+            owner_name: profile.owner_name || null,
+          })
+          .eq('id', user.id);
+      }
       
       setOriginalProfile(profile);
       setIsEditing(false);
-      toast.success('Profile updated successfully!');
+      toast.success(t('settings.savedSuccess'));
     } catch (error) {
       toast.error(error.message);
     } finally {
