@@ -21,16 +21,29 @@ export default function CommandPalette({ isOpen, onClose, isAdmin }) {
 
     if (isAdmin) return;
 
-    const loadCustomers = async () => {
-      const { data } = await supabase
+    let cancelled = false;
+    const timer = setTimeout(async () => {
+      const safeQ = query.trim().replace(/[%_,()]/g, '');
+      let req = supabase
         .from('customers')
         .select('id, name, phone, total_outstanding')
-        .order('name', { ascending: true })
-        .limit(50);
-      if (data) setCustomers(data);
+        .order('name', { ascending: true });
+
+      if (safeQ) {
+        req = req.or(`name.ilike.%${safeQ}%,phone.ilike.%${safeQ}%`).limit(12);
+      } else {
+        req = req.limit(20);
+      }
+
+      const { data } = await req;
+      if (!cancelled && data) setCustomers(data);
+    }, query ? 150 : 0);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
     };
-    loadCustomers();
-  }, [isOpen, isAdmin]);
+  }, [isOpen, isAdmin, query]);
 
   const baseActions = useMemo(() => {
     if (isAdmin) {

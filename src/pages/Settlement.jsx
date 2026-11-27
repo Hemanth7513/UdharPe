@@ -23,7 +23,8 @@ export default function Settlement() {
 
   const fetchCustomers = useCallback(async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user ?? (navigator.onLine ? (await supabase.auth.getUser()).data?.user : null);
       if (!user) return;
 
       const { data, error } = await supabase

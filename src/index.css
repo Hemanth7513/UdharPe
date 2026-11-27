@@ -10,6 +10,9 @@
   h1, h2, h3, h4, h5, h6 {
     @apply text-zinc-900 font-display tracking-tight font-bold;
   }
+  button:focus-visible, a:focus-visible, select:focus-visible {
+    @apply outline-none ring-2 ring-zinc-900/25 ring-offset-1;
+  }
 }
 
 @layer components {

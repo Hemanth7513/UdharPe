@@ -53,8 +53,8 @@ function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-neu-bg">
-        <div className="animate-pulse text-neu-primary font-bold">Loading UdharPe...</div>
+      <div className="min-h-screen flex items-center justify-center bg-[#f4f4f5]">
+        <div className="animate-pulse text-zinc-700 font-display font-bold">Loading UdharPe...</div>
       </div>
     );
   }
@@ -64,8 +64,8 @@ function App() {
       <OfflineScreen />
       <Toaster position="top-center" toastOptions={{ className: 'font-bold' }} />
       <Suspense fallback={
-        <div className="min-h-screen flex items-center justify-center bg-neu-bg">
-          <div className="animate-pulse text-neu-primary font-bold">Loading...</div>
+        <div className="min-h-screen flex items-center justify-center bg-[#f4f4f5]">
+          <div className="animate-pulse text-zinc-700 font-display font-bold">Loading...</div>
         </div>
       }>
         <Routes>

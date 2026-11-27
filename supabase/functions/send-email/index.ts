@@ -42,6 +42,13 @@ serve(async (req) => {
       })
     }
 
+    if (!user.email_confirmed_at) {
+      return new Response(JSON.stringify({ error: 'Please verify your email address before sending customer emails.' }), {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
     checkRateLimit(`send-email:${user.id}`, 60000, 5)
 
     const bodyText = await req.text()

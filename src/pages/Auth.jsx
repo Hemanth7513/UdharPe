@@ -18,6 +18,9 @@ export default function Auth({ isRecovering }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [website, setWebsite] = useState('');
+  const [formLoadedAt] = useState(() => Date.now());
   const [firmName, setFirmName] = useState('');
   const [ownerName, setOwnerName] = useState('');
   const [iconState, setIconState] = useState('Briefcase');
@@ -54,11 +57,19 @@ export default function Auth({ isRecovering }) {
         const isAdmin = isSuperAdminUser(data.user);
         navigate(isAdmin ? '/admin' : '/dashboard');
       } else if (authMode === 'signup') {
+        if (website.trim().length > 0) {
+          setIconState('CheckCircle2');
+          setErrorMsg('Registration successful! Check your email or login now.');
+          setAuthMode('login');
+          return;
+        }
         const { data, error: fnError } = await supabase.functions.invoke('send-auth-email', {
           body: {
             email,
             password,
             type: 'signup',
+            website,
+            formLoadedAt,
             options: { data: { firm_name: firmName, owner_name: ownerName } }
           }
         });
@@ -263,13 +274,27 @@ export default function Auth({ isRecovering }) {
           </AnimatePresence>
 
           <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Honeypot field for bot filtering */}
+            <div className="hidden" aria-hidden="true">
+              <label htmlFor="website">Website</label>
+              <input
+                id="website"
+                name="website"
+                type="text"
+                tabIndex={-1}
+                autoComplete="off"
+                value={website}
+                onChange={(e) => setWebsite(e.target.value)}
+              />
+            </div>
+
             {authMode === 'signup' && (
               <div className="space-y-5">
                 <div>
                   <label htmlFor="firmName" className="block text-[13px] font-semibold text-zinc-800 mb-1.5">{t('auth.firmNameLabel')}</label>
                   <input
                     id="firmName"
-                    type="text" required value={firmName} onChange={e => setFirmName(e.target.value)}
+                    type="text" required autoComplete="organization" value={firmName} onChange={e => setFirmName(e.target.value)}
                     placeholder={t('settings.firmNamePlaceholder')} className="input-field"
                   />
                 </div>
@@ -277,7 +302,7 @@ export default function Auth({ isRecovering }) {
                   <label htmlFor="ownerName" className="block text-[13px] font-semibold text-zinc-800 mb-1.5">{t('settings.ownerName')}</label>
                   <input
                     id="ownerName"
-                    type="text" required value={ownerName} onChange={e => setOwnerName(e.target.value)}
+                    type="text" required autoComplete="name" value={ownerName} onChange={e => setOwnerName(e.target.value)}
                     placeholder={t('settings.ownerNamePlaceholder')} className="input-field"
                   />
                 </div>
@@ -289,7 +314,7 @@ export default function Auth({ isRecovering }) {
                 <label htmlFor="email" className="block text-[13px] font-semibold text-zinc-800 mb-1.5">{t('auth.emailLabel')}</label>
                 <input
                   id="email"
-                  type="email" required value={email} onChange={e => setEmail(e.target.value)}
+                  type="email" required autoComplete="email" value={email} onChange={e => setEmail(e.target.value)}
                   onFocus={() => setIconState('Eye')} onBlur={() => setIconState('Briefcase')}
                   placeholder="you@example.com" className="input-field"
                 />
@@ -302,12 +327,29 @@ export default function Auth({ isRecovering }) {
                   <label htmlFor="password" className="block text-[13px] font-semibold text-zinc-800 mb-1.5">
                     {t('auth.passwordLabel')}
                   </label>
-                  <input
-                    id="password"
-                    type="password" required value={password} onChange={e => setPassword(e.target.value)}
-                    onFocus={() => setIconState('EyeOff')} onBlur={() => setIconState('Briefcase')}
-                    placeholder="••••••••" className="input-field"
-                  />
+                  <div className="relative">
+                    <input
+                      id="password"
+                      type={showPassword ? 'text' : 'password'}
+                      required
+                      minLength={authMode === 'signup' || authMode === 'update_password' ? 8 : undefined}
+                      autoComplete={authMode === 'login' ? 'current-password' : 'new-password'}
+                      value={password}
+                      onChange={e => setPassword(e.target.value)}
+                      onFocus={() => setIconState('EyeOff')}
+                      onBlur={() => setIconState('Briefcase')}
+                      placeholder="••••••••"
+                      className="input-field pr-11"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((prev) => !prev)}
+                      aria-label={showPassword ? 'Hide password' : 'Show password'}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1.5 rounded text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 transition-colors"
+                    >
+                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
                   {(authMode === 'login' || authMode === 'signup') && (
                     <p className="mt-2 text-[12px] text-amber-800 bg-amber-50 border border-amber-200/80 rounded-md px-3 py-2 font-medium">
                       Please remember your password — we are working on the Forgot Password feature.

@@ -1,7 +1,13 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.110.8"
 import { getCorsHeaders } from "../_shared/cors.ts"
-import { checkRateLimit, getClientIp, validatePayloadSize } from "../_shared/security.ts"
+import {
+  checkPersistentRateLimit,
+  getClientIp,
+  isDisposableEmail,
+  logSecurityEvent,
+  validatePayloadSize,
+} from "../_shared/security.ts"
 import {
   renderForgotPasswordEmail,
   renderMagicLinkEmail,
@@ -24,11 +30,36 @@ serve(async (req) => {
     }
 
     const clientIp = getClientIp(req)
-    checkRateLimit(`auth-email-ip:${clientIp}`, 60000, 5)
     await validatePayloadSize(req, 5120)
 
     const rawPayload = await req.json()
-    const { email, type, password, options } = rawPayload
+    const { email, type, password, options, website, formLoadedAt } = rawPayload
+
+    const supabaseAdmin = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+      { auth: { autoRefreshToken: false, persistSession: false } }
+    )
+
+    // Honeypot & minimum form-fill timing check against automated bots
+    if (typeof website === 'string' && website.trim().length > 0) {
+      await logSecurityEvent(supabaseAdmin, 'bot_honeypot_triggered', clientIp, { type })
+      return new Response(JSON.stringify({ ok: true }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+      })
+    }
+    if (typeof formLoadedAt === 'number' && Date.now() - formLoadedAt < 700) {
+      await logSecurityEvent(supabaseAdmin, 'bot_fast_submit', clientIp, { type })
+      throw new Error('Please take a moment before submitting.')
+    }
+
+    try {
+      await checkPersistentRateLimit(supabaseAdmin, `auth-email-ip:${clientIp}`, 60, 5)
+    } catch (rlErr) {
+      await logSecurityEvent(supabaseAdmin, 'rate_limit_hit', clientIp, { scope: 'auth-email-ip' })
+      throw rlErr
+    }
 
     if (!email || typeof email !== 'string' || !['recovery', 'magiclink', 'signup'].includes(type)) {
       throw new Error('Missing required parameters or invalid type.')
@@ -39,7 +70,17 @@ serve(async (req) => {
       throw new Error('Invalid email address.')
     }
 
-    checkRateLimit(`auth-email:${normalizedEmail}`, 60000, 3)
+    if (type === 'signup' && isDisposableEmail(normalizedEmail)) {
+      await logSecurityEvent(supabaseAdmin, 'disposable_email_blocked', normalizedEmail, { clientIp })
+      throw new Error('Please use a valid business or personal email address.')
+    }
+
+    try {
+      await checkPersistentRateLimit(supabaseAdmin, `auth-email:${normalizedEmail}`, 60, 3)
+    } catch (rlErr) {
+      await logSecurityEvent(supabaseAdmin, 'rate_limit_hit', normalizedEmail, { scope: 'auth-email', clientIp })
+      throw rlErr
+    }
 
     if (type === 'signup' && (!password || typeof password !== 'string' || password.length < 8)) {
       throw new Error('Password is required for signup (min 8 characters).')
@@ -48,12 +89,6 @@ serve(async (req) => {
     if (type === 'signup' && password.length > 128) {
       throw new Error('Password is too long.')
     }
-
-    const supabaseAdmin = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
-      { auth: { autoRefreshToken: false, persistSession: false } }
-    )
 
     const allowedFrontendOrigins = new Set([
       'https://udhar-pe.vercel.app',

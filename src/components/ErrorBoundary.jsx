@@ -26,22 +26,22 @@ export default class ErrorBoundary extends Component {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-          <div className="max-w-md w-full bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-200/80 p-8 text-center animate-fade-in">
-            <div className="w-16 h-16 mx-auto mb-6 bg-rose-50 border border-rose-200 rounded-2xl flex items-center justify-center text-rose-600 shadow-sm">
-              <AlertTriangle size={32} />
+        <div className="min-h-screen bg-[#f4f4f5] flex items-center justify-center p-4">
+          <div className="max-w-md w-full bg-white rounded-lg border border-zinc-300 p-8 text-center">
+            <div className="w-14 h-14 mx-auto mb-5 bg-red-50 border border-red-200 rounded-lg flex items-center justify-center text-red-600">
+              <AlertTriangle size={28} />
             </div>
             
-            <h1 className="text-2xl font-black text-slate-900 tracking-tight mb-2">
+            <h1 className="text-2xl font-display font-bold text-zinc-900 tracking-tight mb-2">
               Something went wrong
             </h1>
             
-            <p className="text-slate-600 text-sm font-medium leading-relaxed mb-6">
+            <p className="text-zinc-600 text-[14px] leading-relaxed mb-6">
               An unexpected error occurred while loading this view. Your ledger data and balance records are completely safe.
             </p>
 
             {import.meta.env.DEV && this.state.error && (
-              <div className="mb-6 p-3 bg-slate-100 rounded-xl text-left overflow-x-auto text-xs font-mono text-rose-700 max-h-32">
+              <div className="mb-6 p-3 bg-zinc-100 rounded-md text-left overflow-x-auto text-xs font-mono text-red-700 max-h-32">
                 {this.state.error.toString()}
               </div>
             )}
@@ -49,7 +49,7 @@ export default class ErrorBoundary extends Component {
             <div className="flex flex-col sm:flex-row items-center gap-3 justify-center">
               <button
                 onClick={this.handleReload}
-                className="w-full sm:w-auto px-5 py-2.5 rounded-md bg-zinc-900 hover:bg-zinc-800 text-white font-semibold text-sm transition-colors duration-150 flex items-center justify-center gap-2"
+                className="btn-primary w-full sm:w-auto"
               >
                 <RefreshCw size={16} />
                 Reload Page
@@ -57,7 +57,7 @@ export default class ErrorBoundary extends Component {
               
               <button
                 onClick={this.handleGoHome}
-                className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm border border-slate-200/80 transition flex items-center justify-center gap-2"
+                className="btn-solid w-full sm:w-auto"
               >
                 <Home size={16} />
                 Return Home

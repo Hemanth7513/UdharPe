@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 import { isSuperAdminUser } from '../lib/admin';
-import { Settings as SettingsIcon, LogOut, User, Mail, Briefcase, Edit2, Save, X, ShieldCheck, Globe, Calendar, Download, RotateCw } from 'lucide-react';
+import { Settings as SettingsIcon, LogOut, User, Mail, Briefcase, Edit2, Save, X, ShieldCheck, Globe, Calendar, Download, RotateCw, Lock, Eye, EyeOff } from 'lucide-react';
 import toast from 'react-hot-toast';
 import LanguageSelector from '../components/LanguageSelector';
 import { getMerchantPrefs, saveMerchantPrefs } from '../lib/preferences';
@@ -27,6 +27,11 @@ export default function Settings() {
   const [saving, setSaving] = useState(false);
   const [prefs, setPrefs] = useState(() => getMerchantPrefs());
   const [exporting, setExporting] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmNewPassword, setConfirmNewPassword] = useState('');
+  const [showPasswords, setShowPasswords] = useState(false);
+  const [updatingPassword, setUpdatingPassword] = useState(false);
   
   const [profile, setProfile] = useState({
     firm_name: '',
@@ -43,7 +48,8 @@ export default function Settings() {
 
   const fetchProfile = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user ?? (navigator.onLine ? (await supabase.auth.getUser()).data?.user : null);
       if (!user) return;
 
       setIsAdmin(isSuperAdminUser(user));
@@ -133,10 +139,44 @@ export default function Settings() {
     window.location.reload();
   };
 
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    if (newPassword.length < 8) {
+      toast.error('New password must be at least 8 characters');
+      return;
+    }
+    if (newPassword !== confirmNewPassword) {
+      toast.error('New passwords do not match');
+      return;
+    }
+    setUpdatingPassword(true);
+    try {
+      if (profile.email && currentPassword) {
+        const { error: verifyErr } = await supabase.auth.signInWithPassword({
+          email: profile.email,
+          password: currentPassword,
+        });
+        if (verifyErr) {
+          throw new Error('Current password is incorrect');
+        }
+      }
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      if (error) throw error;
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmNewPassword('');
+      toast.success('Password updated successfully');
+    } catch (error) {
+      toast.error(error.message || 'Failed to update password');
+    } finally {
+      setUpdatingPassword(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="animate-pulse text-neu-primary font-bold">Loading Settings...</div>
+        <div className="animate-pulse text-zinc-700 font-display font-bold">Loading Settings...</div>
       </div>
     );
   }
@@ -436,6 +476,92 @@ export default function Settings() {
                 })}
               </div>
             </div>
+          </section>
+
+          {/* Change Password */}
+          <section className="bg-white border border-zinc-300 rounded-lg p-6 sm:p-7 space-y-4">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-start gap-3">
+                <div className="w-9 h-9 rounded-md bg-zinc-100 border border-zinc-200 flex items-center justify-center shrink-0">
+                  <Lock size={18} className="text-zinc-700" />
+                </div>
+                <div>
+                  <h2 className="text-[16px] font-display font-bold text-zinc-900">
+                    Change Password
+                  </h2>
+                  <p className="text-[13px] text-zinc-600 mt-0.5">
+                    Update your account password (minimum 8 characters)
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowPasswords((prev) => !prev)}
+                className="p-2 rounded-md border border-zinc-200 text-zinc-600 hover:text-zinc-900 hover:bg-zinc-50 transition-colors"
+                aria-label={showPasswords ? 'Hide passwords' : 'Show passwords'}
+              >
+                {showPasswords ? <EyeOff size={15} /> : <Eye size={15} />}
+              </button>
+            </div>
+
+            <form onSubmit={handleChangePassword} className="space-y-3.5">
+              <div>
+                <label htmlFor="currentPassword" className="block text-[13px] font-semibold text-zinc-800 mb-1">
+                  Current Password
+                </label>
+                <input
+                  id="currentPassword"
+                  type={showPasswords ? 'text' : 'password'}
+                  required
+                  autoComplete="current-password"
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="input-field"
+                />
+              </div>
+              <div className="grid sm:grid-cols-2 gap-3">
+                <div>
+                  <label htmlFor="newPassword" className="block text-[13px] font-semibold text-zinc-800 mb-1">
+                    New Password
+                  </label>
+                  <input
+                    id="newPassword"
+                    type={showPasswords ? 'text' : 'password'}
+                    required
+                    minLength={8}
+                    autoComplete="new-password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="Min 8 characters"
+                    className="input-field"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="confirmNewPassword" className="block text-[13px] font-semibold text-zinc-800 mb-1">
+                    Confirm New Password
+                  </label>
+                  <input
+                    id="confirmNewPassword"
+                    type={showPasswords ? 'text' : 'password'}
+                    required
+                    minLength={8}
+                    autoComplete="new-password"
+                    value={confirmNewPassword}
+                    onChange={(e) => setConfirmNewPassword(e.target.value)}
+                    placeholder="Re-enter password"
+                    className="input-field"
+                  />
+                </div>
+              </div>
+              <button
+                type="submit"
+                disabled={updatingPassword}
+                className="btn-primary w-full sm:w-auto"
+              >
+                {updatingPassword ? 'Updating...' : 'Update Password'}
+              </button>
+            </form>
           </section>
         </div>
       </div>

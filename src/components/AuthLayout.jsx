@@ -52,9 +52,20 @@ export default function AuthLayout() {
         setIsProfileMenuOpen(false);
       }
     };
+    const handleEscape = (e) => {
+      if (e.key === 'Escape') {
+        setIsProfileMenuOpen(false);
+      }
+    };
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    window.addEventListener('keydown', handleEscape);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      window.removeEventListener('keydown', handleEscape);
+    };
   }, []);
+
+  const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad|iPod/i.test(navigator.platform || navigator.userAgent || '');
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -136,11 +147,11 @@ export default function AuthLayout() {
               <button
                 onClick={() => setIsCommandOpen(true)}
                 className="hidden sm:flex h-9 items-center gap-2 px-3 rounded-lg bg-white hover:bg-zinc-50 border border-zinc-300 text-zinc-600 hover:text-zinc-900 transition-colors duration-150 text-[13px] font-medium"
-                title={`${t('common.search')} (Ctrl+K)`}
+                title={`${t('common.search')} (${isMac ? '⌘K' : 'Ctrl+K'})`}
               >
                 <Search size={14} className="text-zinc-500" />
                 <span className="hidden xl:inline">{t('common.search')}</span>
-                <kbd className="px-1.5 py-0.5 text-[11px] font-semibold leading-none bg-zinc-100 border border-zinc-300 rounded text-zinc-600">⌘K</kbd>
+                <kbd className="px-1.5 py-0.5 text-[11px] font-semibold leading-none bg-zinc-100 border border-zinc-300 rounded text-zinc-600">{isMac ? '⌘K' : 'Ctrl K'}</kbd>
               </button>
 
               <button
@@ -208,7 +219,11 @@ export default function AuthLayout() {
                         </button>
                       ) : null}
 
-                      <div className="my-1 border-t border-zinc-200" />
+                      <div className="lg:hidden px-3 py-1.5">
+                      <LanguageSelector variant="compact" />
+                    </div>
+
+                    <div className="my-1 border-t border-zinc-200" />
 
                       <button
                         onClick={() => {
@@ -229,7 +244,7 @@ export default function AuthLayout() {
       </nav>
 
       {/* Mobile Bottom Bar (outside sticky/backdrop-blur nav so fixed bottom-0 anchors to viewport) */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-zinc-300 z-50 px-2 py-1.5">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-zinc-300 z-50 px-2 pt-1.5 pb-[calc(0.375rem+env(safe-area-inset-bottom))]">
         <div className="flex justify-around items-center">
           {navItems.map((item) => {
             const Icon = item.icon;

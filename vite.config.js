@@ -7,24 +7,29 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
+      includeAssets: ['favicon.svg', 'logo.png', 'logo.svg'],
       manifest: {
         name: 'UdharPe Ledger',
         short_name: 'UdharPe',
-        description: 'The Elegant Business Ledger',
-        theme_color: '#0a0a0a',
-        background_color: '#0a0a0a',
+        description: 'Business Credit & Digital Ledger Platform',
+        theme_color: '#18181b',
+        background_color: '#f4f4f5',
         display: 'standalone',
         icons: [
           {
-            src: '/pwa-192x192.png',
+            src: '/logo.png',
             sizes: '192x192',
             type: 'image/png'
           },
           {
-            src: '/pwa-512x512.png',
+            src: '/logo.png',
             sizes: '512x512',
             type: 'image/png'
+          },
+          {
+            src: '/logo.svg',
+            sizes: 'any',
+            type: 'image/svg+xml'
           }
         ]
       },
