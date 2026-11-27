@@ -321,10 +321,10 @@ export default function Customers() {
               />
             </div>
             <div>
-              <label htmlFor="customerFirm" className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">{t('settings.firmName')}</label>
+              <label htmlFor="customerFirm" className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">{t('settings.firmName')} *</label>
               <input 
                 id="customerFirm"
-                type="text" value={newCustomer.firm_name} onChange={e => setNewCustomer({...newCustomer, firm_name: e.target.value})}
+                type="text" required value={newCustomer.firm_name} onChange={e => setNewCustomer({...newCustomer, firm_name: e.target.value})}
                 placeholder={t('settings.firmNamePlaceholder')} className="input-field"
               />
             </div>
@@ -332,37 +332,37 @@ export default function Customers() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div>
-              <label htmlFor="customerPhone" className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">{t('customers.phoneLabel')}</label>
+              <label htmlFor="customerPhone" className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">{t('customers.phoneLabel')} *</label>
               <input 
                 id="customerPhone"
-                type="tel" value={newCustomer.phone} onChange={e => setNewCustomer({...newCustomer, phone: e.target.value})}
+                type="tel" required value={newCustomer.phone} onChange={e => setNewCustomer({...newCustomer, phone: e.target.value})}
                 placeholder={t('customers.phonePlaceholder')} className="input-field"
               />
             </div>
             <div>
-              <label htmlFor="customerEmail" className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">{t('customers.emailLabel')}</label>
+              <label htmlFor="customerEmail" className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">{t('customers.emailLabel')} *</label>
               <input 
                 id="customerEmail"
-                type="email" value={newCustomer.email} onChange={e => setNewCustomer({...newCustomer, email: e.target.value})}
+                type="email" required value={newCustomer.email} onChange={e => setNewCustomer({...newCustomer, email: e.target.value})}
                 placeholder={t('customers.emailPlaceholder')} className="input-field"
               />
             </div>
           </div>
 
           <div>
-            <label htmlFor="customerGst" className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">GST (Optional)</label>
+            <label htmlFor="customerGst" className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">GST *</label>
             <input 
               id="customerGst"
-              type="text" value={newCustomer.gst_details} onChange={e => setNewCustomer({...newCustomer, gst_details: e.target.value})}
+              type="text" required value={newCustomer.gst_details} onChange={e => setNewCustomer({...newCustomer, gst_details: e.target.value})}
               placeholder="e.g. 29ABCDE1234F1Z5" className="input-field uppercase"
             />
           </div>
 
           <div>
-            <label htmlFor="customerAddress" className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">{t('customers.addressLabel')}</label>
+            <label htmlFor="customerAddress" className="block text-sm font-semibold text-neu-heading mb-2 pl-1 uppercase tracking-wider text-xs">{t('customers.addressLabel')} *</label>
             <textarea 
               id="customerAddress"
-              rows="2" value={newCustomer.address} onChange={e => setNewCustomer({...newCustomer, address: e.target.value})}
+              rows="2" required value={newCustomer.address} onChange={e => setNewCustomer({...newCustomer, address: e.target.value})}
               placeholder={t('customers.addressPlaceholder')} className="input-field resize-none"
             />
           </div>
