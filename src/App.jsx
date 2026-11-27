@@ -19,6 +19,7 @@ const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
 const TermsOfService = lazy(() => import('./pages/TermsOfService'));
 
 import AuthLayout from './components/AuthLayout';
+import OfflineScreen from './components/OfflineScreen';
 
 function App() {
   const [session, setSession] = useState(null);
@@ -55,6 +56,7 @@ function App() {
 
   return (
     <>
+      <OfflineScreen />
       <Toaster position="top-center" toastOptions={{ className: 'font-bold' }} />
       <Suspense fallback={
         <div className="min-h-screen flex items-center justify-center bg-neu-bg">
