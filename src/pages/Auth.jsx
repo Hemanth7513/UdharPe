@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 import { isSuperAdminUser } from '../lib/admin';
-import { ArrowRight, Briefcase, Eye, EyeOff, Loader2, CheckCircle2, AlertCircle, Mail, Key } from 'lucide-react';
+import { ArrowRight, Briefcase, Eye, EyeOff, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import BrandMark from '../components/BrandMark';
 import LanguageSelector from '../components/LanguageSelector';
 
@@ -205,30 +205,6 @@ export default function Auth({ isRecovering }) {
                     }`}
                   >
                     <span>{t('auth.signUpBtn')}</span>
-                    <ArrowRight size={15} />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => { setAuthMode('magic_link'); setErrorMsg(''); }}
-                    className={`w-full flex items-center justify-between px-4 py-3 rounded-lg border text-left text-[14px] font-semibold transition-colors duration-150 ${
-                      authMode === 'magic_link'
-                        ? 'bg-zinc-900 text-white border-zinc-900'
-                        : 'bg-zinc-50 text-zinc-800 border-zinc-200 hover:border-zinc-400'
-                    }`}
-                  >
-                    <span className="flex items-center gap-2"><Mail size={15} /> {t('auth.useMagicLink')}</span>
-                    <ArrowRight size={15} />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => { setAuthMode('forgot_password'); setErrorMsg(''); }}
-                    className={`w-full flex items-center justify-between px-4 py-3 rounded-lg border text-left text-[14px] font-semibold transition-colors duration-150 ${
-                      authMode === 'forgot_password'
-                        ? 'bg-zinc-900 text-white border-zinc-900'
-                        : 'bg-zinc-50 text-zinc-800 border-zinc-200 hover:border-zinc-400'
-                    }`}
-                  >
-                    <span className="flex items-center gap-2"><Key size={15} /> {t('auth.forgotPassword')}</span>
                     <ArrowRight size={15} />
                   </button>
                 </div>
