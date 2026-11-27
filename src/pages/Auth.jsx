@@ -308,6 +308,11 @@ export default function Auth({ isRecovering }) {
                     onFocus={() => setIconState('EyeOff')} onBlur={() => setIconState('Briefcase')}
                     placeholder="••••••••" className="input-field"
                   />
+                  {(authMode === 'login' || authMode === 'signup') && (
+                    <p className="mt-2 text-[12px] text-amber-800 bg-amber-50 border border-amber-200/80 rounded-md px-3 py-2 font-medium">
+                      Please remember your password — we are working on the Forgot Password feature.
+                    </p>
+                  )}
                 </div>
 
                 {authMode === 'update_password' && (
