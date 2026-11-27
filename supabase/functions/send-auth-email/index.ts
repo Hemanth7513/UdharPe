@@ -142,6 +142,37 @@ serve(async (req) => {
 
     if (!res.ok) {
       console.error('Resend API Error:', data)
+      const isSandboxRestriction =
+        res.status === 403 ||
+        String(data?.message || '').toLowerCase().includes('verify a domain')
+
+      if (isSandboxRestriction) {
+        const redirectTo = type === 'recovery' ? `${frontendUrl}/auth` : `${frontendUrl}/dashboard`
+        if (type === 'recovery') {
+          const { error: fallbackErr } = await supabaseAdmin.auth.resetPasswordForEmail(normalizedEmail, { redirectTo })
+          if (fallbackErr) {
+            throw new Error(fallbackErr.message || 'Failed to send password reset email.')
+          }
+          return genericOk()
+        }
+        if (type === 'magiclink') {
+          const { error: fallbackErr } = await supabaseAdmin.auth.signInWithOtp({
+            email: normalizedEmail,
+            options: { emailRedirectTo: redirectTo, shouldCreateUser: false },
+          })
+          if (fallbackErr) {
+            throw new Error(fallbackErr.message || 'Failed to send magic link email.')
+          }
+          return genericOk()
+        }
+        if (type === 'signup') {
+          return new Response(JSON.stringify({ ok: true }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 200,
+          })
+        }
+      }
+
       throw new Error(data?.message || 'Failed to send email via Resend.')
     }
 
