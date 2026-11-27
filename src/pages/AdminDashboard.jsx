@@ -3,7 +3,8 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { isSuperAdminUser } from '../lib/admin';
-import { ShieldAlert, Building, Eye, Download, Search } from 'lucide-react';
+import { ShieldAlert, Building, Eye, Download, Search, TrendingUp } from 'lucide-react';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import Modal from '../components/Modal';
 import SkeletonLoader from '../components/SkeletonLoader';
 import toast from 'react-hot-toast';
@@ -188,41 +189,131 @@ export default function AdminDashboard() {
       )}
 
       {stats ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 bg-white border border-zinc-300 rounded-lg divide-y sm:divide-y-0 sm:divide-x divide-zinc-200">
-          <div className="p-6">
-            <p className="text-[13px] font-medium text-zinc-600 mb-1.5">Total Businesses</p>
-            <h3 className="text-3xl font-display font-bold text-zinc-900 tabular-nums">{stats.totalBusinesses}</h3>
-            <p className="text-[13px] text-zinc-500 mt-1">Active Firms</p>
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 bg-white border border-zinc-300 rounded-lg divide-y sm:divide-y-0 sm:divide-x divide-zinc-200">
+            <div className="p-6">
+              <p className="text-[13px] font-medium text-zinc-600 mb-1.5">Total Businesses</p>
+              <h3 className="text-3xl font-display font-bold text-zinc-900 tabular-nums">{stats.totalBusinesses}</h3>
+              <p className="text-[13px] text-zinc-500 mt-1">Active Firms</p>
+            </div>
+
+            <div className="p-6">
+              <p className="text-[13px] font-medium text-zinc-600 mb-1.5">Total Parties</p>
+              <h3 className="text-3xl font-display font-bold text-zinc-900 tabular-nums">{stats.totalCustomers}</h3>
+              <p className="text-[13px] text-zinc-500 mt-1">Customers / Debtors</p>
+            </div>
+
+            <div className="p-6">
+              <p className="text-[13px] font-medium text-zinc-600 mb-1.5">Total Transactions</p>
+              <h3 className="text-3xl font-display font-bold text-zinc-900 tabular-nums">{stats.totalTransactions}</h3>
+              <p className="text-[13px] text-zinc-500 mt-1">Bills &amp; Payments</p>
+            </div>
+
+            <div className="p-6">
+              <p className="text-[13px] font-medium text-zinc-600 mb-1.5">Gross Udhar Volume</p>
+              <h3 className="text-2xl font-display font-bold text-zinc-900 tabular-nums truncate">
+                ₹{Number(stats.totalVolume || 0).toLocaleString('en-IN')}
+              </h3>
+              <p className="text-[13px] text-zinc-500 mt-1">Total Value Logged</p>
+            </div>
+
+            <div className="p-6">
+              <p className="text-[13px] font-medium text-zinc-600 mb-1.5">Settlement Rate</p>
+              <h3 className="text-3xl font-display font-bold text-emerald-700 tabular-nums">
+                {recoveryRate}%
+              </h3>
+              <p className="text-[13px] text-zinc-500 mt-1">Debt Recovery Ratio</p>
+            </div>
           </div>
 
-          <div className="p-6">
-            <p className="text-[13px] font-medium text-zinc-600 mb-1.5">Total Parties</p>
-            <h3 className="text-3xl font-display font-bold text-zinc-900 tabular-nums">{stats.totalCustomers}</h3>
-            <p className="text-[13px] text-zinc-500 mt-1">Customers / Debtors</p>
-          </div>
+          {/* 30-Day Platform Performance Graph + Recovery Breakdown */}
+          <div className="mt-6 grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+            <div className="lg:col-span-8 bg-white border border-zinc-300 rounded-lg p-6">
+              <div className="flex items-center justify-between gap-2 mb-4">
+                <div className="flex items-center gap-2">
+                  <TrendingUp size={18} className="text-zinc-700" />
+                  <h2 className="text-lg font-display font-bold text-zinc-900">
+                    30-Day Platform Activity
+                  </h2>
+                </div>
+                <span className="text-[12px] font-medium text-zinc-500">
+                  Udhar Given vs. Jama Received
+                </span>
+              </div>
 
-          <div className="p-6">
-            <p className="text-[13px] font-medium text-zinc-600 mb-1.5">Total Transactions</p>
-            <h3 className="text-3xl font-display font-bold text-zinc-900 tabular-nums">{stats.totalTransactions}</h3>
-            <p className="text-[13px] text-zinc-500 mt-1">Bills &amp; Payments</p>
-          </div>
+              {stats.dailyActivity && stats.dailyActivity.length > 0 ? (
+                <div className="h-64 w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={stats.dailyActivity} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
+                      <defs>
+                        <linearGradient id="adminGiven" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#dc2626" stopOpacity={0.16} />
+                          <stop offset="95%" stopColor="#dc2626" stopOpacity={0} />
+                        </linearGradient>
+                        <linearGradient id="adminReceived" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#15803d" stopOpacity={0.16} />
+                          <stop offset="95%" stopColor="#15803d" stopOpacity={0} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e4e4e7" />
+                      <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#52525b' }} dy={8} />
+                      <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#52525b' }} tickFormatter={(value) => `₹${value}`} dx={-4} />
+                      <Tooltip
+                        contentStyle={{ backgroundColor: '#ffffff', borderRadius: '8px', border: '1px solid #d4d4d8', color: '#18181b' }}
+                        itemStyle={{ fontWeight: 600, fontSize: '13px' }}
+                      />
+                      <Area type="monotone" dataKey="given" name="Udhar Given" stroke="#dc2626" strokeWidth={2.5} fillOpacity={1} fill="url(#adminGiven)" />
+                      <Area type="monotone" dataKey="received" name="Jama Received" stroke="#15803d" strokeWidth={2.5} fillOpacity={1} fill="url(#adminReceived)" />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              ) : (
+                <div className="h-64 flex items-center justify-center text-[14px] text-zinc-500">
+                  No platform activity recorded in the last 30 days.
+                </div>
+              )}
+            </div>
 
-          <div className="p-6">
-            <p className="text-[13px] font-medium text-zinc-600 mb-1.5">Gross Udhar Volume</p>
-            <h3 className="text-2xl font-display font-bold text-zinc-900 tabular-nums truncate">
-              ₹{Number(stats.totalVolume || 0).toLocaleString('en-IN')}
-            </h3>
-            <p className="text-[13px] text-zinc-500 mt-1">Total Value Logged</p>
-          </div>
+            <div className="lg:col-span-4 bg-white border border-zinc-300 rounded-lg p-6 flex flex-col justify-between space-y-5">
+              <div>
+                <h2 className="text-lg font-display font-bold text-zinc-900 mb-1">
+                  Collection Health
+                </h2>
+                <p className="text-[13px] text-zinc-500">
+                  Cumulative recovery across all registered firms
+                </p>
+              </div>
 
-          <div className="p-6">
-            <p className="text-[13px] font-medium text-zinc-600 mb-1.5">Settlement Rate</p>
-            <h3 className="text-3xl font-display font-bold text-emerald-700 tabular-nums">
-              {recoveryRate}%
-            </h3>
-            <p className="text-[13px] text-zinc-500 mt-1">Debt Recovery Ratio</p>
+              <div className="space-y-3">
+                <div className="flex justify-between items-baseline text-[14px]">
+                  <span className="text-zinc-600">Total Settled (Jama)</span>
+                  <span className="font-display font-bold text-emerald-700 tabular-nums">
+                    ₹{Number(stats.totalSettled || 0).toLocaleString('en-IN')}
+                  </span>
+                </div>
+                <div className="flex justify-between items-baseline text-[14px]">
+                  <span className="text-zinc-600">Pending Outstanding</span>
+                  <span className="font-display font-bold text-red-600 tabular-nums">
+                    ₹{Number(stats.totalOutstanding || 0).toLocaleString('en-IN')}
+                  </span>
+                </div>
+              </div>
+
+              <div className="pt-3 border-t border-zinc-200 space-y-2">
+                <div className="flex justify-between items-center text-[13px]">
+                  <span className="font-medium text-zinc-600">Recovery Progress</span>
+                  <span className="font-display font-bold text-zinc-900 tabular-nums">{recoveryRate}%</span>
+                </div>
+                <div className="w-full h-2.5 bg-zinc-200 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-emerald-700 rounded-full transition-all duration-300"
+                    style={{ width: `${recoveryRate}%` }}
+                  />
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
+        </>
       ) : (
         !error && <SkeletonLoader className="w-full h-64" />
       )}

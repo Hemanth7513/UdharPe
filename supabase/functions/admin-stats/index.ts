@@ -124,8 +124,18 @@ serve(async (req) => {
 
     const { data: bills, error: billsErr } = await supabaseAdmin
       .from('bills')
-      .select('amount, business_id')
+      .select('amount, business_id, created_at')
     if (billsErr) throw billsErr
+
+    const thirtyDaysAgo = new Date()
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+    const thirtyDaysAgoISO = thirtyDaysAgo.toISOString()
+
+    const { data: recentSettlements, error: settErr } = await supabaseAdmin
+      .from('settlements')
+      .select('amount_paid, created_at')
+      .gte('created_at', thirtyDaysAgoISO)
+    if (settErr) throw settErr
 
     let totalVolume = 0
     const totalTransactions = bills?.length || 0
@@ -138,11 +148,29 @@ serve(async (req) => {
       custByBiz[c.business_id].outstanding += Number(c.total_outstanding || 0)
     }
 
+    const dailyMap: Record<string, { isoKey: string; date: string; given: number; received: number }> = {}
+    const addDailyPoint = (isoTimestamp: string | null | undefined, key: 'given' | 'received', amount: number) => {
+      if (!isoTimestamp) return
+      const d = new Date(isoTimestamp)
+      if (Number.isNaN(d.getTime()) || d < thirtyDaysAgo) return
+      const isoKey = d.toISOString().slice(0, 10)
+      if (!dailyMap[isoKey]) {
+        dailyMap[isoKey] = {
+          isoKey,
+          date: d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }),
+          given: 0,
+          received: 0,
+        }
+      }
+      dailyMap[isoKey][key] += amount
+    }
+
     const billsByBiz: Record<string, { count: number; volume: number }> = {}
     if (bills) {
       bills.forEach((bill) => {
         const amt = Number(bill.amount || 0)
         totalVolume += amt
+        addDailyPoint(bill.created_at, 'given', amt)
         if (bill.business_id) {
           if (!billsByBiz[bill.business_id]) billsByBiz[bill.business_id] = { count: 0, volume: 0 }
           billsByBiz[bill.business_id].count += 1
@@ -151,6 +179,13 @@ serve(async (req) => {
       })
     }
 
+    if (recentSettlements) {
+      recentSettlements.forEach((s) => {
+        addDailyPoint(s.created_at, 'received', Number(s.amount_paid || 0))
+      })
+    }
+
+    const dailyActivity = Object.values(dailyMap).sort((a, b) => a.isoKey.localeCompare(b.isoKey))
     const totalSettled = Math.max(0, totalVolume - totalOutstanding)
 
     const payload = {
@@ -160,6 +195,7 @@ serve(async (req) => {
       totalVolume,
       totalOutstanding,
       totalSettled,
+      dailyActivity,
       adminEmail: user.email,
       businesses: (users?.users || []).map((u) => {
         const meta = (u.user_metadata || {}) as Record<string, unknown>
