@@ -27,8 +27,13 @@ export default function AdminDashboard() {
 
   const checkAdminAndFetchStats = useCallback(async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
+      const { data: { session } } = await supabase.auth.getSession();
+      let user = session?.user ?? null;
+      if (!user && navigator.onLine) {
+        const { data } = await supabase.auth.getUser();
+        user = data?.user ?? null;
+      }
+
       if (!user) {
         navigate('/auth');
         return;

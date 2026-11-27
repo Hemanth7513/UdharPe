@@ -32,7 +32,12 @@ export default function AuthLayout() {
 
   useEffect(() => {
     const fetchUserAndRole = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
+      let user = session?.user ?? null;
+      if (!user && navigator.onLine) {
+        const { data } = await supabase.auth.getUser();
+        user = data?.user ?? null;
+      }
       if (user) {
         setCurrentUser(user);
         setIsAdmin(isSuperAdminUser(user));
