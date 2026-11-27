@@ -62,16 +62,25 @@ export default function Customers() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('You must be logged in to add a customer.');
 
+      const sanitized = {
+        name: newCustomer.name.trim(),
+        phone: newCustomer.phone.trim(),
+        email: newCustomer.email.trim(),
+        firm_name: newCustomer.firm_name.trim(),
+        address: newCustomer.address.trim(),
+        gst_details: newCustomer.gst_details.trim().toUpperCase(),
+      };
+      if (!sanitized.name || !sanitized.firm_name || !sanitized.phone || !sanitized.email || !sanitized.gst_details || !sanitized.address) {
+        toast.error('Please fill in all required customer fields.');
+        setIsSubmitting(false);
+        return;
+      }
+
       const { data, error } = await supabase
         .from('customers')
         .insert([{ 
           business_id: user.id, 
-          name: newCustomer.name, 
-          phone: newCustomer.phone, 
-          email: newCustomer.email,
-          firm_name: newCustomer.firm_name,
-          address: newCustomer.address,
-          gst_details: newCustomer.gst_details
+          ...sanitized,
         }])
         .select();
 
@@ -85,7 +94,7 @@ export default function Customers() {
       // Close modal and reset form
       setIsModalOpen(false);
       setNewCustomer({ name: '', phone: '', email: '', firm_name: '', address: '', gst_details: '' });
-      toast.success('Customer added successfully!');
+      toast.success(t('customers.customerAdded'));
     } catch (error) {
       toast.error(error.message);
     } finally {
@@ -103,26 +112,33 @@ export default function Customers() {
     setIsSubmitting(true);
 
     try {
+      const sanitized = {
+        name: newCustomer.name.trim(),
+        phone: newCustomer.phone.trim(),
+        email: newCustomer.email.trim(),
+        firm_name: newCustomer.firm_name.trim(),
+        address: newCustomer.address.trim(),
+        gst_details: newCustomer.gst_details.trim().toUpperCase(),
+      };
+      if (!sanitized.name || !sanitized.firm_name || !sanitized.phone || !sanitized.email || !sanitized.gst_details || !sanitized.address) {
+        toast.error('Please fill in all required customer fields.');
+        setIsSubmitting(false);
+        return;
+      }
+
       const { error } = await supabase
         .from('customers')
-        .update({
-          name: newCustomer.name, 
-          phone: newCustomer.phone, 
-          email: newCustomer.email,
-          firm_name: newCustomer.firm_name,
-          address: newCustomer.address,
-          gst_details: newCustomer.gst_details
-        })
+        .update(sanitized)
         .eq('id', editingId);
 
       if (error) throw error;
 
       // Update local state
-      setCustomers(prev => prev.map(c => c.id === editingId ? { ...c, ...newCustomer } : c));
+      setCustomers(prev => prev.map(c => c.id === editingId ? { ...c, ...sanitized } : c));
       
       setIsModalOpen(false);
       setNewCustomer({ name: '', phone: '', email: '', firm_name: '', address: '', gst_details: '' });
-      toast.success('Customer updated successfully!');
+      toast.success(t('customers.customerUpdated'));
     } catch (error) {
       toast.error(error.message);
     } finally {

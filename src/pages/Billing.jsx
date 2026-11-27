@@ -80,16 +80,25 @@ export default function Billing() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
+      const sanitized = {
+        name: newCustomer.name.trim(),
+        phone: newCustomer.phone.trim(),
+        email: newCustomer.email.trim(),
+        firm_name: newCustomer.firm_name.trim(),
+        address: newCustomer.address.trim(),
+        gst_details: newCustomer.gst_details.trim().toUpperCase(),
+      };
+      if (!sanitized.name || !sanitized.firm_name || !sanitized.phone || !sanitized.email || !sanitized.gst_details || !sanitized.address) {
+        toast.error('Please fill in all required customer fields.');
+        setIsAddingCustomer(false);
+        return;
+      }
+
       const { data, error } = await supabase
         .from('customers')
         .insert([{ 
           business_id: user.id, 
-          name: newCustomer.name, 
-          phone: newCustomer.phone,
-          email: newCustomer.email,
-          firm_name: newCustomer.firm_name,
-          address: newCustomer.address,
-          gst_details: newCustomer.gst_details
+          ...sanitized,
         }])
         .select();
 

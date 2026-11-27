@@ -227,7 +227,7 @@ export default function CustomerLedger() {
       headStyles: { fillColor: [24, 24, 27] }
     });
 
-    if (returnBase64) {
+    if (returnBase64 === true) {
       // Return base64 string without data:application/pdf;base64, prefix for Resend
       const dataUri = doc.output('datauristring');
       return dataUri.split(',')[1];
@@ -405,65 +405,67 @@ export default function CustomerLedger() {
             </p>
           </div>
 
-          {Number(customer.total_outstanding) > 0 && (
-            <div className="flex flex-wrap gap-2 w-full md:w-auto">
-              <button
-                onClick={() => {
-                  setSelectedBillForPayment(null);
-                  setIsPaymentModalOpen(true);
-                }}
-                className="btn-primary flex-1 md:flex-none py-2 px-4 text-[14px]"
-              >
-                {t('ledger.recordPayment')}
-              </button>
-              <button
-                onClick={handleEmailReminder}
-                disabled={isSendingEmail}
-                className="btn-solid py-2 px-3.5 text-[14px] shrink-0 disabled:opacity-50"
-                title={customer.email ? `${t('ledger.emailReminder')}: ${customer.email}` : t('ledger.noEmailError')}
-              >
-                <Mail size={16} /> {isSendingEmail ? t('settings.saving') : t('ledger.emailReminder')}
-              </button>
-              <button
-                onClick={handleWhatsAppRemind}
-                className="btn-solid px-3 h-10 text-zinc-700 shrink-0 text-[13px]"
-                title="WhatsApp Reminder (Subscription — Coming Soon)"
-              >
-                <MessageCircle size={16} className="text-zinc-500" />
-                <span className="hidden sm:inline text-[11px] font-semibold bg-zinc-100 border border-zinc-200 rounded px-1.5 py-0.5 text-zinc-600">
-                  Subscription
-                </span>
-              </button>
-              <button
-                onClick={handleEmailStatement}
-                disabled={isSendingEmail}
-                className="btn-solid w-10 h-10 p-0 shrink-0 disabled:opacity-50"
-                title={t('ledger.emailStatement')}
-              >
-                <Mail size={18} />
-              </button>
-              <button
-                onClick={generatePDF}
-                className="btn-solid w-10 h-10 p-0 shrink-0"
-                title={t('ledger.downloadPdf')}
-              >
-                <Download size={18} />
-              </button>
-              <button
-                onClick={handleExportExcel}
-                className="btn-solid w-10 h-10 p-0 text-emerald-700 shrink-0 font-bold text-[13px]"
-                title={t('ledger.exportExcel')}
-              >
-                CSV
-              </button>
-              <button
-                onClick={() => setIsEmailModalOpen(true)}
-                className="btn-solid py-2 px-3.5 text-[14px] shrink-0"
-              >
-                Support Email
-              </button>
-            </div>
-          )}
+          <div className="flex flex-wrap gap-2 w-full md:w-auto">
+            {Number(customer.total_outstanding) > 0 && (
+              <>
+                <button
+                  onClick={() => {
+                    setSelectedBillForPayment(null);
+                    setIsPaymentModalOpen(true);
+                  }}
+                  className="btn-primary flex-1 md:flex-none py-2 px-4 text-[14px]"
+                >
+                  {t('ledger.recordPayment')}
+                </button>
+                <button
+                  onClick={handleEmailReminder}
+                  disabled={isSendingEmail}
+                  className="btn-solid py-2 px-3.5 text-[14px] shrink-0 disabled:opacity-50"
+                  title={customer.email ? `${t('ledger.emailReminder')}: ${customer.email}` : t('ledger.noEmailError')}
+                >
+                  <Mail size={16} /> {isSendingEmail ? t('settings.saving') : t('ledger.emailReminder')}
+                </button>
+                <button
+                  onClick={handleWhatsAppRemind}
+                  className="btn-solid px-3 h-10 text-zinc-700 shrink-0 text-[13px]"
+                  title="WhatsApp Reminder (Subscription — Coming Soon)"
+                >
+                  <MessageCircle size={16} className="text-zinc-500" />
+                  <span className="hidden sm:inline text-[11px] font-semibold bg-zinc-100 border border-zinc-200 rounded px-1.5 py-0.5 text-zinc-600">
+                    Subscription
+                  </span>
+                </button>
+              </>
+            )}
+            <button
+              onClick={handleEmailStatement}
+              disabled={isSendingEmail}
+              className="btn-solid w-10 h-10 p-0 shrink-0 disabled:opacity-50"
+              title={t('ledger.emailStatement')}
+            >
+              <Mail size={18} />
+            </button>
+            <button
+              onClick={() => generatePDF(false)}
+              className="btn-solid w-10 h-10 p-0 shrink-0"
+              title={t('ledger.downloadPdf')}
+            >
+              <Download size={18} />
+            </button>
+            <button
+              onClick={handleExportExcel}
+              className="btn-solid w-10 h-10 p-0 text-emerald-700 shrink-0 font-bold text-[13px]"
+              title={t('ledger.exportExcel')}
+            >
+              CSV
+            </button>
+            <button
+              onClick={() => setIsEmailModalOpen(true)}
+              className="btn-solid py-2 px-3.5 text-[14px] shrink-0"
+            >
+              Support Email
+            </button>
+          </div>
         </div>
       </div>
 
