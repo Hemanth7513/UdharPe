@@ -4,8 +4,12 @@ import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { supabase } from './lib/supabase';
 import { isSuperAdminUser } from './lib/admin';
 
+// Eagerly loaded core auth/layout to prevent chunk-mismatch errors on logout
+import Auth from './pages/Auth';
+import AuthLayout from './components/AuthLayout';
+import OfflineScreen from './components/OfflineScreen';
+
 // Lazy loaded pages
-const Auth = lazy(() => import('./pages/Auth'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const Landing = lazy(() => import('./pages/Landing'));
 const Customers = lazy(() => import('./pages/Customers'));
@@ -17,9 +21,6 @@ const Settings = lazy(() => import('./pages/Settings'));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
 const TermsOfService = lazy(() => import('./pages/TermsOfService'));
-
-import AuthLayout from './components/AuthLayout';
-import OfflineScreen from './components/OfflineScreen';
 
 function App() {
   const { pathname } = useLocation();

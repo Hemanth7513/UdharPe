@@ -13,6 +13,15 @@ export default class ErrorBoundary extends Component {
 
   componentDidCatch(error, errorInfo) {
     console.error('UdharPe Application Error Caught by Boundary:', error, errorInfo);
+    const msg = String(error?.message || error || '');
+    const isChunkError =
+      msg.includes('Failed to fetch dynamically imported module') ||
+      msg.includes('Importing a module script failed') ||
+      msg.includes('Loading chunk');
+    if (isChunkError && !sessionStorage.getItem('udharpe_chunk_reloaded')) {
+      sessionStorage.setItem('udharpe_chunk_reloaded', '1');
+      window.location.reload();
+    }
   }
 
   handleReload = () => {

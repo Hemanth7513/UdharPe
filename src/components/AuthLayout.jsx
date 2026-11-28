@@ -68,8 +68,12 @@ export default function AuthLayout() {
   const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad|iPod/i.test(navigator.platform || navigator.userAgent || '');
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    navigate('/auth');
+    try {
+      await supabase.auth.signOut();
+    } catch {
+      // Ignore network signOut errors and proceed to auth screen
+    }
+    navigate('/auth', { replace: true });
   };
 
   const navItems = isAdmin
